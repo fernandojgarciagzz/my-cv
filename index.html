@@ -254,37 +254,41 @@
             transform: scale(1.3);
             transform-origin: center 25%;
         }
+        .profile-photo-container {
+            position: relative;
+            width: 550px;
+            height: 550px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+        .photo-aurora {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .photo-aurora canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
         .profile-photo-wrapper {
-            width: 180px;
-            height: 180px;
+            width: 250px;
+            height: 250px;
             border-radius: 50%;
             overflow: hidden;
             border: 3px solid var(--border);
             box-shadow: var(--shadow-md);
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
         }
         .profile-photo-wrapper:hover { border-color: var(--sf-blue); box-shadow: var(--shadow-lg); }
-
-        /* QR code */
-        .qr-container {
-            width: 160px; height: 160px;
-            border: 2px solid var(--border);
-            border-radius: 12px; overflow: hidden;
-            background: #FFFFFF;
-            padding: 8px;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-        }
-        .qr-container:hover { box-shadow: var(--shadow-md); border-color: var(--sf-blue); }
-        .qr-container img { width: 100%; height: 100%; }
-        .qr-label {
-            font-family: var(--mono);
-            font-size: 0.6rem;
-            color: var(--text-muted);
-            text-align: center;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
 
         /* --- BLUEPRINT CONNECTOR --- */
         .blueprint-connector {
@@ -740,14 +744,6 @@
             margin-bottom: 2rem;
             transition: color 0.4s ease;
         }
-        .footer-qr {
-            display: flex; justify-content: center; margin-bottom: 2rem;
-        }
-        .footer-qr .qr-container {
-            border-color: rgba(255,255,255,0.1);
-            background: #FFFFFF;
-        }
-        .footer-qr .qr-container:hover { border-color: var(--sf-blue); }
         .social-links {
             display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 2.5rem;
         }
@@ -859,13 +855,12 @@
                 </div>
             </div>
             <div class="hero-right">
-                <div class="profile-photo-wrapper">
-                    <img src="photo.png" alt="Fernando García" class="profile-photo">
+                <div class="profile-photo-container" id="photoContainer">
+                    <div class="photo-aurora"><canvas id="auroraCanvas"></canvas></div>
+                    <div class="profile-photo-wrapper">
+                        <img src="photo.png" alt="Fernando García" class="profile-photo">
+                    </div>
                 </div>
-                <div class="qr-container">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.linkedin.com/in/fernandogarciagzz/&color=0176D3&bgcolor=FFFFFF&margin=1" alt="LinkedIn QR Code">
-                </div>
-                <span class="qr-label">Scan → LinkedIn</span>
             </div>
         </div>
     </header>
@@ -1052,8 +1047,8 @@
     <section id="agents" class="bg-primary">
         <div class="section-inner">
             <p class="section-label reveal">// competencies</p>
-            <h2 class="section-title reveal">Agent Registry</h2>
-            <p class="section-desc reveal">Core agents deployed across the solution stack.</p>
+            <h2 class="section-title reveal">Core Competencies</h2>
+            <p class="section-desc reveal">The capabilities I bring to every solution I build.</p>
 
             <div class="agent-grid">
                 <div class="agent-card magnetic reveal">
@@ -1136,11 +1131,6 @@
                     <span class="skill-pct">95%</span>
                 </div>
                 <div class="skill-row reveal">
-                    <span class="skill-name">Business Intelligence</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="90"></div></div>
-                    <span class="skill-pct">90%</span>
-                </div>
-                <div class="skill-row reveal">
                     <span class="skill-name">Power BI</span>
                     <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="90"></div></div>
                     <span class="skill-pct">90%</span>
@@ -1154,6 +1144,16 @@
                     <span class="skill-name">Google Looker Studio</span>
                     <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="75"></div></div>
                     <span class="skill-pct">75%</span>
+                </div>
+                <div class="skill-row reveal">
+                    <span class="skill-name">Cursor AI</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="15"></div></div>
+                    <span class="skill-pct">15%</span>
+                </div>
+                <div class="skill-row reveal">
+                    <span class="skill-name">Claude Code</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="15"></div></div>
+                    <span class="skill-pct">15%</span>
                 </div>
                 <div class="skill-row reveal">
                     <span class="skill-name">Python (learning)</span>
@@ -1230,7 +1230,7 @@
                 <span class="hobby-tag">✈️ Travel</span>
                 <span class="hobby-tag">🏃 Running</span>
                 <span class="hobby-tag">🏋️ Hyrox / Gym</span>
-                <span class="hobby-tag">🍳 Cooking</span>
+                <span class="hobby-tag">🥩 Cooking</span>
                 <span class="hobby-tag">🎾 Padel</span>
                 <span class="hobby-tag">🏕️ Outdoors</span>
                 <span class="hobby-tag">🤖 AI</span>
@@ -1243,11 +1243,6 @@
         <div class="footer-inner">
             <h2 class="reveal">Let's Build the Future Together</h2>
             <p class="footer-sub reveal">Currently bridging the gap between quality engineering and strategic product solutions.</p>
-            <div class="footer-qr reveal">
-                <div class="qr-container">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.linkedin.com/in/fernandogarciagzz/&color=0176D3&bgcolor=FFFFFF&margin=1" alt="LinkedIn QR Code">
-                </div>
-            </div>
             <div class="social-links reveal">
                 <a href="mailto:fernando.jgarciagzz@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
                 <a href="tel:+528120026642" aria-label="Phone"><i class="fas fa-phone"></i></a>
@@ -1601,6 +1596,101 @@
         }
 
         trigger.addEventListener('click', runOracle);
+
+        // --- AURORA GLOW ---
+        const aCanvas = document.getElementById('auroraCanvas');
+        if (aCanvas) {
+            const aCtx = aCanvas.getContext('2d');
+            const photoBox = document.getElementById('photoContainer');
+            let aW, aH;
+            let intensity = 0;
+            let targetIntensity = 0;
+            let mouseX = 0.5, mouseY = 0.5;
+            let smoothX = 0.5, smoothY = 0.5;
+
+            function aResize() {
+                const rect = photoBox.getBoundingClientRect();
+                aW = aCanvas.width = rect.width * 2;
+                aH = aCanvas.height = rect.height * 2;
+            }
+            aResize();
+            window.addEventListener('resize', aResize);
+
+            photoBox.addEventListener('mousemove', (e) => {
+                const rect = photoBox.getBoundingClientRect();
+                mouseX = (e.clientX - rect.left) / rect.width;
+                mouseY = (e.clientY - rect.top) / rect.height;
+                targetIntensity = 1;
+            });
+            photoBox.addEventListener('mouseleave', () => { targetIntensity = 0; });
+            photoBox.style.pointerEvents = 'auto';
+
+            let time = 0;
+            function drawAurora() {
+                aCtx.clearRect(0, 0, aW, aH);
+                time += 0.008;
+
+                intensity += (targetIntensity - intensity) * 0.04;
+                smoothX += (mouseX - smoothX) * 0.06;
+                smoothY += (mouseY - smoothY) * 0.06;
+
+                const isDark = document.body.classList.contains('dark');
+                const cx = aW / 2;
+                const cy = aH / 2;
+
+                // Three aurora blobs that drift and fade
+                const blobs = [
+                    {
+                        x: cx + Math.sin(time * 0.7) * 80 + (smoothX - 0.5) * 150 * intensity,
+                        y: cy + Math.cos(time * 0.5) * 60 + (smoothY - 0.5) * 100 * intensity,
+                        rx: aW * 0.35 + Math.sin(time * 0.4) * 40,
+                        ry: aH * 0.25 + Math.cos(time * 0.6) * 30,
+                        r: 1, g: 118, b: 211,
+                        baseAlpha: isDark ? 0.15 : 0.18,
+                        hoverAlpha: isDark ? 0.35 : 0.4
+                    },
+                    {
+                        x: cx + Math.cos(time * 0.5) * 90 + (smoothX - 0.5) * 130 * intensity,
+                        y: cy + Math.sin(time * 0.8) * 70 + (smoothY - 0.5) * 80 * intensity,
+                        rx: aW * 0.3 + Math.cos(time * 0.3) * 35,
+                        ry: aH * 0.22 + Math.sin(time * 0.5) * 25,
+                        r: 0, g: 161, b: 224,
+                        baseAlpha: isDark ? 0.12 : 0.14,
+                        hoverAlpha: isDark ? 0.3 : 0.35
+                    },
+                    {
+                        x: cx + Math.sin(time * 0.9) * 70 + (smoothX - 0.5) * 110 * intensity,
+                        y: cy + Math.cos(time * 0.3) * 80 + (smoothY - 0.5) * 120 * intensity,
+                        rx: aW * 0.28 + Math.sin(time * 0.6) * 30,
+                        ry: aH * 0.2 + Math.cos(time * 0.4) * 20,
+                        r: 26, g: 214, b: 255,
+                        baseAlpha: isDark ? 0.1 : 0.12,
+                        hoverAlpha: isDark ? 0.25 : 0.3
+                    }
+                ];
+
+                blobs.forEach(b => {
+                    const alpha = b.baseAlpha + (b.hoverAlpha - b.baseAlpha) * intensity;
+                    const grad = aCtx.createRadialGradient(b.x, b.y, 0, b.x, b.y, Math.max(b.rx, b.ry));
+                    grad.addColorStop(0, 'rgba(' + b.r + ',' + b.g + ',' + b.b + ',' + alpha + ')');
+                    grad.addColorStop(0.4, 'rgba(' + b.r + ',' + b.g + ',' + b.b + ',' + (alpha * 0.6) + ')');
+                    grad.addColorStop(1, 'rgba(' + b.r + ',' + b.g + ',' + b.b + ', 0)');
+
+                    aCtx.save();
+                    aCtx.translate(b.x, b.y);
+                    aCtx.scale(1, b.ry / b.rx);
+                    aCtx.translate(-b.x, -b.y);
+                    aCtx.beginPath();
+                    aCtx.arc(b.x, b.y, b.rx, 0, Math.PI * 2);
+                    aCtx.fillStyle = grad;
+                    aCtx.fill();
+                    aCtx.restore();
+                });
+
+                requestAnimationFrame(drawAurora);
+            }
+            drawAurora();
+        }
     })();
     </script>
 
