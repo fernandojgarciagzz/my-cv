@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fernando García | Solutions Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --sf-blue: #0176D3;
+            --sf-blue-dark: #014486;
+            --sf-blue-light: #00A1E0;
+            --sf-cyan: #1AD6FF;
+            --sf-navy: #032D60;
+            --sf-green: #2E844A;
+            --sf-green-light: #45C65A;
+
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F8FAFC;
+            --bg-tertiary: #F1F5F9;
+            --border: #E2E8F0;
+            --border-light: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-tertiary: #64748B;
+            --text-muted: #94A3B8;
+            --card-bg: #FFFFFF;
+            --nav-bg: rgba(255,255,255,0.88);
+            --node-color: rgba(1, 118, 211, 0.08);
+            --node-line: rgba(1, 118, 211, 0.06);
+            --dot-active: var(--sf-blue);
+            --dot-inactive: #CBD5E1;
+            --toggle-bg: #F1F5F9;
+            --toggle-icon: #F59E0B;
+            --footer-bg: #0F172A;
+            --footer-text: #64748B;
+
+            --radius: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 20px rgba(1,118,211,0.08);
+            --shadow-lg: 0 12px 40px rgba(1,118,211,0.12);
+            --shadow-card: 0 1px 3px rgba(0,0,0,0.04);
+
+            --mono: 'JetBrains Mono', monospace;
+            --heading: 'Space Grotesk', sans-serif;
+            --body: 'Inter', sans-serif;
+        }
+
+        .dark {
+            --bg-primary: #0F172A;
+            --bg-secondary: #1E293B;
+            --bg-tertiary: #334155;
+            --border: #334155;
+            --border-light: #1E293B;
+            --text-primary: #F1F5F9;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --text-muted: #64748B;
+            --card-bg: #1E293B;
+            --nav-bg: rgba(15, 23, 42, 0.92);
+            --node-color: rgba(1, 118, 211, 0.12);
+            --node-line: rgba(1, 118, 211, 0.08);
+            --dot-inactive: #475569;
+            --toggle-bg: #334155;
+            --toggle-icon: #818CF8;
+            --footer-bg: #0B1120;
+            --footer-text: #475569;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.25);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.3);
+            --shadow-card: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--body);
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.5s ease, color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        /* --- REVEAL --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-d1 { transition-delay: 0.1s; }
+        .reveal-d2 { transition-delay: 0.2s; }
+        .reveal-d3 { transition-delay: 0.3s; }
+        .reveal-d4 { transition-delay: 0.4s; }
+
+        /* --- CANVAS NODE NETWORK --- */
+        #nodeCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* --- NAV --- */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: box-shadow 0.3s, background 0.5s ease;
+        }
+        nav.scrolled { box-shadow: var(--shadow-sm); }
+        .nav-inner {
+            max-width: 1100px; margin: 0 auto; padding: 0 2rem;
+            height: 60px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-logo {
+            font-family: var(--heading);
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: -0.02em;
+            color: var(--sf-blue);
+        }
+        .nav-right { display: flex; align-items: center; gap: 2rem; }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-links a {
+            text-decoration: none;
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: color 0.2s;
+            letter-spacing: 0.03em;
+        }
+        .nav-links a:hover { color: var(--sf-blue); }
+        .theme-toggle {
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--toggle-bg);
+            color: var(--toggle-icon); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { border-color: var(--sf-blue); }
+        .mobile-toggle {
+            display: none; background: none; border: none;
+            font-size: 1.2rem; color: var(--text-secondary); cursor: pointer;
+        }
+
+        /* --- SCROLL PROGRESS --- */
+        .scroll-progress {
+            position: fixed; top: 60px; left: 0; height: 2px;
+            background: linear-gradient(90deg, var(--sf-blue), var(--sf-cyan));
+            z-index: 101; width: 0%;
+        }
+
+        /* --- HERO (WHITE + TERMINAL) --- */
+        .hero {
+            position: relative;
+            padding: 10rem 2rem 6rem;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            display: flex; align-items: center;
+            transition: background 0.5s ease;
+            z-index: 1;
+        }
+        .hero-inner {
+            max-width: 1100px; margin: 0 auto; width: 100%;
+            display: flex; align-items: center; justify-content: space-between; gap: 3rem;
+            position: relative; z-index: 2;
+        }
+        .hero-left { flex: 1; }
+        .hero-right {
+            display: flex; flex-direction: column; align-items: center; gap: 1rem;
+        }
+
+        /* Terminal prompt */
+        .hero-terminal {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--sf-blue);
+            margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .terminal-prompt { color: var(--sf-green); }
+        .cursor-blink {
+            display: inline-block; width: 8px; height: 16px;
+            background: var(--sf-blue);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .hero-name {
+            font-family: var(--heading);
+            font-size: clamp(3.5rem, 7.5vw, 6.5rem);
+            font-weight: 700;
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            transition: color 0.4s ease;
+        }
+        .hero-name .accent { color: var(--sf-blue); }
+        .hero-tagline {
+            font-family: var(--heading);
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: 400;
+            color: var(--text-tertiary);
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.01em;
+            transition: color 0.4s ease;
+        }
+        .hero-subtitle {
+            font-size: 0.92rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            max-width: 520px;
+            margin-bottom: 2.5rem;
+            transition: color 0.4s ease;
+        }
+        .hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.7rem 1.5rem; border-radius: 8px;
+            font-family: var(--mono); font-size: 0.75rem; font-weight: 600;
+            text-decoration: none; transition: all 0.25s ease;
+            cursor: pointer; letter-spacing: 0.02em;
+        }
+        .btn-primary {
+            background: var(--sf-blue); color: #FFFFFF; border: none;
+            box-shadow: 0 2px 8px rgba(1,118,211,0.25);
+        }
+        .btn-primary:hover { box-shadow: 0 4px 20px rgba(1,118,211,0.35); transform: translateY(-2px); }
+        .btn-outline {
+            background: transparent; color: var(--sf-blue);
+            border: 1.5px solid var(--border);
+        }
+        .btn-outline:hover { border-color: var(--sf-blue); background: rgba(1,118,211,0.04); }
+
+        /* Profile photo */
+        .profile-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 25%;
+            transform: scale(1.3);
+            transform-origin: center 25%;
+        }
+        .profile-photo-wrapper {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--border);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+        .profile-photo-wrapper:hover { border-color: var(--sf-blue); box-shadow: var(--shadow-lg); }
+
+        /* QR code */
+        .qr-container {
+            width: 160px; height: 160px;
+            border: 2px solid var(--border);
+            border-radius: 12px; overflow: hidden;
+            background: #FFFFFF;
+            padding: 8px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+        .qr-container:hover { box-shadow: var(--shadow-md); border-color: var(--sf-blue); }
+        .qr-container img { width: 100%; height: 100%; }
+        .qr-label {
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-align: center;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        /* --- BLUEPRINT CONNECTOR --- */
+        .blueprint-connector {
+            display: flex; align-items: center; justify-content: center;
+            padding: 2rem 0; position: relative; z-index: 1;
+            background: var(--bg-primary);
+            transition: background 0.5s ease;
+        }
+        .connector-line {
+            display: flex; align-items: center; gap: 0.75rem;
+            color: var(--text-muted); font-family: var(--mono); font-size: 0.6rem;
+            letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        .connector-dash {
+            width: 60px; height: 1px;
+            border-top: 2px dashed var(--border);
+            transition: border-color 0.4s ease;
+        }
+        .connector-node {
+            width: 8px; height: 8px; border-radius: 50%;
+            border: 2px solid var(--sf-blue);
+            background: var(--bg-primary);
+            transition: background 0.4s ease;
+        }
+
+        /* --- SECTIONS --- */
+        section {
+            padding: 5rem 2rem;
+            position: relative; z-index: 1;
+            transition: background 0.5s ease;
+        }
+        .section-inner { max-width: 1100px; margin: 0 auto; }
+        .section-label {
+            font-family: var(--mono);
+            font-size: 0.65rem; font-weight: 600;
+            letter-spacing: 0.18em; text-transform: uppercase;
+            color: var(--sf-blue); margin-bottom: 0.5rem;
+        }
+        .section-title {
+            font-family: var(--heading);
+            font-size: 1.75rem; font-weight: 700;
+            color: var(--text-primary); margin-bottom: 0.75rem;
+            letter-spacing: -0.03em;
+            transition: color 0.4s ease;
+        }
+        .section-desc {
+            color: var(--text-tertiary);
+            max-width: 500px; font-size: 0.9rem; line-height: 1.7;
+            margin-bottom: 3rem;
+            transition: color 0.4s ease;
+        }
+
+        /* --- STATS --- */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem;
+        }
+        .stat-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.5rem; text-align: center;
+            transition: all 0.3s ease; box-shadow: var(--shadow-card);
+            perspective: 600px;
+        }
+        .stat-value {
+            font-family: var(--heading);
+            font-size: 2.2rem; font-weight: 700;
+            color: var(--sf-blue); margin-bottom: 0.4rem;
+            letter-spacing: -0.03em;
+        }
+        .stat-label {
+            font-family: var(--mono);
+            font-size: 0.58rem; font-weight: 500;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* --- ABOUT --- */
+        .about-text {
+            font-size: 1rem; line-height: 1.9;
+            color: var(--text-secondary); max-width: 700px;
+            margin-bottom: 1.25rem;
+            transition: color 0.4s ease;
+        }
+        .about-personal {
+            font-size: 0.85rem; line-height: 1.7;
+            color: var(--text-muted); max-width: 700px;
+            font-style: italic;
+            transition: color 0.4s ease;
+        }
+
+        /* --- TIMELINE (WORKFLOW STYLE) --- */
+        .timeline { position: relative; padding-left: 2.5rem; }
+        .timeline::before {
+            content: ''; position: absolute;
+            left: 7px; top: 0; bottom: 0; width: 2px;
+            background: var(--border);
+            transition: background 0.4s ease;
+        }
+
+        /* Flowing dots */
+        .timeline::after {
+            content: ''; position: absolute;
+            left: 5px; width: 6px; height: 6px;
+            border-radius: 50%; background: var(--sf-blue);
+            animation: flowDown 4s ease-in-out infinite;
+            opacity: 0.6;
+        }
+        @keyframes flowDown {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .timeline-item { position: relative; padding-bottom: 3rem; }
+        .timeline-item:last-child { padding-bottom: 0; }
+
+        /* Workflow status dot */
+        .timeline-dot {
+            position: absolute; left: -2rem; top: 4px;
+            width: 16px; height: 16px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .timeline-dot.active {
+            background: rgba(1, 118, 211, 0.15);
+            border: 2px solid var(--sf-blue);
+        }
+        .timeline-dot.active::after {
+            content: ''; width: 6px; height: 6px;
+            border-radius: 50%; background: var(--sf-blue);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.4); }
+        }
+        .timeline-dot.completed {
+            background: var(--sf-green); border: none;
+        }
+        .timeline-dot.completed::after {
+            content: '✓'; color: #FFFFFF;
+            font-size: 0.55rem; font-weight: 700;
+        }
+
+        .timeline-header {
+            display: flex; align-items: baseline; gap: 0.75rem;
+            flex-wrap: wrap; margin-bottom: 0.2rem;
+        }
+        .timeline-company {
+            font-family: var(--heading);
+            font-size: 1.1rem; font-weight: 700;
+            color: var(--text-primary);
+            transition: color 0.4s ease;
+        }
+        .timeline-badge {
+            font-family: var(--mono);
+            font-size: 0.55rem; font-weight: 600;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            padding: 0.15rem 0.5rem; border-radius: 4px;
+            background: rgba(1, 118, 211, 0.08); color: var(--sf-blue);
+        }
+        .workflow-status {
+            font-family: var(--mono); font-size: 0.55rem;
+            font-weight: 600; letter-spacing: 0.05em;
+            text-transform: uppercase; margin-left: auto;
+        }
+        .workflow-status.running { color: var(--sf-blue); }
+        .workflow-status.done { color: var(--sf-green); }
+        .timeline-role {
+            font-family: var(--mono); font-size: 0.75rem;
+            font-weight: 500; color: var(--text-muted); margin-bottom: 0.75rem;
+        }
+        .timeline-bullets { list-style: none; padding: 0; }
+        .timeline-bullets li {
+            position: relative; padding-left: 1.2rem; margin-bottom: 0.45rem;
+            font-size: 0.85rem; color: var(--text-secondary); line-height: 1.65;
+            transition: color 0.4s ease;
+        }
+        .timeline-bullets li::before {
+            content: ''; position: absolute; left: 0; top: 0.55em;
+            width: 5px; height: 5px; border-radius: 50%; background: var(--border);
+        }
+        .timeline-bullets li strong { color: var(--text-primary); font-weight: 600; }
+
+        /* --- AGENT NODE CARDS --- */
+        .agent-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem;
+            position: relative;
+        }
+        .agent-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.75rem;
+            transition: all 0.3s ease; box-shadow: var(--shadow-card);
+            position: relative;
+            perspective: 600px;
+        }
+        .agent-card::before {
+            content: '';
+            position: absolute; top: 50%; left: -12px;
+            width: 8px; height: 8px; border-radius: 50%;
+            border: 2px solid var(--sf-blue);
+            background: var(--bg-primary);
+            transition: background 0.4s ease;
+        }
+        .agent-card::after {
+            content: '';
+            position: absolute; top: 50%; right: -12px;
+            width: 8px; height: 8px; border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--bg-primary);
+            transition: background 0.4s, border-color 0.4s;
+        }
+        .agent-card-inner { transition: transform 0.15s ease-out; }
+        .agent-icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            background: rgba(1, 118, 211, 0.08);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--sf-blue); font-size: 0.85rem; margin-bottom: 1rem;
+        }
+        .agent-card h3 {
+            font-family: var(--heading);
+            font-size: 0.9rem; font-weight: 600;
+            color: var(--text-primary); margin-bottom: 0.4rem;
+            transition: color 0.4s ease;
+        }
+        .agent-card p {
+            font-size: 0.8rem; color: var(--text-tertiary);
+            line-height: 1.6;
+            transition: color 0.4s ease;
+        }
+        .agent-type {
+            font-family: var(--mono); font-size: 0.55rem;
+            color: var(--sf-blue); letter-spacing: 0.06em;
+            text-transform: uppercase; margin-bottom: 0.75rem;
+        }
+        .learning-card { border-left: 3px solid var(--sf-blue); margin-top: 1.25rem; }
+
+        /* --- SKILLS --- */
+        .skills-list { max-width: 580px; }
+        .skill-row {
+            display: flex; align-items: center; gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .skill-name {
+            font-family: var(--mono); font-size: 0.72rem; font-weight: 500;
+            color: var(--text-secondary); min-width: 200px;
+            transition: color 0.4s ease;
+        }
+        .skill-bar-bg {
+            flex: 1; height: 5px; background: var(--border);
+            border-radius: 3px; overflow: hidden;
+            transition: background 0.4s ease;
+        }
+        .skill-bar-fill {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, var(--sf-blue), var(--sf-blue-light));
+            width: 0%;
+            transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .skill-pct {
+            font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+            color: var(--text-muted); min-width: 34px; text-align: right;
+        }
+
+        /* --- EDUCATION --- */
+        .edu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+        .edu-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.75rem;
+            transition: all 0.3s ease; box-shadow: var(--shadow-card);
+            perspective: 600px;
+        }
+        .edu-card-inner { transition: transform 0.15s ease-out; }
+        .edu-card h3 {
+            font-family: var(--heading);
+            font-size: 0.95rem; font-weight: 600;
+            color: var(--text-primary); margin-bottom: 0.3rem;
+        }
+        .edu-school { font-size: 0.82rem; color: var(--sf-blue); font-weight: 500; margin-bottom: 0.3rem; }
+        .edu-year {
+            font-family: var(--mono); font-size: 0.68rem;
+            color: var(--text-muted); margin-bottom: 0.65rem;
+        }
+        .edu-detail {
+            font-size: 0.78rem; color: var(--text-tertiary);
+            line-height: 1.6; list-style: none; padding: 0;
+        }
+        .edu-detail li { margin-bottom: 0.2rem; }
+
+        /* --- HOBBIES --- */
+        .hobbies-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+        .hobby-tag {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.45rem 0.9rem;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.78rem; color: var(--text-secondary); font-weight: 500;
+            transition: all 0.25s ease; cursor: default;
+        }
+        .hobby-tag:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
+        .hobby-tag-secret { cursor: pointer; }
+        .hobby-tag-secret:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
+
+        /* --- ORACLE AGENT MODAL --- */
+        .oracle-overlay {
+            position: fixed; inset: 0; z-index: 999;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease;
+            padding: 1.5rem;
+        }
+        .oracle-overlay.open { opacity: 1; pointer-events: all; }
+        .oracle-terminal {
+            background: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            width: 100%; max-width: 540px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            overflow: hidden;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { transform: scale(0.95) translateY(10px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .oracle-topbar {
+            display: flex; align-items: center; gap: 6px;
+            padding: 12px 16px;
+            background: #1E293B;
+            border-bottom: 1px solid #334155;
+        }
+        .oracle-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .oracle-dot-r { background: #EF4444; }
+        .oracle-dot-y { background: #F59E0B; }
+        .oracle-dot-g { background: #22C55E; }
+        .oracle-topbar-title {
+            font-family: var(--mono); font-size: 0.6rem;
+            color: #64748B; margin-left: 8px; letter-spacing: 0.06em;
+        }
+        .oracle-close {
+            margin-left: auto; background: none; border: none;
+            color: #64748B; cursor: pointer; font-size: 0.85rem;
+            transition: color 0.2s; padding: 2px 6px;
+        }
+        .oracle-close:hover { color: #F1F5F9; }
+        .oracle-body {
+            padding: 20px;
+            min-height: 280px;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            line-height: 1.8;
+            color: #94A3B8;
+        }
+        .oracle-line { opacity: 0; transform: translateY(4px); transition: all 0.3s ease; }
+        .oracle-line.show { opacity: 1; transform: translateY(0); }
+        .oracle-prompt { color: #22C55E; }
+        .oracle-cmd { color: #F1F5F9; }
+        .oracle-info { color: #0176D3; }
+        .oracle-dots { color: #F59E0B; }
+        .oracle-spinner {
+            display: inline-block;
+            animation: spin 1s steps(4) infinite;
+        }
+        @keyframes spin {
+            0% { content: '|'; }
+            25% { content: '/'; }
+            50% { content: '-'; }
+            75% { content: '\\'; }
+        }
+        .oracle-result {
+            margin-top: 16px; padding: 16px;
+            background: #1E293B; border-radius: 8px;
+            border: 1px solid #334155;
+            opacity: 0; transform: translateY(8px);
+            transition: all 0.5s ease;
+        }
+        .oracle-result.show { opacity: 1; transform: translateY(0); }
+        .oracle-book-title {
+            font-family: var(--heading);
+            font-size: 1.05rem; font-weight: 600;
+            color: #F1F5F9; margin-bottom: 2px;
+            letter-spacing: -0.02em;
+        }
+        .oracle-book-author {
+            font-family: var(--mono); font-size: 0.65rem;
+            color: #0176D3; margin-bottom: 12px; letter-spacing: 0.03em;
+        }
+        .oracle-book-note {
+            font-family: var(--body); font-size: 0.82rem;
+            color: #CBD5E1; line-height: 1.7; font-style: italic;
+        }
+        .oracle-book-note::before { content: '"'; color: #0176D3; }
+        .oracle-book-note::after { content: '"'; color: #0176D3; }
+        .oracle-actions {
+            margin-top: 16px; display: flex; gap: 8px;
+        }
+        .oracle-btn {
+            font-family: var(--mono); font-size: 0.68rem; font-weight: 600;
+            padding: 6px 14px; border-radius: 6px; cursor: pointer;
+            transition: all 0.2s; letter-spacing: 0.03em;
+        }
+        .oracle-btn-primary {
+            background: #0176D3; color: #FFFFFF; border: none;
+        }
+        .oracle-btn-primary:hover { background: #00A1E0; }
+        .oracle-btn-ghost {
+            background: transparent; color: #64748B;
+            border: 1px solid #334155;
+        }
+        .oracle-btn-ghost:hover { color: #F1F5F9; border-color: #64748B; }
+
+        /* --- SIDE DOTS --- */
+        .side-dots {
+            position: fixed; right: 1.25rem; top: 50%;
+            transform: translateY(-50%); z-index: 90;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .side-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--dot-inactive);
+            cursor: pointer; transition: all 0.3s ease;
+            border: none; padding: 0; position: relative;
+        }
+        .side-dot.active {
+            background: var(--dot-active);
+            box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.15);
+        }
+        .side-dot-label {
+            position: absolute; right: 18px; top: 50%;
+            transform: translateY(-50%);
+            font-family: var(--mono); font-size: 0.58rem; font-weight: 500;
+            color: var(--text-muted); white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        .side-dot:hover .side-dot-label { opacity: 1; }
+
+        /* --- FOOTER --- */
+        footer {
+            background: var(--footer-bg); color: #FFFFFF;
+            padding: 4rem 2rem; text-align: center;
+            transition: background 0.5s ease; position: relative; z-index: 1;
+        }
+        .footer-inner { max-width: 1100px; margin: 0 auto; }
+        footer h2 {
+            font-family: var(--heading);
+            font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+        .footer-sub {
+            color: var(--footer-text); font-size: 0.85rem;
+            margin-bottom: 2rem;
+            transition: color 0.4s ease;
+        }
+        .footer-qr {
+            display: flex; justify-content: center; margin-bottom: 2rem;
+        }
+        .footer-qr .qr-container {
+            border-color: rgba(255,255,255,0.1);
+            background: #FFFFFF;
+        }
+        .footer-qr .qr-container:hover { border-color: var(--sf-blue); }
+        .social-links {
+            display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 2.5rem;
+        }
+        .social-links a {
+            width: 40px; height: 40px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--footer-text); text-decoration: none;
+            transition: all 0.25s ease; font-size: 0.9rem;
+        }
+        .social-links a:hover { color: #FFFFFF; border-color: var(--sf-blue); background: var(--sf-blue); }
+        .footer-meta {
+            font-family: var(--mono); font-size: 0.6rem;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: rgba(255,255,255,0.18);
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-toggle { display: block; }
+            .nav-links.open {
+                display: flex; flex-direction: column;
+                position: absolute; top: 60px; left: 0; width: 100%;
+                background: var(--nav-bg); backdrop-filter: blur(16px);
+                padding: 1.5rem 2rem;
+                border-bottom: 1px solid var(--border); gap: 1rem;
+            }
+            .hero { padding: 8rem 1.5rem 4rem; min-height: auto; }
+            .hero-inner { flex-direction: column; text-align: center; }
+            .hero-subtitle { max-width: 100%; }
+            .hero-actions { justify-content: center; }
+            .hero-terminal { justify-content: center; }
+            .hero-name { font-size: clamp(2.8rem, 12vw, 4rem); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .agent-grid { grid-template-columns: 1fr; }
+            .agent-card::before, .agent-card::after { display: none; }
+            .edu-grid { grid-template-columns: 1fr; }
+            .side-dots { display: none; }
+            .skill-name { min-width: 140px; font-size: 0.65rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Animated node network background -->
+    <canvas id="nodeCanvas"></canvas>
+
+    <!-- Scroll progress -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Nav -->
+    <nav id="navbar">
+        <div class="nav-inner">
+            <span class="nav-logo">fernando.garcia</span>
+            <button class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-right">
+                <div class="nav-links">
+                    <a href="#about">about</a>
+                    <a href="#experience">experience</a>
+                    <a href="#agents">competencies</a>
+                    <a href="#skills">skills</a>
+                    <a href="#education">education</a>
+                    <a href="#contact">contact</a>
+                </div>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Side dots -->
+    <div class="side-dots" id="sideDots">
+        <button class="side-dot active" data-target="hero"><span class="side-dot-label">Top</span></button>
+        <button class="side-dot" data-target="about"><span class="side-dot-label">About</span></button>
+        <button class="side-dot" data-target="experience"><span class="side-dot-label">Experience</span></button>
+        <button class="side-dot" data-target="agents"><span class="side-dot-label">Competencies</span></button>
+        <button class="side-dot" data-target="skills"><span class="side-dot-label">Skills</span></button>
+        <button class="side-dot" data-target="education"><span class="side-dot-label">Education</span></button>
+        <button class="side-dot" data-target="contact"><span class="side-dot-label">Contact</span></button>
+    </div>
+
+    <!-- HERO -->
+    <header class="hero" id="hero">
+        <div class="hero-inner" id="heroContent">
+            <div class="hero-left">
+                <div class="hero-terminal">
+                    <span class="terminal-prompt">~/solutions $</span>
+                    <span>run workflow --agent fernando.garcia</span>
+                    <span class="cursor-blink"></span>
+                </div>
+                <h1 class="hero-name">
+                    FERNANDO<br><span class="accent">GARCÍA</span>
+                </h1>
+                <p class="hero-tagline">Architecting the Future of Agentic Processes</p>
+                <p class="hero-subtitle">
+                    Engineer with a Master's in Business Intelligence and a builder's mindset — translating high-stakes industrial workflows into resilient, no-code AI solutions that drive operational performance.
+                </p>
+                <div class="hero-actions">
+                    <a href="#experience" class="btn btn-primary">
+                        <i class="fas fa-play" style="font-size: 0.6rem;"></i> View My Impact
+                    </a>
+                    <a href="https://www.linkedin.com/in/fernandogarciagzz/" target="_blank" class="btn btn-outline">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                </div>
+            </div>
+            <div class="hero-right">
+                <div class="profile-photo-wrapper">
+                    <img src="photo.png" alt="Fernando García" class="profile-photo">
+                </div>
+                <div class="qr-container">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.linkedin.com/in/fernandogarciagzz/&color=0176D3&bgcolor=FFFFFF&margin=1" alt="LinkedIn QR Code">
+                </div>
+                <span class="qr-label">Scan → LinkedIn</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Connector -->
+    <div class="blueprint-connector">
+        <div class="connector-line">
+            <div class="connector-dash"></div>
+            <div class="connector-node"></div>
+            <span>metrics</span>
+            <div class="connector-node"></div>
+            <div class="connector-dash"></div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <section class="bg-primary" style="padding: 2rem 2rem 3.5rem;">
+        <div class="section-inner">
+            <div class="stats-grid">
+                <div class="stat-card magnetic reveal">
+                    <div class="stat-value" data-count="1.5" data-suffix="+" data-decimal="true">0+</div>
+                    <div class="stat-label">Years Agentic Orchestration</div>
+                </div>
+                <div class="stat-card magnetic reveal reveal-d1">
+                    <div class="stat-value" data-static="true">M.S.</div>
+                    <div class="stat-label">Business Intelligence</div>
+                </div>
+                <div class="stat-card magnetic reveal reveal-d2">
+                    <div class="stat-value" data-count="20" data-suffix="%">0%</div>
+                    <div class="stat-label">Working Capital Reduction Across Supply Chain</div>
+                </div>
+                <div class="stat-card magnetic reveal reveal-d3">
+                    <div class="stat-value" data-static="true">2nd</div>
+                    <div class="stat-label">CLAUT Innovation Award</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connector -->
+    <div class="blueprint-connector">
+        <div class="connector-line">
+            <div class="connector-dash"></div>
+            <div class="connector-node"></div>
+            <span>about</span>
+            <div class="connector-node"></div>
+            <div class="connector-dash"></div>
+        </div>
+    </div>
+
+    <!-- About -->
+    <section id="about" class="bg-primary">
+        <div class="section-inner">
+            <p class="section-label reveal">// about</p>
+            <h2 class="section-title reveal">The "Why" Behind the Solutions</h2>
+            <p class="about-text reveal">
+                Engineer with a structured mindset and a Master's in Business Intelligence, passionate about understanding the "why" behind complex problems to turn them into scalable solutions. As a Quality Engineer at Salesforce, I specialize in the Agentforce (formerly Regrello) platform, architecting agentic workflows including different agents to help manufacturing teams work smarter. I bring a proven track record in supply chain optimization, notably reducing working capital by 20% at a global automotive leader by identifying inefficiencies and designing high-impact industrial processes. I leverage a "builder's mindset" to translate high-stakes industrial workflows into resilient, no-code AI solutions that drive operational performance.
+            </p>
+            <p class="about-personal reveal">
+                Outside of my professional focus on strategic data analysis and process automation, I am committed to continuous learning and maintaining a disciplined lifestyle through exercise, reading, and mindfulness.
+            </p>
+        </div>
+    </section>
+
+    <!-- Connector -->
+    <div class="blueprint-connector">
+        <div class="connector-line">
+            <div class="connector-dash"></div>
+            <div class="connector-node"></div>
+            <span>workflow log</span>
+            <div class="connector-node"></div>
+            <div class="connector-dash"></div>
+        </div>
+    </div>
+
+    <!-- Experience -->
+    <section id="experience" class="bg-primary">
+        <div class="section-inner">
+            <p class="section-label reveal">// experience</p>
+            <h2 class="section-title reveal">Professional Journey</h2>
+            <p class="section-desc reveal">From engineering internships to building agentic AI systems at Salesforce.</p>
+
+            <div class="timeline">
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot active"></div>
+                    <div class="timeline-header">
+                        <span class="timeline-company">Salesforce</span>
+                        <span class="timeline-badge">Current</span>
+                        <span class="workflow-status running">● Running</span>
+                    </div>
+                    <p class="timeline-role">Quality Engineer · Nov 2025 – Present</p>
+                    <ul class="timeline-bullets">
+                        <li><strong>Agentic Orchestration:</strong> Engineered a high-complexity "Master Blueprint" that orchestrates child workflows to automate daily efficiency tracking of the full Agentforce suite.</li>
+                        <li><strong>Automation Leadership:</strong> Developed "Lemurized" (automated) blueprint cycles to monitor agent performance over time, validating the speed and accuracy of agentic interactions.</li>
+                        <li><strong>Cross-Functional Feedback:</strong> Collaborates directly with Product and Engineering teams to refine agent capabilities and identify logic gaps in new releases.</li>
+                        <li><strong>Strategic Testing:</strong> Leverages deep supply chain knowledge to create "out-of-the-box" test scenarios that mirror complex industrial environments, increasing platform robustness.</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot completed"></div>
+                    <div class="timeline-header">
+                        <span class="timeline-company">Regrello</span>
+                        <span class="timeline-badge">Acquired by Salesforce</span>
+                        <span class="workflow-status done">✓ Completed</span>
+                    </div>
+                    <p class="timeline-role">Industry Analyst · Oct 2024 – Oct 2025</p>
+                    <ul class="timeline-bullets">
+                        <li><strong>Solution Design:</strong> Designed and tested intelligent blueprints with task logic, field mappings, and conditions for supply chain and finance workflows.</li>
+                        <li><strong>AI Refinement:</strong> Refined prompts and improved AI-generated task responses to ensure accuracy and consistency across agent outputs.</li>
+                        <li><strong>Quality Assurance:</strong> Led "Golden Tests" and quality assurance simulations to detect bugs and workflow inconsistencies before production deployments.</li>
+                        <li><strong>BI Reporting:</strong> Created operational dashboards and KPI reports by analyzing platform data using Google Looker Studio.</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot completed"></div>
+                    <div class="timeline-header">
+                        <span class="timeline-company">Metalsa</span>
+                        <span class="timeline-badge">Toyota Program</span>
+                        <span class="workflow-status done">✓ Completed</span>
+                    </div>
+                    <p class="timeline-role">Demand Planning Specialist · 2022 – Oct 2024</p>
+                    <ul class="timeline-bullets">
+                        <li><strong>Financial Impact:</strong> Partnered with the Supply Chain Director to optimize demand planning, successfully reducing working capital by over 20% through historical forecast analysis.</li>
+                        <li><strong>Award-Winning Innovation:</strong> Awarded 2nd Place in the Automotive Cluster (CLAUT) Innovation Contest for excellence in supply chain improvement.</li>
+                        <li><strong>Strategic Visualization:</strong> Designed a custom S&OP Dashboard from scratch in Power BI, used by Plant Managers and Directors to track production and inventory levels for global platforms (Tacoma, Tundra).</li>
+                        <li><strong>ERP Management:</strong> Managed sales forecasts and inventory plans within the QAD ERP system.</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot completed"></div>
+                    <div class="timeline-header">
+                        <span class="timeline-company">Metalsa</span>
+                        <span class="workflow-status done">✓ Completed</span>
+                    </div>
+                    <p class="timeline-role">Logistics Specialist · 2021 – 2022</p>
+                    <ul class="timeline-bullets">
+                        <li><strong>Supply Chain Resilience:</strong> Managed logistics for local and imported components, ensuring timely delivery to production lines.</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot completed"></div>
+                    <div class="timeline-header">
+                        <span class="timeline-company">Metalsa</span>
+                        <span class="timeline-badge">Stellantis Project</span>
+                        <span class="workflow-status done">✓ Completed</span>
+                    </div>
+                    <p class="timeline-role">Production Control Intern · 2021</p>
+                    <ul class="timeline-bullets">
+                        <li><strong>Demand Analysis:</strong> Supported MPS planning and demand analysis for major automotive production projects.</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot completed"></div>
+                    <div class="timeline-header">
+                        <span class="timeline-company">John Deere</span>
+                        <span class="workflow-status done">✓ Completed</span>
+                    </div>
+                    <p class="timeline-role">Design Engineering Intern · 2020</p>
+                    <ul class="timeline-bullets">
+                        <li><strong>Engineering Simulation:</strong> Performed Finite Element Analysis (FEA) and topological optimization for industrial designs.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connector -->
+    <div class="blueprint-connector">
+        <div class="connector-line">
+            <div class="connector-dash"></div>
+            <div class="connector-node"></div>
+            <span>agent registry</span>
+            <div class="connector-node"></div>
+            <div class="connector-dash"></div>
+        </div>
+    </div>
+
+    <!-- Core Competencies (Agent Nodes) -->
+    <section id="agents" class="bg-primary">
+        <div class="section-inner">
+            <p class="section-label reveal">// competencies</p>
+            <h2 class="section-title reveal">Agent Registry</h2>
+            <p class="section-desc reveal">Core agents deployed across the solution stack.</p>
+
+            <div class="agent-grid">
+                <div class="agent-card magnetic reveal">
+                    <div class="agent-card-inner">
+                        <div class="agent-type">agent::product</div>
+                        <div class="agent-icon"><i class="fas fa-robot"></i></div>
+                        <h3>Product & Solutions</h3>
+                        <p>Agentic Orchestration, No-Code Workflow Design, Quality Assurance</p>
+                    </div>
+                </div>
+                <div class="agent-card magnetic reveal reveal-d1">
+                    <div class="agent-card-inner">
+                        <div class="agent-type">agent::automation</div>
+                        <div class="agent-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+                        <h3>AI & Automation</h3>
+                        <p>Generative AI (GPT/Gemini), Agentic Testing & Automation, Prompt Engineering</p>
+                    </div>
+                </div>
+                <div class="agent-card magnetic reveal reveal-d2">
+                    <div class="agent-card-inner">
+                        <div class="agent-type">agent::analytics</div>
+                        <div class="agent-icon"><i class="fas fa-chart-line"></i></div>
+                        <h3>Business Intelligence</h3>
+                        <p>Power BI (Advanced), Tableau, Looker Studio, QAD ERP, Data Modeling</p>
+                    </div>
+                </div>
+                <div class="agent-card magnetic reveal reveal-d3">
+                    <div class="agent-card-inner">
+                        <div class="agent-type">agent::domain</div>
+                        <div class="agent-icon"><i class="fas fa-industry"></i></div>
+                        <h3>Domain Expertise</h3>
+                        <p>Demand Planning, Production Control, Logistics, S&OP Strategy, Automotive Supply Chain</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="agent-card learning-card magnetic reveal" style="margin-top: 1.25rem;">
+                <div class="agent-card-inner">
+                    <div class="agent-type">agent::learning // in training</div>
+                    <div class="agent-icon"><i class="fas fa-code"></i></div>
+                    <h3>Technical Development</h3>
+                    <p>Software Development with Claude Code to deepen understanding of SaaS and bug fixing. Actively learning Python and SQL for advanced data analysis and AI/software logic comprehension.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connector -->
+    <div class="blueprint-connector">
+        <div class="connector-line">
+            <div class="connector-dash"></div>
+            <div class="connector-node"></div>
+            <span>proficiency</span>
+            <div class="connector-node"></div>
+            <div class="connector-dash"></div>
+        </div>
+    </div>
+
+    <!-- Skills -->
+    <section id="skills" class="bg-primary">
+        <div class="section-inner">
+            <p class="section-label reveal">// skills</p>
+            <h2 class="section-title reveal">Proficiency Levels</h2>
+            <p class="section-desc reveal">A transparent view of where I stand today.</p>
+
+            <div class="skills-list" id="skillsList">
+                <div class="skill-row reveal">
+                    <span class="skill-name">Agentforce for Supply Chain</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="100"></div></div>
+                    <span class="skill-pct">100%</span>
+                </div>
+                <div class="skill-row reveal">
+                    <span class="skill-name">Generative AI (GPT / Gemini)</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95"></div></div>
+                    <span class="skill-pct">95%</span>
+                </div>
+                <div class="skill-row reveal">
+                    <span class="skill-name">Excel</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95"></div></div>
+                    <span class="skill-pct">95%</span>
+                </div>
+                <div class="skill-row reveal">
+                    <span class="skill-name">Business Intelligence</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="90"></div></div>
+                    <span class="skill-pct">90%</span>
+                </div>
+                <div class="skill-row reveal">
+                    <span class="skill-name">Power BI</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="90"></div></div>
+                    <span class="skill-pct">90%</span>
+                </div>
+                <div class="skill-row reveal">
+                    <span class="skill-name">Tableau</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="80"></div></div>
+                    <span class="skill-pct">80%</span>
+                </div>
+                <div class="skill-row reveal">
+                    <span class="skill-name">Google Looker Studio</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="75"></div></div>
+                    <span class="skill-pct">75%</span>
+                </div>
+                <div class="skill-row reveal">
+                    <span class="skill-name">Python (learning)</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="10"></div></div>
+                    <span class="skill-pct">10%</span>
+                </div>
+                <div class="skill-row reveal">
+                    <span class="skill-name">SQL (learning)</span>
+                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="10"></div></div>
+                    <span class="skill-pct">10%</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connector -->
+    <div class="blueprint-connector">
+        <div class="connector-line">
+            <div class="connector-dash"></div>
+            <div class="connector-node"></div>
+            <span>credentials</span>
+            <div class="connector-node"></div>
+            <div class="connector-dash"></div>
+        </div>
+    </div>
+
+    <!-- Education -->
+    <section id="education" class="bg-primary">
+        <div class="section-inner">
+            <p class="section-label reveal">// education</p>
+            <h2 class="section-title reveal">Academic Background</h2>
+            <div class="edu-grid" style="margin-top: 2rem;">
+                <div class="edu-card magnetic reveal">
+                    <div class="edu-card-inner">
+                        <h3>Master's in Business Intelligence</h3>
+                        <p class="edu-school">University of Barcelona & OBS Business School</p>
+                        <p class="edu-year">2023 – 2024</p>
+                    </div>
+                </div>
+                <div class="edu-card magnetic reveal reveal-d1">
+                    <div class="edu-card-inner">
+                        <h3>B.S. in Mechanical Engineering with Management</h3>
+                        <p class="edu-school">Universidad de Monterrey (UDEM)</p>
+                        <p class="edu-year">2017 – 2021</p>
+                        <ul class="edu-detail">
+                            <li>&#8226; Academic Excellence Scholarship</li>
+                            <li>&#8226; Certificates in Leadership, Spirituality & Social Justice</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connector -->
+    <div class="blueprint-connector">
+        <div class="connector-line">
+            <div class="connector-dash"></div>
+            <div class="connector-node"></div>
+            <span>idle tasks</span>
+            <div class="connector-node"></div>
+            <div class="connector-dash"></div>
+        </div>
+    </div>
+
+    <!-- Hobbies -->
+    <section class="bg-primary">
+        <div class="section-inner">
+            <p class="section-label reveal">// beyond_work</p>
+            <h2 class="section-title reveal">Hobbies & Interests</h2>
+            <div class="hobbies-grid reveal" style="margin-top: 2rem;">
+                <span class="hobby-tag hobby-tag-secret" id="oracleTrigger">📖 Books</span>
+                <span class="hobby-tag">⚽ Soccer</span>
+                <span class="hobby-tag">✈️ Travel</span>
+                <span class="hobby-tag">🏃 Running</span>
+                <span class="hobby-tag">🏋️ Hyrox / Gym</span>
+                <span class="hobby-tag">🍳 Cooking</span>
+                <span class="hobby-tag">🎾 Padel</span>
+                <span class="hobby-tag">🏕️ Outdoors</span>
+                <span class="hobby-tag">🤖 AI</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-inner">
+            <h2 class="reveal">Let's Build the Future Together</h2>
+            <p class="footer-sub reveal">Currently bridging the gap between quality engineering and strategic product solutions.</p>
+            <div class="footer-qr reveal">
+                <div class="qr-container">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.linkedin.com/in/fernandogarciagzz/&color=0176D3&bgcolor=FFFFFF&margin=1" alt="LinkedIn QR Code">
+                </div>
+            </div>
+            <div class="social-links reveal">
+                <a href="mailto:fernando.jgarciagzz@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+                <a href="tel:+528120026642" aria-label="Phone"><i class="fas fa-phone"></i></a>
+                <a href="https://www.linkedin.com/in/fernandogarciagzz/" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="https://www.salesforce.com/trailblazer/f0geoy9fs18wzcvj6f" target="_blank" aria-label="Trailhead"><i class="fas fa-cloud"></i></a>
+            </div>
+            <p class="footer-meta reveal">Based in Monterrey, Mexico · Working Remotely for Salesforce</p>
+        </div>
+    </footer>
+
+    <script>
+    (function() {
+
+        // --- DARK MODE ---
+        const toggle = document.getElementById('themeToggle');
+        const icon = toggle.querySelector('i');
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            icon.className = 'fas fa-moon';
+        }
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const dark = document.body.classList.contains('dark');
+            icon.className = dark ? 'fas fa-moon' : 'fas fa-sun';
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+        });
+
+        // --- SCROLL: NAV + PROGRESS ---
+        const navbar = document.getElementById('navbar');
+        const progress = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 10);
+            const h = document.documentElement.scrollHeight - window.innerHeight;
+            progress.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
+        });
+
+        // --- PARALLAX HERO ---
+        const heroContent = document.getElementById('heroContent');
+        window.addEventListener('scroll', () => {
+            const y = window.scrollY;
+            if (y < window.innerHeight) {
+                heroContent.style.transform = 'translateY(' + (y * 0.3) + 'px)';
+                heroContent.style.opacity = 1 - (y / (window.innerHeight * 0.75));
+            }
+        });
+
+        // --- REVEAL ON SCROLL ---
+        const reveals = document.querySelectorAll('.reveal');
+        const revealObs = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+        reveals.forEach(el => revealObs.observe(el));
+
+        // --- COUNTER ANIMATION ---
+        const stats = document.querySelectorAll('.stat-value[data-count]');
+        const counterObs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting || entry.target.dataset.counted) return;
+                const el = entry.target;
+                el.dataset.counted = 'true';
+                if (el.dataset.static === 'true') return;
+                const target = parseFloat(el.dataset.count);
+                const suffix = el.dataset.suffix || '';
+                const dec = el.dataset.decimal === 'true';
+                const dur = 1400, start = performance.now();
+                function tick(now) {
+                    const p = Math.min((now - start) / dur, 1);
+                    const ease = 1 - Math.pow(1 - p, 3);
+                    el.textContent = (dec ? (target * ease).toFixed(1) : Math.round(target * ease)) + suffix;
+                    if (p < 1) requestAnimationFrame(tick);
+                }
+                requestAnimationFrame(tick);
+            });
+        }, { threshold: 0.5 });
+        stats.forEach(el => counterObs.observe(el));
+
+        // --- SKILL BARS ---
+        const bars = document.querySelectorAll('.skill-bar-fill');
+        const barObs = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.style.width = e.target.dataset.width + '%'; });
+        }, { threshold: 0.25 });
+        bars.forEach(b => barObs.observe(b));
+
+        // --- SIDE DOTS ---
+        const sectionIds = ['hero','about','experience','agents','skills','education','contact'];
+        const dots = document.querySelectorAll('.side-dot');
+        dots.forEach(d => d.addEventListener('click', () => {
+            const el = document.getElementById(d.dataset.target);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }));
+        const dotObs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    dots.forEach(d => d.classList.toggle('active', d.dataset.target === e.target.id));
+                }
+            });
+        }, { threshold: 0.25, rootMargin: '-15% 0px -55% 0px' });
+        sectionIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) dotObs.observe(el);
+        });
+
+        // --- MAGNETIC CARDS (3D TILT) ---
+        document.querySelectorAll('.magnetic').forEach(card => {
+            const inner = card.querySelector('.agent-card-inner, .edu-card-inner') || card;
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                const rotateX = y * -12;
+                const rotateY = x * 12;
+                inner.style.transform = 'perspective(600px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale(1.02)';
+                card.style.boxShadow = '0 ' + (8 + y * 4) + 'px ' + (25 + Math.abs(x) * 10) + 'px rgba(1,118,211,' + (0.08 + Math.abs(x) * 0.04) + ')';
+            });
+            card.addEventListener('mouseleave', () => {
+                inner.style.transform = 'perspective(600px) rotateX(0) rotateY(0) scale(1)';
+                card.style.boxShadow = 'var(--shadow-card)';
+            });
+        });
+
+        // --- ANIMATED NODE NETWORK BACKGROUND ---
+        const canvas = document.getElementById('nodeCanvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, nodes = [], mouse = { x: -1000, y: -1000 };
+        const NODE_COUNT = 50;
+        const CONNECT_DIST = 180;
+        const MOUSE_DIST = 200;
+
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        for (let i = 0; i < NODE_COUNT; i++) {
+            nodes.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                r: Math.random() * 2 + 1.5
+            });
+        }
+
+        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+        function drawNodes() {
+            ctx.clearRect(0, 0, w, h);
+            const isDark = document.body.classList.contains('dark');
+            const nodeAlpha = isDark ? 0.2 : 0.12;
+            const lineAlpha = isDark ? 0.08 : 0.04;
+            const mouseAlpha = isDark ? 0.2 : 0.1;
+
+            nodes.forEach(n => {
+                n.x += n.vx;
+                n.y += n.vy;
+                if (n.x < 0 || n.x > w) n.vx *= -1;
+                if (n.y < 0 || n.y > h) n.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(n.x, n.y + window.scrollY * -0.05, n.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(1, 118, 211, ' + nodeAlpha + ')';
+                ctx.fill();
+            });
+
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const dx = nodes[i].x - nodes[j].x;
+                    const dy = nodes[i].y - nodes[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < CONNECT_DIST) {
+                        const alpha = (1 - dist / CONNECT_DIST) * lineAlpha;
+                        ctx.beginPath();
+                        ctx.moveTo(nodes[i].x, nodes[i].y + window.scrollY * -0.05);
+                        ctx.lineTo(nodes[j].x, nodes[j].y + window.scrollY * -0.05);
+                        ctx.strokeStyle = 'rgba(1, 118, 211, ' + alpha + ')';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+
+                const mdx = nodes[i].x - mouse.x;
+                const mdy = nodes[i].y - (mouse.y + window.scrollY * 0.05);
+                const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+                if (mDist < MOUSE_DIST) {
+                    const alpha = (1 - mDist / MOUSE_DIST) * mouseAlpha;
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[i].x, nodes[i].y + window.scrollY * -0.05);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.strokeStyle = 'rgba(1, 118, 211, ' + alpha + ')';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+            }
+
+            requestAnimationFrame(drawNodes);
+        }
+        drawNodes();
+
+    })();
+    </script>
+
+    <!-- Oracle Agent Modal -->
+    <div class="oracle-overlay" id="oracleOverlay">
+        <div class="oracle-terminal">
+            <div class="oracle-topbar">
+                <div class="oracle-dot oracle-dot-r"></div>
+                <div class="oracle-dot oracle-dot-y"></div>
+                <div class="oracle-dot oracle-dot-g"></div>
+                <span class="oracle-topbar-title">fernando.garcia — book recommendation</span>
+                <button class="oracle-close" id="oracleClose">✕</button>
+            </div>
+            <div class="oracle-body" id="oracleBody"></div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const books = [
+            {
+                title: 'The Power of Your Subconscious Mind',
+                author: 'Joseph Murphy',
+                note: 'This was the first book that showed me how our inner thoughts create our reality. It taught me how to "reprogram" my brain to stop holding me back and start helping me grow.'
+            },
+            {
+                title: 'The Power of Now',
+                author: 'Eckhart Tolle',
+                note: 'This book is a total life-changer and my personal favorite. It made me question everything and you can feel the truth in every single word. It helped me understand that true power comes from staying focused on the present moment.'
+            },
+            {
+                title: 'A New Earth',
+                author: 'Eckhart Tolle',
+                note: 'I recommend this for anyone who wants to understand their ego and find a deeper purpose. It shows how changing your mind is the first step to changing the entire world.'
+            },
+            {
+                title: 'Secrets of the Millionaire Mind',
+                author: 'T. Harv Eker',
+                note: 'This book explains that wealth is a "mental game" before it is a financial one. It helped me identify and fix the old, negative beliefs I had about success.'
+            },
+            {
+                title: 'Think and Grow Rich',
+                author: 'Napoleon Hill',
+                note: 'A classic that proves success is a science, not a matter of luck. It shows that if you can control your thoughts and your desire, you can achieve any goal.'
+            },
+            {
+                title: 'The Almanack of Naval Ravikant',
+                author: 'Eric Jorgenson',
+                note: 'This is a modern guide on using logic and clear thinking to build a happy life. It\u2019s a great book for learning how to use your mind as a tool for wealth and peace.'
+            },
+            {
+                title: 'Manifest',
+                author: 'Roxie Nafousi',
+                note: 'I love this book because it turns big spiritual ideas into simple, daily steps. It\u2019s a practical manual for using your mind to attract the life you actually want.'
+            }
+        ];
+
+        const overlay = document.getElementById('oracleOverlay');
+        const body = document.getElementById('oracleBody');
+        const trigger = document.getElementById('oracleTrigger');
+        const closeBtn = document.getElementById('oracleClose');
+        let running = false;
+        let shuffled = [];
+        function getNextBook() {
+            if (shuffled.length === 0) {
+                shuffled = [...books];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+            }
+            return shuffled.pop();
+        }
+
+        function close() {
+            overlay.classList.remove('open');
+            running = false;
+        }
+
+        closeBtn.addEventListener('click', close);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        function addLine(html, cls) {
+            const div = document.createElement('div');
+            div.className = 'oracle-line' + (cls ? ' ' + cls : '');
+            div.innerHTML = html;
+            body.appendChild(div);
+            requestAnimationFrame(() => requestAnimationFrame(() => div.classList.add('show')));
+            return div;
+        }
+
+        async function runOracle() {
+            if (running) return;
+            running = true;
+            body.innerHTML = '';
+
+            overlay.classList.add('open');
+            await sleep(400);
+
+            addLine('<span class="oracle-prompt">~/solutions $</span> <span class="oracle-cmd">run fernando.garcia --recommend book</span>');
+            await sleep(800);
+
+            addLine('<span class="oracle-info">[info]</span> Loading personal library...');
+            await sleep(600);
+
+            addLine('<span class="oracle-info">[info]</span> Scanning reading history...');
+            await sleep(700);
+
+            addLine('<span class="oracle-info">[info]</span> Finding the right one for you...');
+            await sleep(900);
+
+            const spinLine = addLine('<span class="oracle-dots">[processing]</span> Selecting your recommendation <span id="oracleSpinChar">|</span>');
+            const spinChars = ['|', '/', '-', '\\'];
+            let spinIdx = 0;
+            const spinEl = document.getElementById('oracleSpinChar');
+            const spinInterval = setInterval(() => {
+                spinIdx = (spinIdx + 1) % spinChars.length;
+                if (spinEl) spinEl.textContent = spinChars[spinIdx];
+            }, 150);
+
+            await sleep(2200);
+            clearInterval(spinInterval);
+            spinLine.innerHTML = '<span class="oracle-dots">[complete]</span> Book found. This one is for you.';
+            await sleep(500);
+
+            const book = getNextBook();
+
+            const result = document.createElement('div');
+            result.className = 'oracle-result';
+            result.innerHTML =
+                '<div class="oracle-book-title">' + book.title + '</div>' +
+                '<div class="oracle-book-author">by ' + book.author + '</div>' +
+                '<div class="oracle-book-note">' + book.note + '</div>' +
+                '<div class="oracle-actions">' +
+                    '<button class="oracle-btn oracle-btn-primary" id="oracleRerun">Run again</button>' +
+                    '<button class="oracle-btn oracle-btn-ghost" id="oracleDismiss">Close</button>' +
+                '</div>';
+            body.appendChild(result);
+            await sleep(100);
+            result.classList.add('show');
+
+            document.getElementById('oracleRerun').addEventListener('click', () => {
+                running = false;
+                runOracle();
+            });
+            document.getElementById('oracleDismiss').addEventListener('click', close);
+            running = false;
+        }
+
+        trigger.addEventListener('click', runOracle);
+    })();
+    </script>
+
+</body>
+</html>
