@@ -263,19 +263,29 @@
             justify-content: center;
             overflow: visible;
         }
-        .photo-aurora {
+        .photo-bg-3d {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: -45%;
+            left: -39%;
+            width: 200%;
+            height: 200%;
             z-index: 0;
-            pointer-events: none;
         }
-        .photo-aurora canvas {
+        .photo-bg-3d iframe {
             display: block;
             width: 100%;
             height: 100%;
+            border: none;
+        }
+        .photo-scroll-guard {
+            position: absolute;
+            top: -30%;
+            left: -30%;
+            width: 200%;
+            height: 200%;
+            z-index: 3;
+            background: transparent;
+            pointer-events: auto;
         }
         .profile-photo-wrapper {
             width: 250px;
@@ -856,7 +866,10 @@
             </div>
             <div class="hero-right">
                 <div class="profile-photo-container" id="photoContainer">
-                    <div class="photo-aurora"><canvas id="auroraCanvas"></canvas></div>
+                    <div class="photo-bg-3d">
+                        <iframe src="https://my.spline.design/pandemoniumchaosartwork-KjSeQ5Fwh0tOJv1twUQFefWC/" frameborder="0" loading="lazy" title="3D Background"></iframe>
+                    </div>
+                    <div class="photo-scroll-guard" id="scrollGuard"></div>
                     <div class="profile-photo-wrapper">
                         <img src="photo.png" alt="Fernando García" class="profile-photo">
                     </div>
@@ -1596,6 +1609,29 @@
         }
 
         trigger.addEventListener('click', runOracle);
+
+        // --- SCROLL GUARD: block scroll on Spline, allow hover ---
+        const scrollGuard = document.getElementById('scrollGuard');
+        if (scrollGuard) {
+            let hoverTimer;
+            let guardDisabled = false;
+
+            scrollGuard.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.scrollBy({ top: e.deltaY, behavior: 'instant' });
+            }, { passive: false });
+
+            scrollGuard.addEventListener('mousemove', () => {
+                guardDisabled = true;
+                scrollGuard.style.pointerEvents = 'none';
+                clearTimeout(hoverTimer);
+                hoverTimer = setTimeout(() => {
+                    guardDisabled = false;
+                    scrollGuard.style.pointerEvents = 'auto';
+                }, 300);
+            });
+        }
 
         // --- AURORA GLOW ---
         const aCanvas = document.getElementById('auroraCanvas');
