@@ -1614,7 +1614,6 @@
         const scrollGuard = document.getElementById('scrollGuard');
         if (scrollGuard) {
             let hoverTimer;
-            let guardDisabled = false;
 
             scrollGuard.addEventListener('wheel', (e) => {
                 e.preventDefault();
@@ -1623,14 +1622,17 @@
             }, { passive: false });
 
             scrollGuard.addEventListener('mousemove', () => {
-                guardDisabled = true;
                 scrollGuard.style.pointerEvents = 'none';
                 clearTimeout(hoverTimer);
                 hoverTimer = setTimeout(() => {
-                    guardDisabled = false;
                     scrollGuard.style.pointerEvents = 'auto';
-                }, 300);
+                }, 60);
             });
+
+            window.addEventListener('wheel', () => {
+                clearTimeout(hoverTimer);
+                scrollGuard.style.pointerEvents = 'auto';
+            }, { capture: true, passive: true });
         }
 
         // --- AURORA GLOW ---
