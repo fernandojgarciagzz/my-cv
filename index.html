@@ -279,8 +279,8 @@
         }
         .photo-scroll-guard {
             position: absolute;
-            top: -30%;
-            left: -30%;
+            top: -45%;
+            left: -39%;
             width: 200%;
             height: 200%;
             z-index: 3;
@@ -867,7 +867,7 @@
             <div class="hero-right">
                 <div class="profile-photo-container" id="photoContainer">
                     <div class="photo-bg-3d">
-                        <iframe src="https://my.spline.design/pandemoniumchaosartwork-KjSeQ5Fwh0tOJv1twUQFefWC/" frameborder="0" loading="lazy" title="3D Background"></iframe>
+                        <iframe id="splineFrame" src="https://my.spline.design/pandemoniumchaosartwork-KjSeQ5Fwh0tOJv1twUQFefWC/?v=3" frameborder="0" loading="lazy" title="3D Background"></iframe>
                     </div>
                     <div class="photo-scroll-guard" id="scrollGuard"></div>
                     <div class="profile-photo-wrapper">
@@ -1610,7 +1610,7 @@
 
         trigger.addEventListener('click', runOracle);
 
-        // --- SCROLL GUARD: block scroll on Spline, allow hover ---
+        // --- SPLINE: scroll guard with hover pass-through ---
         const scrollGuard = document.getElementById('scrollGuard');
         if (scrollGuard) {
             let hoverTimer;
