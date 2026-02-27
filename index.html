@@ -601,116 +601,141 @@
         .hobby-tag-secret { cursor: pointer; }
         .hobby-tag-secret:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
 
-        /* --- ORACLE AGENT MODAL --- */
-        .oracle-overlay {
-            position: fixed; inset: 0; z-index: 999;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+        /* --- BOOK CHAT AGENT --- */
+        .book-chat {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            width: 380px; height: 520px; max-height: calc(100vh - 3rem);
+            border-radius: 16px; z-index: 999; overflow: hidden;
+            display: flex; flex-direction: column;
+            background: var(--bg-primary); border: 1px solid var(--border);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(20px) scale(0.96); opacity: 0; pointer-events: none;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+        .book-chat.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: all; }
+        .book-chat-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 16px; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--sf-blue), var(--sf-blue-dark));
+            color: #FFF;
+        }
+        .book-chat-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
             display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.4s ease;
-            padding: 1.5rem;
+            font-size: 0.9rem; flex-shrink: 0;
         }
-        .oracle-overlay.open { opacity: 1; pointer-events: all; }
-        .oracle-terminal {
-            background: #0F172A;
-            border: 1px solid #334155;
-            border-radius: 12px;
-            width: 100%; max-width: 540px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
-            overflow: hidden;
-            animation: modalIn 0.3s ease;
+        .book-chat-header-info { flex: 1; }
+        .book-chat-header-name {
+            font-family: var(--heading); font-size: 0.88rem;
+            font-weight: 600; letter-spacing: -0.01em;
         }
-        @keyframes modalIn {
-            from { transform: scale(0.95) translateY(10px); opacity: 0; }
-            to { transform: scale(1) translateY(0); opacity: 1; }
-        }
-        .oracle-topbar {
-            display: flex; align-items: center; gap: 6px;
-            padding: 12px 16px;
-            background: #1E293B;
-            border-bottom: 1px solid #334155;
-        }
-        .oracle-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .oracle-dot-r { background: #EF4444; }
-        .oracle-dot-y { background: #F59E0B; }
-        .oracle-dot-g { background: #22C55E; }
-        .oracle-topbar-title {
+        .book-chat-header-status {
             font-family: var(--mono); font-size: 0.6rem;
-            color: #64748B; margin-left: 8px; letter-spacing: 0.06em;
+            opacity: 0.8; letter-spacing: 0.03em;
         }
-        .oracle-close {
-            margin-left: auto; background: none; border: none;
-            color: #64748B; cursor: pointer; font-size: 0.85rem;
-            transition: color 0.2s; padding: 2px 6px;
+        .book-chat-close {
+            background: rgba(255,255,255,0.15); border: none; color: #FFF;
+            width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; transition: background 0.2s; flex-shrink: 0;
         }
-        .oracle-close:hover { color: #F1F5F9; }
-        .oracle-body {
-            padding: 20px;
-            min-height: 280px;
-            font-family: var(--mono);
-            font-size: 0.75rem;
-            line-height: 1.8;
-            color: #94A3B8;
+        .book-chat-close:hover { background: rgba(255,255,255,0.25); }
+        .book-chat-messages {
+            flex: 1; overflow-y: auto; padding: 16px;
+            display: flex; flex-direction: column; gap: 10px;
         }
-        .oracle-line { opacity: 0; transform: translateY(4px); transition: all 0.3s ease; }
-        .oracle-line.show { opacity: 1; transform: translateY(0); }
-        .oracle-prompt { color: #22C55E; }
-        .oracle-cmd { color: #F1F5F9; }
-        .oracle-info { color: #0176D3; }
-        .oracle-dots { color: #F59E0B; }
-        .oracle-spinner {
-            display: inline-block;
-            animation: spin 1s steps(4) infinite;
-        }
-        @keyframes spin {
-            0% { content: '|'; }
-            25% { content: '/'; }
-            50% { content: '-'; }
-            75% { content: '\\'; }
-        }
-        .oracle-result {
-            margin-top: 16px; padding: 16px;
-            background: #1E293B; border-radius: 8px;
-            border: 1px solid #334155;
+        .book-chat-messages::-webkit-scrollbar { width: 4px; }
+        .book-chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .book-chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .chat-row {
+            display: flex; gap: 8px; align-items: flex-end; max-width: 88%;
             opacity: 0; transform: translateY(8px);
-            transition: all 0.5s ease;
+            animation: chatIn 0.3s ease forwards;
         }
-        .oracle-result.show { opacity: 1; transform: translateY(0); }
-        .oracle-book-title {
-            font-family: var(--heading);
-            font-size: 1.05rem; font-weight: 600;
-            color: #F1F5F9; margin-bottom: 2px;
-            letter-spacing: -0.02em;
+        .chat-row.agent { align-self: flex-start; }
+        .chat-row.user { align-self: flex-end; flex-direction: row-reverse; }
+        @keyframes chatIn { to { opacity: 1; transform: translateY(0); } }
+        .chat-av {
+            width: 26px; height: 26px; border-radius: 50%;
+            background: rgba(1,118,211,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; flex-shrink: 0; color: var(--sf-blue);
         }
-        .oracle-book-author {
-            font-family: var(--mono); font-size: 0.65rem;
-            color: #0176D3; margin-bottom: 12px; letter-spacing: 0.03em;
+        .chat-row.user .chat-av { display: none; }
+        .chat-bubble {
+            padding: 10px 14px; border-radius: 16px;
+            font-size: 0.82rem; line-height: 1.55; word-wrap: break-word;
         }
-        .oracle-book-note {
-            font-family: var(--body); font-size: 0.82rem;
-            color: #CBD5E1; line-height: 1.7; font-style: italic;
+        .chat-row.agent .chat-bubble {
+            background: var(--bg-tertiary); color: var(--text-primary);
+            border-bottom-left-radius: 4px;
         }
-        .oracle-book-note::before { content: '"'; color: #0176D3; }
-        .oracle-book-note::after { content: '"'; color: #0176D3; }
-        .oracle-actions {
-            margin-top: 16px; display: flex; gap: 8px;
+        .chat-row.user .chat-bubble {
+            background: var(--sf-blue); color: #FFF;
+            border-bottom-right-radius: 4px;
         }
-        .oracle-btn {
-            font-family: var(--mono); font-size: 0.68rem; font-weight: 600;
-            padding: 6px 14px; border-radius: 6px; cursor: pointer;
-            transition: all 0.2s; letter-spacing: 0.03em;
+        .chat-typing {
+            display: flex; gap: 8px; align-items: flex-end;
+            align-self: flex-start; max-width: 88%;
+            opacity: 0; transform: translateY(8px);
+            animation: chatIn 0.3s ease forwards;
         }
-        .oracle-btn-primary {
-            background: #0176D3; color: #FFFFFF; border: none;
+        .typing-dots {
+            display: flex; gap: 4px; padding: 12px 16px;
+            background: var(--bg-tertiary); border-radius: 16px;
+            border-bottom-left-radius: 4px;
         }
-        .oracle-btn-primary:hover { background: #00A1E0; }
-        .oracle-btn-ghost {
-            background: transparent; color: #64748B;
-            border: 1px solid #334155;
+        .typing-dots span {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--text-muted);
+            animation: dotBounce 1.4s ease-in-out infinite;
         }
-        .oracle-btn-ghost:hover { color: #F1F5F9; border-color: #64748B; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-6px); opacity: 1; }
+        }
+        .book-card-chat {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 12px; overflow: hidden;
+            box-shadow: var(--shadow-sm); max-width: 260px;
+        }
+        .book-card-accent { height: 4px; width: 100%; }
+        .book-card-body { padding: 14px; }
+        .book-card-title {
+            font-family: var(--heading); font-size: 0.9rem; font-weight: 600;
+            color: var(--text-primary); margin-bottom: 2px; letter-spacing: -0.01em;
+        }
+        .book-card-author {
+            font-family: var(--mono); font-size: 0.6rem; color: var(--sf-blue);
+            letter-spacing: 0.04em; margin-bottom: 10px; text-transform: uppercase;
+        }
+        .book-card-note {
+            font-size: 0.78rem; color: var(--text-secondary);
+            line-height: 1.65; font-style: italic;
+        }
+        .book-card-note::before { content: '\201C'; color: var(--sf-blue); font-weight: 600; }
+        .book-card-note::after { content: '\201D'; color: var(--sf-blue); font-weight: 600; }
+        .book-chat-footer {
+            padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
+        }
+        .book-chat-btn {
+            width: 100%; padding: 10px; border-radius: 10px; border: none;
+            background: var(--sf-blue); color: #FFF;
+            font-family: var(--mono); font-size: 0.75rem; font-weight: 600;
+            letter-spacing: 0.02em; cursor: pointer; transition: all 0.2s;
+        }
+        .book-chat-btn:hover {
+            background: var(--sf-blue-light); transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(1,118,211,0.3);
+        }
+        .book-chat-btn:disabled {
+            opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
+        }
+        .chat-row.faded { opacity: 0.4; transition: opacity 0.4s; }
+        .chat-row.faded:hover, .chat-typing.faded:hover { opacity: 1; }
 
         /* --- SIDE DOTS --- */
         .side-dots {
@@ -794,6 +819,11 @@
             .edu-grid { grid-template-columns: 1fr; }
             .side-dots { display: none; }
             .skill-name { min-width: 140px; font-size: 0.65rem; }
+            .book-chat {
+                bottom: 0; right: 0; width: 100%;
+                height: 75vh; max-height: 75vh;
+                border-radius: 16px 16px 0 0;
+            }
         }
     </style>
 </head>
@@ -1238,7 +1268,7 @@
             <p class="section-label reveal">// beyond_work</p>
             <h2 class="section-title reveal">Hobbies & Interests</h2>
             <div class="hobbies-grid reveal" style="margin-top: 2rem;">
-                <span class="hobby-tag hobby-tag-secret" id="oracleTrigger">📖 Books</span>
+                <span class="hobby-tag hobby-tag-secret" id="bookTrigger">📖 Books</span>
                 <span class="hobby-tag">⚽ Soccer</span>
                 <span class="hobby-tag">✈️ Travel</span>
                 <span class="hobby-tag">🏃 Running</span>
@@ -1247,6 +1277,7 @@
                 <span class="hobby-tag">🎾 Padel</span>
                 <span class="hobby-tag">🏕️ Outdoors</span>
                 <span class="hobby-tag">🤖 AI</span>
+                <span class="hobby-tag">🧘 Mindfulness</span>
             </div>
         </div>
     </section>
@@ -1272,6 +1303,7 @@
         // --- DARK MODE ---
         const toggle = document.getElementById('themeToggle');
         const icon = toggle.querySelector('i');
+        var triggerConstellation = null;
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark');
             icon.className = 'fas fa-moon';
@@ -1281,6 +1313,7 @@
             const dark = document.body.classList.contains('dark');
             icon.className = dark ? 'fas fa-moon' : 'fas fa-sun';
             localStorage.setItem('theme', dark ? 'dark' : 'light');
+            if (dark && triggerConstellation) triggerConstellation();
         });
 
         // --- SCROLL: NAV + PROGRESS ---
@@ -1403,50 +1436,164 @@
 
         window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
 
+        // --- CONSTELLATION EASTER EGG (Salesforce cloud on dark mode) ---
+        var cloudShape = [
+            {x:0.15,y:0.55},{x:0.13,y:0.48},{x:0.15,y:0.41},{x:0.21,y:0.35},{x:0.28,y:0.33},
+            {x:0.32,y:0.20},{x:0.37,y:0.15},{x:0.44,y:0.14},{x:0.51,y:0.15},{x:0.56,y:0.20},
+            {x:0.60,y:0.17},{x:0.70,y:0.16},{x:0.80,y:0.19},{x:0.87,y:0.26},{x:0.90,y:0.36},
+            {x:0.89,y:0.46},{x:0.84,y:0.54},{x:0.76,y:0.59},{x:0.78,y:0.68},{x:0.72,y:0.72},
+            {x:0.60,y:0.72},{x:0.45,y:0.72},{x:0.30,y:0.72},{x:0.20,y:0.72},{x:0.16,y:0.65}
+        ];
+        var cst = { phase: null, glowAlpha: 0, holdStart: 0 };
+
+        triggerConstellation = function() {
+            if (cst.phase) return;
+            canvas.style.zIndex = '2';
+            var used = {};
+            cloudShape.forEach(function(target) {
+                var best = -1, bestD = Infinity;
+                for (var i = 0; i < nodes.length; i++) {
+                    if (used[i]) continue;
+                    var dx = nodes[i].x - target.x * w;
+                    var dy = nodes[i].y - target.y * h;
+                    var d = dx * dx + dy * dy;
+                    if (d < bestD) { bestD = d; best = i; }
+                }
+                if (best >= 0) {
+                    used[best] = true;
+                    nodes[best].cloudTarget = target;
+                    nodes[best].lerpSpeed = 0.03 + Math.random() * 0.025;
+                }
+            });
+            cst.phase = 'forming';
+            cst.glowAlpha = 0;
+        };
+
         function drawNodes() {
             ctx.clearRect(0, 0, w, h);
-            const isDark = document.body.classList.contains('dark');
-            const nodeAlpha = isDark ? 0.2 : 0.12;
-            const lineAlpha = isDark ? 0.08 : 0.04;
-            const mouseAlpha = isDark ? 0.2 : 0.1;
+            var isDark = document.body.classList.contains('dark');
+            var baseAlpha = isDark ? 0.2 : 0.12;
+            var lineAlpha = isDark ? 0.08 : 0.04;
+            var mouseAlpha = isDark ? 0.2 : 0.1;
+            var sy = window.scrollY * -0.05;
 
-            nodes.forEach(n => {
-                n.x += n.vx;
-                n.y += n.vy;
+            // --- Phase management ---
+            if (cst.phase === 'forming') {
+                var allClose = true;
+                for (var i = 0; i < nodes.length; i++) {
+                    if (nodes[i].cloudTarget) {
+                        var dx = nodes[i].x - nodes[i].cloudTarget.x * w;
+                        var dy = nodes[i].y - nodes[i].cloudTarget.y * h;
+                        if (dx * dx + dy * dy > 9) { allClose = false; break; }
+                    }
+                }
+                cst.glowAlpha = Math.min(cst.glowAlpha + 0.015, 1);
+                if (allClose) {
+                    cst.phase = 'holding';
+                    cst.holdStart = performance.now();
+                }
+            } else if (cst.phase === 'holding') {
+                cst.glowAlpha = 1;
+                if (performance.now() - cst.holdStart > 2000) {
+                    cst.phase = 'scattering';
+                    for (var i = 0; i < nodes.length; i++) {
+                        if (nodes[i].cloudTarget) {
+                            nodes[i].vx = (Math.random() - 0.5) * 0.5;
+                            nodes[i].vy = (Math.random() - 0.5) * 0.5;
+                        }
+                    }
+                }
+            } else if (cst.phase === 'scattering') {
+                cst.glowAlpha = Math.max(cst.glowAlpha - 0.015, 0);
+                if (cst.glowAlpha <= 0) {
+                    cst.phase = null;
+                    canvas.style.zIndex = '0';
+                    for (var i = 0; i < nodes.length; i++) {
+                        nodes[i].cloudTarget = null;
+                        nodes[i].lerpSpeed = 0;
+                        nodes[i].vx = (Math.random() - 0.5) * 0.3;
+                        nodes[i].vy = (Math.random() - 0.5) * 0.3;
+                    }
+                }
+            }
+
+            // --- Constellation backdrop + glow ---
+            if (cst.glowAlpha > 0) {
+                ctx.fillStyle = 'rgba(15, 23, 42, ' + (0.88 * cst.glowAlpha) + ')';
+                ctx.fillRect(0, 0, w, h);
+                var gx = 0.50 * w, gy = 0.44 * h;
+                var gr = 0.38 * Math.min(w, h);
+                var grad = ctx.createRadialGradient(gx, gy + sy, 0, gx, gy + sy, gr);
+                grad.addColorStop(0, 'rgba(1, 118, 211, ' + (0.25 * cst.glowAlpha) + ')');
+                grad.addColorStop(0.5, 'rgba(1, 118, 211, ' + (0.08 * cst.glowAlpha) + ')');
+                grad.addColorStop(1, 'rgba(1, 118, 211, 0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            // --- Update + draw nodes ---
+            for (var i = 0; i < nodes.length; i++) {
+                var n = nodes[i];
+                if (n.cloudTarget && (cst.phase === 'forming' || cst.phase === 'holding')) {
+                    n.x += (n.cloudTarget.x * w - n.x) * n.lerpSpeed;
+                    n.y += (n.cloudTarget.y * h - n.y) * n.lerpSpeed;
+                    if (cst.phase === 'holding') {
+                        n.x += (Math.random() - 0.5) * 0.3;
+                        n.y += (Math.random() - 0.5) * 0.3;
+                    }
+                } else {
+                    n.x += n.vx;
+                    n.y += n.vy;
+                }
                 if (n.x < 0 || n.x > w) n.vx *= -1;
                 if (n.y < 0 || n.y > h) n.vy *= -1;
 
+                var na = baseAlpha;
+                var nr = n.r;
+                if (cst.glowAlpha > 0) {
+                    if (n.cloudTarget) {
+                        na = baseAlpha + (0.75 - baseAlpha) * cst.glowAlpha;
+                        nr = n.r * (1 + cst.glowAlpha * 0.6);
+                    } else {
+                        na = baseAlpha * (1 - cst.glowAlpha * 0.6);
+                    }
+                }
                 ctx.beginPath();
-                ctx.arc(n.x, n.y + window.scrollY * -0.05, n.r, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(1, 118, 211, ' + nodeAlpha + ')';
+                ctx.arc(n.x, n.y + sy, nr, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(1, 118, 211, ' + na + ')';
                 ctx.fill();
-            });
+            }
 
-            for (let i = 0; i < nodes.length; i++) {
-                for (let j = i + 1; j < nodes.length; j++) {
-                    const dx = nodes[i].x - nodes[j].x;
-                    const dy = nodes[i].y - nodes[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < CONNECT_DIST) {
-                        const alpha = (1 - dist / CONNECT_DIST) * lineAlpha;
+            // --- Connection lines ---
+            for (var i = 0; i < nodes.length; i++) {
+                for (var j = i + 1; j < nodes.length; j++) {
+                    var dx = nodes[i].x - nodes[j].x;
+                    var dy = nodes[i].y - nodes[j].y;
+                    var dist = Math.sqrt(dx * dx + dy * dy);
+                    var cd = CONNECT_DIST;
+                    var bothCloud = nodes[i].cloudTarget && nodes[j].cloudTarget;
+                    if (bothCloud && cst.glowAlpha > 0) cd = CONNECT_DIST * (1 + 0.5 * cst.glowAlpha);
+                    if (dist < cd) {
+                        var la = lineAlpha;
+                        if (bothCloud && cst.glowAlpha > 0) la = lineAlpha + (0.18 - lineAlpha) * cst.glowAlpha;
+                        var a = (1 - dist / cd) * la;
                         ctx.beginPath();
-                        ctx.moveTo(nodes[i].x, nodes[i].y + window.scrollY * -0.05);
-                        ctx.lineTo(nodes[j].x, nodes[j].y + window.scrollY * -0.05);
-                        ctx.strokeStyle = 'rgba(1, 118, 211, ' + alpha + ')';
-                        ctx.lineWidth = 1;
+                        ctx.moveTo(nodes[i].x, nodes[i].y + sy);
+                        ctx.lineTo(nodes[j].x, nodes[j].y + sy);
+                        ctx.strokeStyle = 'rgba(1, 118, 211, ' + a + ')';
+                        ctx.lineWidth = (bothCloud && cst.glowAlpha > 0.5) ? 1.5 : 1;
                         ctx.stroke();
                     }
                 }
-
-                const mdx = nodes[i].x - mouse.x;
-                const mdy = nodes[i].y - (mouse.y + window.scrollY * 0.05);
-                const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+                var mdx = nodes[i].x - mouse.x;
+                var mdy = nodes[i].y - (mouse.y + window.scrollY * 0.05);
+                var mDist = Math.sqrt(mdx * mdx + mdy * mdy);
                 if (mDist < MOUSE_DIST) {
-                    const alpha = (1 - mDist / MOUSE_DIST) * mouseAlpha;
+                    var a = (1 - mDist / MOUSE_DIST) * mouseAlpha;
                     ctx.beginPath();
-                    ctx.moveTo(nodes[i].x, nodes[i].y + window.scrollY * -0.05);
+                    ctx.moveTo(nodes[i].x, nodes[i].y + sy);
                     ctx.lineTo(mouse.x, mouse.y);
-                    ctx.strokeStyle = 'rgba(1, 118, 211, ' + alpha + ')';
+                    ctx.strokeStyle = 'rgba(1, 118, 211, ' + a + ')';
                     ctx.lineWidth = 1.5;
                     ctx.stroke();
                 }
@@ -1459,156 +1606,178 @@
     })();
     </script>
 
-    <!-- Oracle Agent Modal -->
-    <div class="oracle-overlay" id="oracleOverlay">
-        <div class="oracle-terminal">
-            <div class="oracle-topbar">
-                <div class="oracle-dot oracle-dot-r"></div>
-                <div class="oracle-dot oracle-dot-y"></div>
-                <div class="oracle-dot oracle-dot-g"></div>
-                <span class="oracle-topbar-title">fernando.garcia — book recommendation</span>
-                <button class="oracle-close" id="oracleClose">✕</button>
+    <!-- Book Chat Agent -->
+    <div class="book-chat" id="bookChat">
+        <div class="book-chat-header">
+            <div class="book-chat-avatar">📚</div>
+            <div class="book-chat-header-info">
+                <div class="book-chat-header-name">Fercho's Book Agent</div>
+                <div class="book-chat-header-status">online</div>
             </div>
-            <div class="oracle-body" id="oracleBody"></div>
+            <button class="book-chat-close" id="bookChatClose">✕</button>
+        </div>
+        <div class="book-chat-messages" id="bookChatMessages"></div>
+        <div class="book-chat-footer">
+            <button class="book-chat-btn" id="bookChatBtn" style="display:none;">🔄 Another one!</button>
         </div>
     </div>
 
     <script>
     (function() {
-        const books = [
-            {
-                title: 'The Power of Your Subconscious Mind',
-                author: 'Joseph Murphy',
-                note: 'This was the first book that showed me how our inner thoughts create our reality. It taught me how to "reprogram" my brain to stop holding me back and start helping me grow.'
-            },
-            {
-                title: 'The Power of Now',
-                author: 'Eckhart Tolle',
-                note: 'This book is a total life-changer and my personal favorite. It made me question everything and you can feel the truth in every single word. It helped me understand that true power comes from staying focused on the present moment.'
-            },
-            {
-                title: 'A New Earth',
-                author: 'Eckhart Tolle',
-                note: 'I recommend this for anyone who wants to understand their ego and find a deeper purpose. It shows how changing your mind is the first step to changing the entire world.'
-            },
-            {
-                title: 'Secrets of the Millionaire Mind',
-                author: 'T. Harv Eker',
-                note: 'This book explains that wealth is a "mental game" before it is a financial one. It helped me identify and fix the old, negative beliefs I had about success.'
-            },
-            {
-                title: 'Think and Grow Rich',
-                author: 'Napoleon Hill',
-                note: 'A classic that proves success is a science, not a matter of luck. It shows that if you can control your thoughts and your desire, you can achieve any goal.'
-            },
-            {
-                title: 'The Almanack of Naval Ravikant',
-                author: 'Eric Jorgenson',
-                note: 'This is a modern guide on using logic and clear thinking to build a happy life. It\u2019s a great book for learning how to use your mind as a tool for wealth and peace.'
-            },
-            {
-                title: 'Manifest',
-                author: 'Roxie Nafousi',
-                note: 'I love this book because it turns big spiritual ideas into simple, daily steps. It\u2019s a practical manual for using your mind to attract the life you actually want.'
-            }
+        var books = [
+            { title: 'The Power of Your Subconscious Mind', author: 'Joseph Murphy', gradient: 'linear-gradient(135deg, #667eea, #764ba2)', note: 'This was the first book that showed me how our inner thoughts create our reality. It taught me how to \u201Creprogram\u201D my brain to stop holding me back and start helping me grow.' },
+            { title: 'The Power of Now', author: 'Eckhart Tolle', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', note: 'This book is a total life-changer and my personal favorite. It made me question everything and you can feel the truth in every single word. It helped me understand that true power comes from staying focused on the present moment.' },
+            { title: 'A New Earth', author: 'Eckhart Tolle', gradient: 'linear-gradient(135deg, #10b981, #059669)', note: 'I recommend this for anyone who wants to understand their ego and find a deeper purpose. It shows how changing your mind is the first step to changing the entire world.' },
+            { title: 'Secrets of the Millionaire Mind', author: 'T. Harv Eker', gradient: 'linear-gradient(135deg, #f97316, #eab308)', note: 'This book explains that wealth is a \u201Cmental game\u201D before it is a financial one. It helped me identify and fix the old, negative beliefs I had about success.' },
+            { title: 'Think and Grow Rich', author: 'Napoleon Hill', gradient: 'linear-gradient(135deg, #ef4444, #be123c)', note: 'A classic that proves success is a science, not a matter of luck. It shows that if you can control your thoughts and your desire, you can achieve any goal.' },
+            { title: 'The Almanack of Naval Ravikant', author: 'Eric Jorgenson', gradient: 'linear-gradient(135deg, #0ea5e9, #6366f1)', note: 'This is a modern guide on using logic and clear thinking to build a happy life. It\u2019s a great book for learning how to use your mind as a tool for wealth and peace.' },
+            { title: 'Manifest', author: 'Roxie Nafousi', gradient: 'linear-gradient(135deg, #ec4899, #f43f5e)', note: 'I love this book because it turns big spiritual ideas into simple, daily steps. It\u2019s a practical manual for using your mind to attract the life you actually want.' }
         ];
 
-        const overlay = document.getElementById('oracleOverlay');
-        const body = document.getElementById('oracleBody');
-        const trigger = document.getElementById('oracleTrigger');
-        const closeBtn = document.getElementById('oracleClose');
-        let running = false;
-        let shuffled = [];
-        function getNextBook() {
-            if (shuffled.length === 0) {
-                shuffled = [...books];
-                for (let i = shuffled.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        var introLines = [
+            'Oh, this one is special. You\u2019re gonna love it.',
+            'I\u2019ve been waiting for someone to ask about this one.',
+            'Perfect timing \u2014 this is exactly what you need right now.',
+            'This book literally changed my perspective.',
+            'Here\u2019s one that hits different every time you read it.',
+            'I keep coming back to this one. Trust me.',
+            'This one stays with you long after you finish it.'
+        ];
+
+        var chatEl = document.getElementById('bookChat');
+        var msgsEl = document.getElementById('bookChatMessages');
+        var trigger = document.getElementById('bookTrigger');
+        var closeBtn = document.getElementById('bookChatClose');
+        var actionBtn = document.getElementById('bookChatBtn');
+        var firstVisit = true, animating = false, count = 0;
+        var sDeck = [], iDeck = [], lastBook = null;
+
+        function shuffle(a) {
+            var c = a.slice();
+            for (var i = c.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var tmp = c[i]; c[i] = c[j]; c[j] = tmp;
+            }
+            return c;
+        }
+        function nextBook() {
+            if (!sDeck.length) {
+                sDeck = shuffle(books);
+                if (lastBook && sDeck[sDeck.length - 1].title === lastBook.title) {
+                    var si = Math.floor(Math.random() * (sDeck.length - 1));
+                    var tmp = sDeck[sDeck.length - 1]; sDeck[sDeck.length - 1] = sDeck[si]; sDeck[si] = tmp;
                 }
             }
-            return shuffled.pop();
+            lastBook = sDeck[sDeck.length - 1];
+            return sDeck.pop();
+        }
+        function nextIntro() {
+            if (!iDeck.length) iDeck = shuffle(introLines);
+            return iDeck.pop();
+        }
+        function wait(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+        function scrollDown() { msgsEl.scrollTop = msgsEl.scrollHeight; }
+
+        function fadeOlder() {
+            var rows = msgsEl.querySelectorAll('.chat-row, .chat-typing');
+            if (rows.length > 8) {
+                for (var i = 0; i < rows.length; i++) {
+                    if (i < rows.length - 8) rows[i].classList.add('faded');
+                    else rows[i].classList.remove('faded');
+                }
+            }
         }
 
-        function close() {
-            overlay.classList.remove('open');
-            running = false;
+        function agentMsg(text) {
+            var d = document.createElement('div');
+            d.className = 'chat-row agent';
+            d.innerHTML = '<div class="chat-av">\uD83D\uDCDA</div><div class="chat-bubble">' + text + '</div>';
+            msgsEl.appendChild(d); scrollDown();
+        }
+        function userMsg(text) {
+            var d = document.createElement('div');
+            d.className = 'chat-row user';
+            d.innerHTML = '<div class="chat-bubble">' + text + '</div>';
+            msgsEl.appendChild(d); scrollDown();
+        }
+        function showTyping() {
+            var d = document.createElement('div');
+            d.className = 'chat-typing';
+            d.innerHTML = '<div class="chat-av">\uD83D\uDCDA</div><div class="typing-dots"><span></span><span></span><span></span></div>';
+            msgsEl.appendChild(d); scrollDown();
+            return d;
+        }
+        function hideTyping(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
+
+        function bookCard(book) {
+            var d = document.createElement('div');
+            d.className = 'chat-row agent';
+            d.innerHTML = '<div class="chat-av">\uD83D\uDCDA</div>' +
+                '<div class="book-card-chat">' +
+                '<div class="book-card-accent" style="background:' + book.gradient + '"></div>' +
+                '<div class="book-card-body">' +
+                '<div class="book-card-title">' + book.title + '</div>' +
+                '<div class="book-card-author">by ' + book.author + '</div>' +
+                '<div class="book-card-note">' + book.note + '</div>' +
+                '</div></div>';
+            msgsEl.appendChild(d); scrollDown();
         }
 
-        closeBtn.addEventListener('click', close);
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+        function openChat() { chatEl.classList.add('open'); if (firstVisit) runGreeting(); }
+        function closeChat() { chatEl.classList.remove('open'); }
 
-        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+        trigger.addEventListener('click', function() {
+            chatEl.classList.contains('open') ? closeChat() : openChat();
+        });
+        closeBtn.addEventListener('click', closeChat);
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && chatEl.classList.contains('open')) closeChat(); });
 
-        function addLine(html, cls) {
-            const div = document.createElement('div');
-            div.className = 'oracle-line' + (cls ? ' ' + cls : '');
-            div.innerHTML = html;
-            body.appendChild(div);
-            requestAnimationFrame(() => requestAnimationFrame(() => div.classList.add('show')));
-            return div;
+        async function runGreeting() {
+            firstVisit = false; animating = true;
+            actionBtn.style.display = 'none';
+
+            var t = showTyping(); await wait(1000); hideTyping(t);
+            agentMsg('Hey! \uD83D\uDC4B I\u2019m Fercho\u2019s Book Agent.');
+            await wait(600);
+
+            t = showTyping(); await wait(800); hideTyping(t);
+            agentMsg('I have access to Fernando\u2019s personal library \u2014 want me to pick something meaningful for you?');
+            await wait(800);
+
+            userMsg('Recommend me a book \uD83D\uDCD6');
+            await wait(600);
+
+            await recommend();
+            animating = false;
+            actionBtn.style.display = 'block';
+            actionBtn.disabled = false;
         }
 
-        async function runOracle() {
-            if (running) return;
-            running = true;
-            body.innerHTML = '';
+        async function recommend() {
+            if (count > 0 && count % books.length === 0) {
+                var t = showTyping(); await wait(1200); hideTyping(t);
+                agentMsg('You\u2019ve gone through my top 7! Let me revisit one\u2026');
+                await wait(800);
+            }
 
-            overlay.classList.add('open');
-            await sleep(400);
+            var t = showTyping(); await wait(1000); hideTyping(t);
+            agentMsg(nextIntro());
+            await wait(400);
 
-            addLine('<span class="oracle-prompt">~/solutions $</span> <span class="oracle-cmd">run fernando.garcia --recommend book</span>');
-            await sleep(800);
-
-            addLine('<span class="oracle-info">[info]</span> Loading personal library...');
-            await sleep(600);
-
-            addLine('<span class="oracle-info">[info]</span> Scanning reading history...');
-            await sleep(700);
-
-            addLine('<span class="oracle-info">[info]</span> Finding the right one for you...');
-            await sleep(900);
-
-            const spinLine = addLine('<span class="oracle-dots">[processing]</span> Selecting your recommendation <span id="oracleSpinChar">|</span>');
-            const spinChars = ['|', '/', '-', '\\'];
-            let spinIdx = 0;
-            const spinEl = document.getElementById('oracleSpinChar');
-            const spinInterval = setInterval(() => {
-                spinIdx = (spinIdx + 1) % spinChars.length;
-                if (spinEl) spinEl.textContent = spinChars[spinIdx];
-            }, 150);
-
-            await sleep(2200);
-            clearInterval(spinInterval);
-            spinLine.innerHTML = '<span class="oracle-dots">[complete]</span> Book found. This one is for you.';
-            await sleep(500);
-
-            const book = getNextBook();
-
-            const result = document.createElement('div');
-            result.className = 'oracle-result';
-            result.innerHTML =
-                '<div class="oracle-book-title">' + book.title + '</div>' +
-                '<div class="oracle-book-author">by ' + book.author + '</div>' +
-                '<div class="oracle-book-note">' + book.note + '</div>' +
-                '<div class="oracle-actions">' +
-                    '<button class="oracle-btn oracle-btn-primary" id="oracleRerun">Run again</button>' +
-                    '<button class="oracle-btn oracle-btn-ghost" id="oracleDismiss">Close</button>' +
-                '</div>';
-            body.appendChild(result);
-            await sleep(100);
-            result.classList.add('show');
-
-            document.getElementById('oracleRerun').addEventListener('click', () => {
-                running = false;
-                runOracle();
-            });
-            document.getElementById('oracleDismiss').addEventListener('click', close);
-            running = false;
+            t = showTyping(); await wait(600); hideTyping(t);
+            bookCard(nextBook());
+            count++;
+            fadeOlder();
         }
 
-        trigger.addEventListener('click', runOracle);
+        actionBtn.addEventListener('click', async function() {
+            if (animating) return;
+            animating = true; actionBtn.disabled = true;
+            userMsg('Another one! \uD83D\uDD04');
+            await wait(400);
+            await recommend();
+            animating = false; actionBtn.disabled = false;
+        });
 
         // --- SPLINE: scroll guard with hover pass-through ---
         const scrollGuard = document.getElementById('scrollGuard');
