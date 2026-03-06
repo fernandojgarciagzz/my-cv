@@ -359,7 +359,12 @@
             background: var(--card-bg); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 1.5rem; text-align: center;
             transition: all 0.3s ease; box-shadow: var(--shadow-card);
-            perspective: 600px;
+            position: relative; overflow: hidden;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(1, 118, 211, 0.25);
         }
         .stat-value {
             font-family: var(--heading);
@@ -491,8 +496,12 @@
             background: var(--card-bg); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 1.75rem;
             transition: all 0.3s ease; box-shadow: var(--shadow-card);
-            position: relative;
-            perspective: 600px;
+            position: relative; overflow: hidden;
+        }
+        .agent-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(1, 118, 211, 0.25);
         }
         .agent-card::before {
             content: '';
@@ -510,7 +519,15 @@
             background: var(--bg-primary);
             transition: background 0.4s, border-color 0.4s;
         }
-        .agent-card-inner { transition: transform 0.15s ease-out; }
+        .spotlight {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+        .magnetic:hover .spotlight { opacity: 1; }
+        .agent-card-inner, .edu-card-inner { position: relative; z-index: 1; }
         .agent-icon {
             width: 36px; height: 36px; border-radius: 8px;
             background: rgba(1, 118, 211, 0.08);
@@ -562,15 +579,51 @@
             color: var(--text-muted); min-width: 34px; text-align: right;
         }
 
+        /* --- SKILLS: LEARNING TAGS --- */
+        .skills-learning { margin-top: 2.5rem; }
+        .skills-learning-label {
+            font-family: var(--mono);
+            font-size: 0.6rem; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 1rem;
+            transition: color 0.4s ease;
+        }
+        .skills-learning-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+        .learning-tag {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: var(--mono); font-size: 0.72rem; font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+        .learning-tag:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
+        .learning-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--sf-blue);
+            animation: pulse 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        .learning-tag-status {
+            font-size: 0.55rem; font-weight: 600;
+            letter-spacing: 0.05em; text-transform: uppercase;
+            color: var(--sf-blue);
+        }
+
         /* --- EDUCATION --- */
         .edu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
         .edu-card {
             background: var(--card-bg); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 1.75rem;
             transition: all 0.3s ease; box-shadow: var(--shadow-card);
-            perspective: 600px;
+            position: relative; overflow: hidden;
         }
-        .edu-card-inner { transition: transform 0.15s ease-out; }
+        .edu-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(1, 118, 211, 0.25);
+        }
         .edu-card h3 {
             font-family: var(--heading);
             font-size: 0.95rem; font-weight: 600;
@@ -883,7 +936,7 @@
                 </h1>
                 <p class="hero-tagline">Architecting the Future of Agentic Processes</p>
                 <p class="hero-subtitle">
-                    Engineer with a Master's in Business Intelligence and a builder's mindset — translating high-stakes industrial workflows into resilient, no-code AI solutions that drive operational performance.
+                    Engineer with a Master's in Business Intelligence and a builder's mindset translating high-stakes industrial workflows into resilient, no-code AI solutions that drive operational performance.
                 </p>
                 <div class="hero-actions">
                     <a href="#experience" class="btn btn-primary">
@@ -960,10 +1013,13 @@
             <p class="section-label reveal">// about</p>
             <h2 class="section-title reveal">The "Why" Behind the Solutions</h2>
             <p class="about-text reveal">
-                Engineer with a structured mindset and a Master's in Business Intelligence, passionate about understanding the "why" behind complex problems to turn them into scalable solutions. As a Quality Engineer at Salesforce, I specialize in the Agentforce (formerly Regrello) platform, architecting agentic workflows including different agents to help manufacturing teams work smarter. I bring a proven track record in supply chain optimization, notably reducing working capital by 20% at a global automotive leader by identifying inefficiencies and designing high-impact industrial processes. I leverage a "builder's mindset" to translate high-stakes industrial workflows into resilient, no-code AI solutions that drive operational performance.
+                I am a Data-Driven Engineer with a Master's in Business Intelligence, driven by a passion for uncovering the "why" behind complex bottlenecks to build truly scalable solutions. Currently an Engineer at Salesforce, I specialize in the Agentforce platform, where I architect sophisticated agentic workflows that enable manufacturing teams to automate high-stakes processes and work significantly smarter.
+            </p>
+            <p class="about-text reveal">
+                I am a creator at heart with a deep background in Supply Chain, now focused on evolving into a strategic thinker who builds across all business verticals. Leveraging a "builder's mindset," I translate fragmented workflows into resilient, AI-driven solutions - whether in Finance, HR, or Industrial Operations. My objective is not simply to fix existing systems, but to architect the next generation of AI tools that drive peak operational performance across any industry.
             </p>
             <p class="about-personal reveal">
-                Outside of my professional focus on strategic data analysis and process automation, I am committed to continuous learning and maintaining a disciplined lifestyle through exercise, reading, and mindfulness.
+                Outside of architecting data strategies and process automation, I stay sharp through continuous learning, reading, and maintaining a disciplined lifestyle centered on fitness and mindfulness.
             </p>
         </div>
     </section>
@@ -996,10 +1052,10 @@
                     </div>
                     <p class="timeline-role">Quality Engineer · Nov 2025 – Present</p>
                     <ul class="timeline-bullets">
-                        <li><strong>Agentic Orchestration:</strong> Engineered a high-complexity "Master Blueprint" that orchestrates child workflows to automate daily efficiency tracking of the full Agentforce suite.</li>
-                        <li><strong>Automation Leadership:</strong> Developed "Lemurized" (automated) blueprint cycles to monitor agent performance over time, validating the speed and accuracy of agentic interactions.</li>
-                        <li><strong>Cross-Functional Feedback:</strong> Collaborates directly with Product and Engineering teams to refine agent capabilities and identify logic gaps in new releases.</li>
-                        <li><strong>Strategic Testing:</strong> Leverages deep supply chain knowledge to create "out-of-the-box" test scenarios that mirror complex industrial environments, increasing platform robustness.</li>
+                        <li><strong>Agentic Orchestration:</strong> Engineered "AgentSuite," a master fully agentic blueprint that orchestrates complex child workflows to execute real-world use case scenarios daily. I developed an automated self-evaluation layer where agents audit their own responses, ensuring high-fidelity outputs across the entire agent suite.</li>
+                        <li><strong>Customer Success AI:</strong> Developed and deployed a Slack-based Service Agent that leverages full product documentation to provide real-time support. This agent acts as an intelligent filter for internal and external queries, resolving doubts instantly and significantly reducing the volume of manual Customer Support cases.</li>
+                        <li><strong>Cross-Functional Feedback:</strong> Collaborates directly with Product and Engineering teams to refine agent capabilities, identifying logic gaps in new releases and translating them into improved system architecture.</li>
+                        <li><strong>Strategic Testing:</strong> Leverages deep supply chain expertise to design "out-of-the-box" test scenarios that mirror complex industrial workflows, increasing platform robustness and resilience.</li>
                     </ul>
                 </div>
 
@@ -1012,10 +1068,11 @@
                     </div>
                     <p class="timeline-role">Industry Analyst · Oct 2024 – Oct 2025</p>
                     <ul class="timeline-bullets">
-                        <li><strong>Solution Design:</strong> Designed and tested intelligent blueprints with task logic, field mappings, and conditions for supply chain and finance workflows.</li>
-                        <li><strong>AI Refinement:</strong> Refined prompts and improved AI-generated task responses to ensure accuracy and consistency across agent outputs.</li>
-                        <li><strong>Quality Assurance:</strong> Led "Golden Tests" and quality assurance simulations to detect bugs and workflow inconsistencies before production deployments.</li>
-                        <li><strong>BI Reporting:</strong> Created operational dashboards and KPI reports by analyzing platform data using Google Looker Studio.</li>
+                        <li><strong>Operational Automation:</strong> "Lemurized" (automated) high-complexity supply chain and finance blueprints to run on a daily cadence. This system measures platform output consistency over time, providing a continuous pulse on the reliability of agentic interactions in industrial environments.</li>
+                        <li><strong>Intelligent Solution Design:</strong> Architected "Golden Blueprints" featuring advanced task logic, field mappings, and conditional branching for global supply chain and finance workflows.</li>
+                        <li><strong>AI & Prompt Refinement:</strong> Engineered and refined high-precision prompts to improve AI-generated task responses, ensuring 99%+ accuracy and consistency across diverse agent outputs.</li>
+                        <li><strong>Strategic Quality Assurance:</strong> Led "Golden Test" simulations and rigorous QA cycles to identify edge-case logic gaps and workflow inconsistencies prior to production deployment.</li>
+                        <li><strong>BI Architecture & Reporting:</strong> Transformed raw platform data into actionable intelligence by designing operational dashboards and KPI reports in Google Looker Studio, enabling data-driven decision-making for stakeholders.</li>
                     </ul>
                 </div>
 
@@ -1026,12 +1083,13 @@
                         <span class="timeline-badge">Toyota Program</span>
                         <span class="workflow-status done">✓ Completed</span>
                     </div>
-                    <p class="timeline-role">Demand Planning Specialist · 2022 – Oct 2024</p>
+                    <p class="timeline-role">Production Planning Specialist · 2022 – Oct 2024</p>
                     <ul class="timeline-bullets">
-                        <li><strong>Financial Impact:</strong> Partnered with the Supply Chain Director to optimize demand planning, successfully reducing working capital by over 20% through historical forecast analysis.</li>
-                        <li><strong>Award-Winning Innovation:</strong> Awarded 2nd Place in the Automotive Cluster (CLAUT) Innovation Contest for excellence in supply chain improvement.</li>
-                        <li><strong>Strategic Visualization:</strong> Designed a custom S&OP Dashboard from scratch in Power BI, used by Plant Managers and Directors to track production and inventory levels for global platforms (Tacoma, Tundra).</li>
-                        <li><strong>ERP Management:</strong> Managed sales forecasts and inventory plans within the QAD ERP system.</li>
+                        <li><strong>Operational Impact:</strong> Led the finished product planning for Toyota chassis, managing the Master Production Schedule (MPS) and sales forecasting within the QAD ERP system to ensure 100% assembly fulfillment.</li>
+                        <li><strong>Financial Optimization:</strong> Partnered with the Supply Chain Director to optimize demand planning and inventory projections, successfully reducing working capital by over 20% through rigorous historical forecast analysis.</li>
+                        <li><strong>Strategic Business Intelligence:</strong> Architected and deployed the entire suite of Power BI S&OP Dashboards for the Toyota and Stellantis business units. These tools became the primary source of truth for Plant Managers and Directors to track production and global inventory levels.</li>
+                        <li><strong>Award-Winning Innovation:</strong> Awarded 2nd Place in the Automotive Cluster (CLAUT) Innovation Contest for excellence in supply chain improvement and process optimization.</li>
+                        <li><strong>Demand Analysis:</strong> Conducted deep-dive analysis of customer demand variations to engineer inventory buffers that protected capital flow while maintaining lean manufacturing standards.</li>
                     </ul>
                 </div>
 
@@ -1041,9 +1099,13 @@
                         <span class="timeline-company">Metalsa</span>
                         <span class="workflow-status done">✓ Completed</span>
                     </div>
-                    <p class="timeline-role">Logistics Specialist · 2021 – 2022</p>
+                    <p class="timeline-role">Logistics & Demand Planning Specialist · 2021 – 2022</p>
                     <ul class="timeline-bullets">
-                        <li><strong>Supply Chain Resilience:</strong> Managed logistics for local and imported components, ensuring timely delivery to production lines.</li>
+                        <li><strong>Supplier Intervention:</strong> Traveled to supplier facilities across the US and Mexico to identify production bottlenecks. I worked on-site with suppliers to resolve delays and ensure critical components reached the production lines on time.</li>
+                        <li><strong>Component Planning:</strong> Managed the planning and inventory for all necessary components. I analyzed customer demand to ensure we had the right materials to meet finished-product goals.</li>
+                        <li><strong>Logistics Coordination:</strong> Acted as the daily point of contact for external logistics teams. I tracked all incoming deliveries and made strategic decisions on when to expedite materials to prevent line stoppages.</li>
+                        <li><strong>Supply Chain Resilience:</strong> Managed the end-to-end logistics for both local and imported components, maintaining a steady flow of materials for high-volume automotive production.</li>
+                        <li><strong>Process Improvement:</strong> Led the management and rotation of plastic pallets and returnable packaging, optimizing the physical flow of materials between suppliers and the plant.</li>
                     </ul>
                 </div>
 
@@ -1164,7 +1226,7 @@
                     <span class="skill-pct">100%</span>
                 </div>
                 <div class="skill-row reveal">
-                    <span class="skill-name">Generative AI (GPT / Gemini)</span>
+                    <span class="skill-name">Generative AI (Claude / GPT / Gemini)</span>
                     <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95"></div></div>
                     <span class="skill-pct">95%</span>
                 </div>
@@ -1188,25 +1250,15 @@
                     <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="75"></div></div>
                     <span class="skill-pct">75%</span>
                 </div>
-                <div class="skill-row reveal">
-                    <span class="skill-name">Cursor AI</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="15"></div></div>
-                    <span class="skill-pct">15%</span>
-                </div>
-                <div class="skill-row reveal">
-                    <span class="skill-name">Claude Code</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="15"></div></div>
-                    <span class="skill-pct">15%</span>
-                </div>
-                <div class="skill-row reveal">
-                    <span class="skill-name">Python (learning)</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="10"></div></div>
-                    <span class="skill-pct">10%</span>
-                </div>
-                <div class="skill-row reveal">
-                    <span class="skill-name">SQL (learning)</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="10"></div></div>
-                    <span class="skill-pct">10%</span>
+            </div>
+
+            <div class="skills-learning reveal">
+                <p class="skills-learning-label">// currently_exploring</p>
+                <div class="skills-learning-grid">
+                    <span class="learning-tag"><span class="learning-dot"></span> Cursor AI <span class="learning-tag-status">In Progress</span></span>
+                    <span class="learning-tag"><span class="learning-dot"></span> Claude Code <span class="learning-tag-status">In Progress</span></span>
+                    <span class="learning-tag"><span class="learning-dot"></span> Python <span class="learning-tag-status">In Progress</span></span>
+                    <span class="learning-tag"><span class="learning-dot"></span> SQL <span class="learning-tag-status">In Progress</span></span>
                 </div>
             </div>
         </div>
@@ -1303,7 +1355,6 @@
         // --- DARK MODE ---
         const toggle = document.getElementById('themeToggle');
         const icon = toggle.querySelector('i');
-        var triggerConstellation = null;
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark');
             icon.className = 'fas fa-moon';
@@ -1313,7 +1364,6 @@
             const dark = document.body.classList.contains('dark');
             icon.className = dark ? 'fas fa-moon' : 'fas fa-sun';
             localStorage.setItem('theme', dark ? 'dark' : 'light');
-            if (dark && triggerConstellation) triggerConstellation();
         });
 
         // --- SCROLL: NAV + PROGRESS ---
@@ -1391,21 +1441,19 @@
             if (el) dotObs.observe(el);
         });
 
-        // --- MAGNETIC CARDS (3D TILT) ---
+        // --- SPOTLIGHT CARDS ---
         document.querySelectorAll('.magnetic').forEach(card => {
-            const inner = card.querySelector('.agent-card-inner, .edu-card-inner') || card;
+            const spot = document.createElement('div');
+            spot.className = 'spotlight';
+            card.appendChild(spot);
+
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width - 0.5;
-                const y = (e.clientY - rect.top) / rect.height - 0.5;
-                const rotateX = y * -12;
-                const rotateY = x * 12;
-                inner.style.transform = 'perspective(600px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale(1.02)';
-                card.style.boxShadow = '0 ' + (8 + y * 4) + 'px ' + (25 + Math.abs(x) * 10) + 'px rgba(1,118,211,' + (0.08 + Math.abs(x) * 0.04) + ')';
-            });
-            card.addEventListener('mouseleave', () => {
-                inner.style.transform = 'perspective(600px) rotateX(0) rotateY(0) scale(1)';
-                card.style.boxShadow = 'var(--shadow-card)';
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const isDark = document.body.classList.contains('dark');
+                const alpha = isDark ? 0.12 : 0.08;
+                spot.style.background = 'radial-gradient(circle 180px at ' + x + 'px ' + y + 'px, rgba(1,118,211,' + alpha + '), transparent)';
             });
         });
 
@@ -1436,39 +1484,6 @@
 
         window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
 
-        // --- CONSTELLATION EASTER EGG (Salesforce cloud on dark mode) ---
-        var cloudShape = [
-            {x:0.15,y:0.55},{x:0.13,y:0.48},{x:0.15,y:0.41},{x:0.21,y:0.35},{x:0.28,y:0.33},
-            {x:0.32,y:0.20},{x:0.37,y:0.15},{x:0.44,y:0.14},{x:0.51,y:0.15},{x:0.56,y:0.20},
-            {x:0.60,y:0.17},{x:0.70,y:0.16},{x:0.80,y:0.19},{x:0.87,y:0.26},{x:0.90,y:0.36},
-            {x:0.89,y:0.46},{x:0.84,y:0.54},{x:0.76,y:0.59},{x:0.78,y:0.68},{x:0.72,y:0.72},
-            {x:0.60,y:0.72},{x:0.45,y:0.72},{x:0.30,y:0.72},{x:0.20,y:0.72},{x:0.16,y:0.65}
-        ];
-        var cst = { phase: null, glowAlpha: 0, holdStart: 0 };
-
-        triggerConstellation = function() {
-            if (cst.phase) return;
-            canvas.style.zIndex = '2';
-            var used = {};
-            cloudShape.forEach(function(target) {
-                var best = -1, bestD = Infinity;
-                for (var i = 0; i < nodes.length; i++) {
-                    if (used[i]) continue;
-                    var dx = nodes[i].x - target.x * w;
-                    var dy = nodes[i].y - target.y * h;
-                    var d = dx * dx + dy * dy;
-                    if (d < bestD) { bestD = d; best = i; }
-                }
-                if (best >= 0) {
-                    used[best] = true;
-                    nodes[best].cloudTarget = target;
-                    nodes[best].lerpSpeed = 0.03 + Math.random() * 0.025;
-                }
-            });
-            cst.phase = 'forming';
-            cst.glowAlpha = 0;
-        };
-
         function drawNodes() {
             ctx.clearRect(0, 0, w, h);
             var isDark = document.body.classList.contains('dark');
@@ -1477,111 +1492,31 @@
             var mouseAlpha = isDark ? 0.2 : 0.1;
             var sy = window.scrollY * -0.05;
 
-            // --- Phase management ---
-            if (cst.phase === 'forming') {
-                var allClose = true;
-                for (var i = 0; i < nodes.length; i++) {
-                    if (nodes[i].cloudTarget) {
-                        var dx = nodes[i].x - nodes[i].cloudTarget.x * w;
-                        var dy = nodes[i].y - nodes[i].cloudTarget.y * h;
-                        if (dx * dx + dy * dy > 9) { allClose = false; break; }
-                    }
-                }
-                cst.glowAlpha = Math.min(cst.glowAlpha + 0.015, 1);
-                if (allClose) {
-                    cst.phase = 'holding';
-                    cst.holdStart = performance.now();
-                }
-            } else if (cst.phase === 'holding') {
-                cst.glowAlpha = 1;
-                if (performance.now() - cst.holdStart > 2000) {
-                    cst.phase = 'scattering';
-                    for (var i = 0; i < nodes.length; i++) {
-                        if (nodes[i].cloudTarget) {
-                            nodes[i].vx = (Math.random() - 0.5) * 0.5;
-                            nodes[i].vy = (Math.random() - 0.5) * 0.5;
-                        }
-                    }
-                }
-            } else if (cst.phase === 'scattering') {
-                cst.glowAlpha = Math.max(cst.glowAlpha - 0.015, 0);
-                if (cst.glowAlpha <= 0) {
-                    cst.phase = null;
-                    canvas.style.zIndex = '0';
-                    for (var i = 0; i < nodes.length; i++) {
-                        nodes[i].cloudTarget = null;
-                        nodes[i].lerpSpeed = 0;
-                        nodes[i].vx = (Math.random() - 0.5) * 0.3;
-                        nodes[i].vy = (Math.random() - 0.5) * 0.3;
-                    }
-                }
-            }
-
-            // --- Constellation backdrop + glow ---
-            if (cst.glowAlpha > 0) {
-                ctx.fillStyle = 'rgba(15, 23, 42, ' + (0.88 * cst.glowAlpha) + ')';
-                ctx.fillRect(0, 0, w, h);
-                var gx = 0.50 * w, gy = 0.44 * h;
-                var gr = 0.38 * Math.min(w, h);
-                var grad = ctx.createRadialGradient(gx, gy + sy, 0, gx, gy + sy, gr);
-                grad.addColorStop(0, 'rgba(1, 118, 211, ' + (0.25 * cst.glowAlpha) + ')');
-                grad.addColorStop(0.5, 'rgba(1, 118, 211, ' + (0.08 * cst.glowAlpha) + ')');
-                grad.addColorStop(1, 'rgba(1, 118, 211, 0)');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-            }
-
-            // --- Update + draw nodes ---
             for (var i = 0; i < nodes.length; i++) {
                 var n = nodes[i];
-                if (n.cloudTarget && (cst.phase === 'forming' || cst.phase === 'holding')) {
-                    n.x += (n.cloudTarget.x * w - n.x) * n.lerpSpeed;
-                    n.y += (n.cloudTarget.y * h - n.y) * n.lerpSpeed;
-                    if (cst.phase === 'holding') {
-                        n.x += (Math.random() - 0.5) * 0.3;
-                        n.y += (Math.random() - 0.5) * 0.3;
-                    }
-                } else {
-                    n.x += n.vx;
-                    n.y += n.vy;
-                }
+                n.x += n.vx;
+                n.y += n.vy;
                 if (n.x < 0 || n.x > w) n.vx *= -1;
                 if (n.y < 0 || n.y > h) n.vy *= -1;
 
-                var na = baseAlpha;
-                var nr = n.r;
-                if (cst.glowAlpha > 0) {
-                    if (n.cloudTarget) {
-                        na = baseAlpha + (0.75 - baseAlpha) * cst.glowAlpha;
-                        nr = n.r * (1 + cst.glowAlpha * 0.6);
-                    } else {
-                        na = baseAlpha * (1 - cst.glowAlpha * 0.6);
-                    }
-                }
                 ctx.beginPath();
-                ctx.arc(n.x, n.y + sy, nr, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(1, 118, 211, ' + na + ')';
+                ctx.arc(n.x, n.y + sy, n.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(1, 118, 211, ' + baseAlpha + ')';
                 ctx.fill();
             }
 
-            // --- Connection lines ---
             for (var i = 0; i < nodes.length; i++) {
                 for (var j = i + 1; j < nodes.length; j++) {
                     var dx = nodes[i].x - nodes[j].x;
                     var dy = nodes[i].y - nodes[j].y;
                     var dist = Math.sqrt(dx * dx + dy * dy);
-                    var cd = CONNECT_DIST;
-                    var bothCloud = nodes[i].cloudTarget && nodes[j].cloudTarget;
-                    if (bothCloud && cst.glowAlpha > 0) cd = CONNECT_DIST * (1 + 0.5 * cst.glowAlpha);
-                    if (dist < cd) {
-                        var la = lineAlpha;
-                        if (bothCloud && cst.glowAlpha > 0) la = lineAlpha + (0.18 - lineAlpha) * cst.glowAlpha;
-                        var a = (1 - dist / cd) * la;
+                    if (dist < CONNECT_DIST) {
+                        var a = (1 - dist / CONNECT_DIST) * lineAlpha;
                         ctx.beginPath();
                         ctx.moveTo(nodes[i].x, nodes[i].y + sy);
                         ctx.lineTo(nodes[j].x, nodes[j].y + sy);
                         ctx.strokeStyle = 'rgba(1, 118, 211, ' + a + ')';
-                        ctx.lineWidth = (bothCloud && cst.glowAlpha > 0.5) ? 1.5 : 1;
+                        ctx.lineWidth = 1;
                         ctx.stroke();
                     }
                 }
