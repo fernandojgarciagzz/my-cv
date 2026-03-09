@@ -870,9 +870,11 @@
             .profile-photo-container { width: 280px; height: 280px; overflow: visible; }
             .profile-photo-wrapper { width: 200px; height: 200px; position: relative; z-index: 3; }
             .photo-bg-3d {
-                position: fixed; top: 0; left: 0;
-                width: 100vw; height: 100vh;
-                z-index: 0; opacity: 0.4;
+                position: absolute;
+                top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                width: 250vw; height: 250vw;
+                z-index: 0; opacity: 0.5;
                 pointer-events: none;
             }
             .photo-scroll-guard { display: none; }
