@@ -860,18 +860,20 @@
                 padding: 1.5rem 2rem;
                 border-bottom: 1px solid var(--border); gap: 1rem;
             }
-            .hero { padding: 8rem 1.5rem 4rem; min-height: auto; }
-            .hero-inner { flex-direction: column; text-align: center; }
+            .hero { padding: 8rem 1.5rem 4rem; min-height: auto; position: relative; overflow: hidden; }
+            .hero-inner { flex-direction: column; text-align: center; position: relative; z-index: 3; }
             .hero-left { position: relative; z-index: 5; }
             .hero-subtitle { max-width: 100%; }
             .hero-actions { justify-content: center; }
             .hero-terminal { justify-content: center; }
             .hero-name { font-size: clamp(2.8rem, 12vw, 4rem); }
-            .profile-photo-container { width: 280px; height: 280px; overflow: hidden; }
-            .profile-photo-wrapper { width: 200px; height: 200px; }
+            .profile-photo-container { width: 280px; height: 280px; overflow: visible; }
+            .profile-photo-wrapper { width: 200px; height: 200px; position: relative; z-index: 3; }
             .photo-bg-3d {
-                top: -30%; left: -30%;
-                width: 160%; height: 160%;
+                position: fixed; top: 0; left: 0;
+                width: 100vw; height: 100vh;
+                z-index: 0; opacity: 0.4;
+                pointer-events: none;
             }
             .photo-scroll-guard { display: none; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
