@@ -862,16 +862,25 @@
             }
             .hero { padding: 8rem 1.5rem 4rem; min-height: auto; }
             .hero-inner { flex-direction: column; text-align: center; }
+            .hero-left { position: relative; z-index: 5; }
             .hero-subtitle { max-width: 100%; }
             .hero-actions { justify-content: center; }
             .hero-terminal { justify-content: center; }
             .hero-name { font-size: clamp(2.8rem, 12vw, 4rem); }
+            .profile-photo-container { width: 280px; height: 280px; overflow: hidden; }
+            .profile-photo-wrapper { width: 200px; height: 200px; }
+            .photo-bg-3d {
+                top: -30%; left: -30%;
+                width: 160%; height: 160%;
+            }
+            .photo-scroll-guard { display: none; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .agent-grid { grid-template-columns: 1fr; }
             .agent-card::before, .agent-card::after { display: none; }
             .edu-grid { grid-template-columns: 1fr; }
             .side-dots { display: none; }
-            .skill-name { min-width: 140px; font-size: 0.65rem; }
+            .skill-name { min-width: 0; width: 45%; flex-shrink: 0; font-size: 0.65rem; }
+            .skill-row { gap: 0.5rem; }
             .book-chat {
                 bottom: 0; right: 0; width: 100%;
                 height: 75vh; max-height: 75vh;
