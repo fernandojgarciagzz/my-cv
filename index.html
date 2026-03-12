@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -342,38 +342,55 @@
         /* ── Handwritten annotation ── */
         .song-annotation {
             position: absolute;
-            bottom: -1rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(8px);
+            top: 50%;
+            left: calc(50% + 140px);
+            transform: translateY(-50%) translateX(8px);
             z-index: 10;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.6s ease 0.4s, transform 0.6s ease 0.4s;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
+            gap: 0.3rem;
         }
         .vinyl-active .song-annotation {
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            transform: translateY(-50%) translateX(0);
         }
         .song-annotation-arrow {
             display: block;
-            width: 36px;
-            height: 30px;
-            margin-bottom: 0.15rem;
+            width: 80px;
+            height: 44px;
+            flex-shrink: 0;
         }
+        .arrow-vertical { display: none; }
+        .arrow-horizontal { display: block; }
         .song-annotation-text {
-            font-family: 'Caveat', cursive;
-            font-size: 1.35rem;
+            font-family: 'Covered By Your Grace', cursive;
+            font-size: 2.6rem;
             color: #D97757;
             white-space: nowrap;
             line-height: 1.25;
-            text-align: center;
+            text-align: left;
         }
         @media (max-width: 768px) {
-            .song-annotation { bottom: -4.5rem; }
-            .song-annotation-text { font-size: 1.1rem; }
+            .song-annotation {
+                top: auto;
+                left: 50%;
+                bottom: -5rem;
+                transform: translateX(-50%) translateY(8px);
+                flex-direction: column;
+                align-items: center;
+                gap: 0.2rem;
+            }
+            .vinyl-active .song-annotation {
+                transform: translateX(-50%) translateY(0);
+            }
+            .arrow-horizontal { display: none; }
+            .arrow-vertical { display: block; }
+            .song-annotation-arrow { width: 48px; height: 40px; }
+            .song-annotation-text { font-size: 2.2rem; text-align: center; }
         }
 
         /* Smooth color transitions when toggling Claude mode */
@@ -1057,7 +1074,7 @@
                 padding: 1.5rem 2rem;
                 border-bottom: 1px solid var(--border); gap: 1rem;
             }
-            .hero { padding: 8rem 1.5rem 8rem; min-height: auto; position: relative; overflow: hidden; }
+            .hero { padding: 8rem 1.5rem 14rem; min-height: auto; position: relative; overflow: hidden; }
             .hero-inner { flex-direction: column; text-align: center; position: relative; z-index: 3; }
             .hero-left { position: relative; z-index: 5; }
             .hero-subtitle { max-width: 100%; }
@@ -1165,7 +1182,11 @@
                         </div>
                     </div>
                     <div class="song-annotation" id="songAnnotation">
-                        <svg class="song-annotation-arrow" viewBox="0 0 36 30" fill="none">
+                        <svg class="song-annotation-arrow arrow-horizontal" viewBox="0 0 80 44" fill="none">
+                            <path d="M76 22 C60 20, 34 24, 14 22" stroke="#D97757" stroke-width="2" stroke-linecap="round" fill="none" stroke-dasharray="4 4"/>
+                            <path d="M20 15 L8 22 L20 29" stroke="#D97757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                        <svg class="song-annotation-arrow arrow-vertical" viewBox="0 0 36 30" fill="none">
                             <path d="M18 2 C18 8, 17 16, 18 24" stroke="#D97757" stroke-width="1.8" stroke-linecap="round" fill="none" stroke-dasharray="3 3"/>
                             <path d="M13 19 L18 26 L23 19" stroke="#D97757" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                         </svg>
