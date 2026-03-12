@@ -238,7 +238,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Full vinyl disc (replaces photo) */
+        /* Full vinyl disc (back face of card) */
         .profile-photo-wrapper::before {
             content: '';
             position: absolute;
@@ -246,7 +246,9 @@
             border-radius: 50%;
             z-index: 2;
             pointer-events: none;
-            opacity: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transform: rotateY(180deg);
             background:
                 /* outer rim */
                 radial-gradient(circle, transparent 93%, rgba(255,255,255,0.04) 93.5%, rgba(0,0,0,0.3) 96%, #1a1008 97%, transparent 97.5%),
@@ -284,20 +286,20 @@
                 radial-gradient(circle, transparent 89%, rgba(255,255,255,0.01) 89.2%, transparent 89.8%),
                 /* base disc color */
                 conic-gradient(from 0deg, #1a1008, #261a10, #1a1008, #2D1F14, #1a1008, #261a10, #1a1008, #2D1F14);
-            transition: opacity 0.5s ease;
         }
 
-        /* Center label */
+        /* Center label (back face of card) */
         .profile-photo-wrapper::after {
             content: '';
             position: absolute;
             top: 50%; left: 50%;
-            transform: translate(-50%,-50%);
+            transform: translate(-50%,-50%) rotateY(180deg);
             width: 22%; height: 22%;
             border-radius: 50%;
             z-index: 3;
             pointer-events: none;
-            opacity: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
             background:
                 /* spindle hole */
                 radial-gradient(circle, #1a1008 0%, #1a1008 10%, transparent 11%),
@@ -311,26 +313,42 @@
                 0 0 14px rgba(217,119,87,0.45),
                 inset 0 1px 3px rgba(255,255,255,0.15),
                 inset 0 -1px 2px rgba(0,0,0,0.2);
-            transition: opacity 0.5s ease;
         }
 
-        .vinyl-active .profile-photo-wrapper::before,
-        .vinyl-active .profile-photo-wrapper::after {
-            opacity: 1;
-        }
-        .vinyl-active .profile-photo {
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-        .profile-photo {
-            transition: opacity 0.4s ease;
-        }
+        /* Flip to reveal vinyl */
         .vinyl-active .profile-photo-wrapper {
-            animation: vinylSpin 3.5s linear infinite;
+            transform: rotateY(180deg);
             border-color: #D97757 !important;
             box-shadow: 0 0 30px rgba(217,119,87,0.3), 0 0 80px rgba(217,119,87,0.1) !important;
         }
-        @keyframes vinylSpin { to { transform: rotate(360deg); } }
+        /* Spin after flip completes */
+        .vinyl-spinning .profile-photo-wrapper {
+            animation: vinylSpin 3.5s linear infinite;
+        }
+        @keyframes vinylSpin {
+            from { transform: rotateY(180deg) rotate(0deg); }
+            to { transform: rotateY(180deg) rotate(360deg); }
+        }
+
+        /* ── Tonearm ── */
+        .vinyl-tonearm {
+            position: absolute;
+            top: calc(50% - 125px);
+            left: calc(50% + 50px);
+            width: 75px;
+            height: auto;
+            z-index: 8;
+            pointer-events: none;
+            opacity: 0;
+            transform-origin: 72.5% 10.7%;
+            transform: rotate(-40deg);
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            filter: drop-shadow(0 2px 6px rgba(45,31,20,0.3));
+        }
+        .vinyl-spinning .vinyl-tonearm {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
 
         /* Shift Spline 3D background to warm tones */
         .vinyl-active .photo-bg-3d iframe {
@@ -374,8 +392,8 @@
             text-align: center;
         }
         @media (max-width: 768px) {
-            .song-annotation { bottom: -0.5rem; }
-            .song-annotation-text { font-size: 1.15rem; }
+            .song-annotation { bottom: -4.5rem; }
+            .song-annotation-text { font-size: 1.1rem; }
         }
 
         /* Smooth color transitions when toggling Claude mode */
@@ -452,6 +470,7 @@
             align-items: center;
             justify-content: center;
             overflow: visible;
+            perspective: 1000px;
         }
         .photo-bg-3d {
             position: absolute;
@@ -481,12 +500,20 @@
             width: 250px;
             height: 250px;
             border-radius: 50%;
-            overflow: hidden;
             border: 3px solid var(--border);
             box-shadow: var(--shadow-md);
-            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             z-index: 5;
+            transform-style: preserve-3d;
+        }
+        .photo-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            overflow: hidden;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
         .profile-photo-wrapper:hover { border-color: var(--sf-blue); box-shadow: var(--shadow-lg); }
 
@@ -1050,23 +1077,33 @@
                 padding: 1.5rem 2rem;
                 border-bottom: 1px solid var(--border); gap: 1rem;
             }
-            .hero { padding: 8rem 1.5rem 4rem; min-height: auto; position: relative; overflow: hidden; }
+            .hero { padding: 8rem 1.5rem 5.5rem; min-height: auto; position: relative; overflow: hidden; }
             .hero-inner { flex-direction: column; text-align: center; position: relative; z-index: 3; }
             .hero-left { position: relative; z-index: 5; }
             .hero-subtitle { max-width: 100%; }
             .hero-actions { justify-content: center; }
             
             .hero-name { font-size: clamp(2.8rem, 12vw, 4rem); }
-            .profile-photo-container { width: 280px; height: 280px; overflow: visible; }
-            .profile-photo-wrapper { width: 200px; height: 200px; position: relative; z-index: 5; }
+            .profile-photo-container { width: 280px; height: 280px; overflow: visible; perspective: 800px; }
+            .profile-photo-wrapper { width: 200px; height: 200px; position: relative; z-index: 5; transform-style: preserve-3d; }
             .photo-bg-3d {
                 position: absolute;
                 top: -42%; left: -32%;
                 width: 200%; height: 200%;
                 z-index: 0; opacity: 0.5;
                 pointer-events: none;
+                transition: opacity 0.8s ease;
+            }
+            .vinyl-active .photo-bg-3d {
+                opacity: 0;
+            }
+            .vinyl-tonearm {
+                top: calc(50% - 100px);
+                left: calc(50% + 35px);
+                width: 55px;
             }
             .photo-scroll-guard { display: none; }
+            .blueprint-connector { padding: 3.5rem 0; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .agent-grid { grid-template-columns: 1fr; }
             .agent-card::before, .agent-card::after { display: none; }
@@ -1151,8 +1188,20 @@
                     </div>
                     <div class="photo-scroll-guard" id="scrollGuard"></div>
                     <div class="profile-photo-wrapper" id="vinylTrigger">
-                        <img src="photo.png" alt="Fernando García" class="profile-photo">
+                        <div class="photo-face">
+                            <img src="photo.png" alt="Fernando García" class="profile-photo">
+                        </div>
                     </div>
+                    <svg class="vinyl-tonearm" viewBox="0 0 80 150" fill="none">
+                        <ellipse cx="67" cy="10" rx="8" ry="5.5" fill="#2D1F14" opacity="0.7"/>
+                        <path d="M58 18 Q44 72, 20 134" stroke="#3D2B1F" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+                        <path d="M58 18 Q44 72, 20 134" stroke="#D97757" stroke-width="0.7" stroke-linecap="round" fill="none" opacity="0.3"/>
+                        <circle cx="58" cy="16" r="7.5" fill="#2D1F14" stroke="#5C4033" stroke-width="1"/>
+                        <circle cx="58" cy="16" r="3" fill="#D97757"/>
+                        <path d="M20 134 L12 148 L19 150 L23 137" fill="#2D1F14" stroke="#5C4033" stroke-width="0.5"/>
+                        <rect x="10" y="146" width="10" height="4" rx="1" fill="#5C4033"/>
+                        <line x1="15" y1="150" x2="15" y2="153" stroke="#D97757" stroke-width="1.3" stroke-linecap="round"/>
+                    </svg>
                     <div class="song-annotation" id="songAnnotation">
                         <svg class="song-annotation-arrow" viewBox="0 0 36 30" fill="none">
                             <path d="M18 2 C18 8, 17 16, 18 24" stroke="#D97757" stroke-width="1.8" stroke-linecap="round" fill="none" stroke-dasharray="3 3"/>
@@ -2086,15 +2135,26 @@
             }, FADE / n);
         }
 
+        let spinTimer = null;
+        let audioTimer = null;
+
         function activate() {
             playing = true;
             container.classList.add('vinyl-active');
             document.body.classList.add('claude-mode');
-            fadeIn();
+            spinTimer = setTimeout(() => {
+                if (playing) container.classList.add('vinyl-spinning');
+            }, 800);
+            audioTimer = setTimeout(() => {
+                if (playing) fadeIn();
+            }, 1500);
         }
 
         function deactivate() {
             playing = false;
+            clearTimeout(spinTimer);
+            clearTimeout(audioTimer);
+            container.classList.remove('vinyl-spinning');
             fadeOut(() => {
                 audio.currentTime = 0;
                 container.classList.remove('vinyl-active');
@@ -2108,6 +2168,9 @@
         });
 
         audio.addEventListener('ended', () => {
+            clearTimeout(spinTimer);
+            clearTimeout(audioTimer);
+            container.classList.remove('vinyl-spinning');
             container.classList.remove('vinyl-active');
             document.body.classList.remove('claude-mode');
             playing = false;
