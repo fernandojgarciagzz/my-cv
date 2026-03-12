@@ -330,26 +330,6 @@
             to { transform: rotateY(180deg) rotate(360deg); }
         }
 
-        /* ── Tonearm ── */
-        .vinyl-tonearm {
-            position: absolute;
-            top: calc(50% - 125px);
-            left: calc(50% + 50px);
-            width: 75px;
-            height: auto;
-            z-index: 8;
-            pointer-events: none;
-            opacity: 0;
-            transform-origin: 72.5% 10.7%;
-            transform: rotate(-40deg);
-            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
-            filter: drop-shadow(0 2px 6px rgba(45,31,20,0.3));
-        }
-        .vinyl-spinning .vinyl-tonearm {
-            opacity: 1;
-            transform: rotate(0deg);
-        }
-
         /* Shift Spline 3D background to warm tones */
         .vinyl-active .photo-bg-3d iframe {
             filter: sepia(0.6) hue-rotate(5deg) saturate(1.5) brightness(0.9);
@@ -1077,7 +1057,7 @@
                 padding: 1.5rem 2rem;
                 border-bottom: 1px solid var(--border); gap: 1rem;
             }
-            .hero { padding: 8rem 1.5rem 5.5rem; min-height: auto; position: relative; overflow: hidden; }
+            .hero { padding: 8rem 1.5rem 8rem; min-height: auto; position: relative; overflow: hidden; }
             .hero-inner { flex-direction: column; text-align: center; position: relative; z-index: 3; }
             .hero-left { position: relative; z-index: 5; }
             .hero-subtitle { max-width: 100%; }
@@ -1094,16 +1074,8 @@
                 pointer-events: none;
                 transition: opacity 0.8s ease;
             }
-            .vinyl-active .photo-bg-3d {
-                opacity: 0;
-            }
-            .vinyl-tonearm {
-                top: calc(50% - 100px);
-                left: calc(50% + 35px);
-                width: 55px;
-            }
             .photo-scroll-guard { display: none; }
-            .blueprint-connector { padding: 3.5rem 0; }
+            .blueprint-connector { padding: 4.5rem 0; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .agent-grid { grid-template-columns: 1fr; }
             .agent-card::before, .agent-card::after { display: none; }
@@ -1192,16 +1164,6 @@
                             <img src="photo.png" alt="Fernando García" class="profile-photo">
                         </div>
                     </div>
-                    <svg class="vinyl-tonearm" viewBox="0 0 80 150" fill="none">
-                        <ellipse cx="67" cy="10" rx="8" ry="5.5" fill="#2D1F14" opacity="0.7"/>
-                        <path d="M58 18 Q44 72, 20 134" stroke="#3D2B1F" stroke-width="2.8" stroke-linecap="round" fill="none"/>
-                        <path d="M58 18 Q44 72, 20 134" stroke="#D97757" stroke-width="0.7" stroke-linecap="round" fill="none" opacity="0.3"/>
-                        <circle cx="58" cy="16" r="7.5" fill="#2D1F14" stroke="#5C4033" stroke-width="1"/>
-                        <circle cx="58" cy="16" r="3" fill="#D97757"/>
-                        <path d="M20 134 L12 148 L19 150 L23 137" fill="#2D1F14" stroke="#5C4033" stroke-width="0.5"/>
-                        <rect x="10" y="146" width="10" height="4" rx="1" fill="#5C4033"/>
-                        <line x1="15" y1="150" x2="15" y2="153" stroke="#D97757" stroke-width="1.3" stroke-linecap="round"/>
-                    </svg>
                     <div class="song-annotation" id="songAnnotation">
                         <svg class="song-annotation-arrow" viewBox="0 0 36 30" fill="none">
                             <path d="M18 2 C18 8, 17 16, 18 24" stroke="#D97757" stroke-width="1.8" stroke-linecap="round" fill="none" stroke-dasharray="3 3"/>
@@ -2136,24 +2098,22 @@
         }
 
         let spinTimer = null;
-        let audioTimer = null;
 
         function activate() {
             playing = true;
             container.classList.add('vinyl-active');
             document.body.classList.add('claude-mode');
             spinTimer = setTimeout(() => {
-                if (playing) container.classList.add('vinyl-spinning');
+                if (playing) {
+                    container.classList.add('vinyl-spinning');
+                    fadeIn();
+                }
             }, 800);
-            audioTimer = setTimeout(() => {
-                if (playing) fadeIn();
-            }, 1500);
         }
 
         function deactivate() {
             playing = false;
             clearTimeout(spinTimer);
-            clearTimeout(audioTimer);
             container.classList.remove('vinyl-spinning');
             fadeOut(() => {
                 audio.currentTime = 0;
@@ -2169,7 +2129,6 @@
 
         audio.addEventListener('ended', () => {
             clearTimeout(spinTimer);
-            clearTimeout(audioTimer);
             container.classList.remove('vinyl-spinning');
             container.classList.remove('vinyl-active');
             document.body.classList.remove('claude-mode');
