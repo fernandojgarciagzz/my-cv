@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -161,7 +162,7 @@
             z-index: 101; width: 0%;
         }
 
-        /* --- HERO (WHITE + TERMINAL) --- */
+        /* --- HERO --- */
         .hero {
             position: relative;
             padding: 10rem 2rem 6rem;
@@ -181,22 +182,211 @@
             display: flex; flex-direction: column; align-items: center; gap: 1rem;
         }
 
-        /* Terminal prompt */
-        .hero-terminal {
-            font-family: var(--mono);
-            font-size: 0.72rem;
-            color: var(--sf-blue);
-            margin-bottom: 1.5rem;
-            display: flex; align-items: center; gap: 0.5rem;
+        /* ── Claude Mode (warm Anthropic palette) ── */
+        .claude-mode {
+            --sf-blue: #D97757;
+            --sf-blue-dark: #B85C3A;
+            --sf-blue-light: #E8956E;
+            --sf-cyan: #D97757;
+            --sf-navy: #3D2B1F;
+            --sf-green: #B87333;
+            --sf-green-light: #D4956B;
+            --bg-primary: #FAF6F1;
+            --bg-secondary: #F5EDE4;
+            --bg-tertiary: #EDE3D7;
+            --border: #DDD0C0;
+            --border-light: #EDE3D7;
+            --text-primary: #2D1F14;
+            --text-secondary: #5C4033;
+            --text-tertiary: #8B7355;
+            --text-muted: #A69279;
+            --card-bg: #FFFFFF;
+            --nav-bg: rgba(250,246,241,0.92);
+            --node-color: rgba(217,119,87,0.1);
+            --node-line: rgba(217,119,87,0.06);
+            --dot-active: #D97757;
+            --dot-inactive: #D4C4B0;
+            --toggle-bg: #EDE3D7;
+            --footer-bg: #2D1F14;
+            --footer-text: #8B7355;
+            --shadow-sm: 0 1px 3px rgba(45,31,20,0.06);
+            --shadow-md: 0 4px 20px rgba(217,119,87,0.1);
+            --shadow-lg: 0 12px 40px rgba(217,119,87,0.14);
+            --shadow-card: 0 1px 3px rgba(45,31,20,0.05);
         }
-        .terminal-prompt { color: var(--sf-green); }
-        .cursor-blink {
-            display: inline-block; width: 8px; height: 16px;
-            background: var(--sf-blue);
-            animation: blink 1s step-end infinite;
-            vertical-align: text-bottom;
+        .claude-mode.dark {
+            --bg-primary: #1C1210;
+            --bg-secondary: #2D1F14;
+            --bg-tertiary: #3D2B1F;
+            --border: #4A3728;
+            --border-light: #2D1F14;
+            --text-primary: #F5EDE4;
+            --text-secondary: #D4C4B0;
+            --text-tertiary: #A69279;
+            --text-muted: #8B7355;
+            --card-bg: #2D1F14;
+            --nav-bg: rgba(28,18,16,0.94);
+            --node-color: rgba(217,119,87,0.15);
+            --node-line: rgba(217,119,87,0.08);
+            --dot-inactive: #4A3728;
+            --footer-bg: #120C0A;
         }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* ── Vinyl Easter Egg ── */
+        .profile-photo-wrapper {
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Full vinyl disc (replaces photo) */
+        .profile-photo-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                /* outer rim */
+                radial-gradient(circle, transparent 93%, rgba(255,255,255,0.04) 93.5%, rgba(0,0,0,0.3) 96%, #1a1008 97%, transparent 97.5%),
+                /* light reflection arc */
+                conic-gradient(from 200deg at 50% 50%,
+                    transparent 0deg, rgba(255,255,255,0.06) 30deg, rgba(255,255,255,0.09) 50deg,
+                    transparent 80deg, transparent 360deg),
+                /* label area */
+                radial-gradient(circle, #2D1F14 0%, #2D1F14 15.5%, transparent 16%),
+                radial-gradient(circle, rgba(217,119,87,0.3) 16.5%, transparent 17%),
+                /* grooves — alternating warm & cool micro-rings */
+                radial-gradient(circle, transparent 20%, rgba(217,119,87,0.07) 20.2%, transparent 20.8%),
+                radial-gradient(circle, transparent 23%, rgba(255,255,255,0.03) 23.2%, transparent 23.8%),
+                radial-gradient(circle, transparent 26%, rgba(217,119,87,0.06) 26.2%, transparent 26.8%),
+                radial-gradient(circle, transparent 29%, rgba(255,255,255,0.025) 29.2%, transparent 29.8%),
+                radial-gradient(circle, transparent 32%, rgba(217,119,87,0.055) 32.2%, transparent 32.8%),
+                radial-gradient(circle, transparent 35%, rgba(255,255,255,0.03) 35.2%, transparent 35.8%),
+                radial-gradient(circle, transparent 38%, rgba(217,119,87,0.05) 38.2%, transparent 38.8%),
+                radial-gradient(circle, transparent 41%, rgba(255,255,255,0.025) 41.2%, transparent 41.8%),
+                radial-gradient(circle, transparent 44%, rgba(217,119,87,0.05) 44.2%, transparent 44.8%),
+                radial-gradient(circle, transparent 47%, rgba(255,255,255,0.02) 47.2%, transparent 47.8%),
+                radial-gradient(circle, transparent 50%, rgba(217,119,87,0.045) 50.2%, transparent 50.8%),
+                radial-gradient(circle, transparent 53%, rgba(255,255,255,0.025) 53.2%, transparent 53.8%),
+                radial-gradient(circle, transparent 56%, rgba(217,119,87,0.04) 56.2%, transparent 56.8%),
+                radial-gradient(circle, transparent 59%, rgba(255,255,255,0.02) 59.2%, transparent 59.8%),
+                radial-gradient(circle, transparent 62%, rgba(217,119,87,0.04) 62.2%, transparent 62.8%),
+                radial-gradient(circle, transparent 65%, rgba(255,255,255,0.02) 65.2%, transparent 65.8%),
+                radial-gradient(circle, transparent 68%, rgba(217,119,87,0.035) 68.2%, transparent 68.8%),
+                radial-gradient(circle, transparent 71%, rgba(255,255,255,0.02) 71.2%, transparent 71.8%),
+                radial-gradient(circle, transparent 74%, rgba(217,119,87,0.035) 74.2%, transparent 74.8%),
+                radial-gradient(circle, transparent 77%, rgba(255,255,255,0.015) 77.2%, transparent 77.8%),
+                radial-gradient(circle, transparent 80%, rgba(217,119,87,0.03) 80.2%, transparent 80.8%),
+                radial-gradient(circle, transparent 83%, rgba(255,255,255,0.015) 83.2%, transparent 83.8%),
+                radial-gradient(circle, transparent 86%, rgba(217,119,87,0.025) 86.2%, transparent 86.8%),
+                radial-gradient(circle, transparent 89%, rgba(255,255,255,0.01) 89.2%, transparent 89.8%),
+                /* base disc color */
+                conic-gradient(from 0deg, #1a1008, #261a10, #1a1008, #2D1F14, #1a1008, #261a10, #1a1008, #2D1F14);
+            transition: opacity 0.5s ease;
+        }
+
+        /* Center label */
+        .profile-photo-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 22%; height: 22%;
+            border-radius: 50%;
+            z-index: 3;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                /* spindle hole */
+                radial-gradient(circle, #1a1008 0%, #1a1008 10%, transparent 11%),
+                /* paper texture highlight */
+                radial-gradient(circle at 35% 30%,
+                    rgba(255,255,255,0.18) 0%, transparent 45%),
+                /* label base */
+                radial-gradient(circle,
+                    #F0A882 0%, #D97757 35%, #C4633F 70%, #A8502E 100%);
+            box-shadow:
+                0 0 14px rgba(217,119,87,0.45),
+                inset 0 1px 3px rgba(255,255,255,0.15),
+                inset 0 -1px 2px rgba(0,0,0,0.2);
+            transition: opacity 0.5s ease;
+        }
+
+        .vinyl-active .profile-photo-wrapper::before,
+        .vinyl-active .profile-photo-wrapper::after {
+            opacity: 1;
+        }
+        .vinyl-active .profile-photo {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .profile-photo {
+            transition: opacity 0.4s ease;
+        }
+        .vinyl-active .profile-photo-wrapper {
+            animation: vinylSpin 3.5s linear infinite;
+            border-color: #D97757 !important;
+            box-shadow: 0 0 30px rgba(217,119,87,0.3), 0 0 80px rgba(217,119,87,0.1) !important;
+        }
+        @keyframes vinylSpin { to { transform: rotate(360deg); } }
+
+        /* Shift Spline 3D background to warm tones */
+        .vinyl-active .photo-bg-3d iframe {
+            filter: sepia(0.6) hue-rotate(5deg) saturate(1.5) brightness(0.9);
+            transition: filter 1s ease;
+        }
+        .photo-bg-3d iframe {
+            transition: filter 1s ease;
+        }
+
+        /* ── Handwritten annotation ── */
+        .song-annotation {
+            position: absolute;
+            bottom: -1rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(8px);
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.6s ease 0.4s, transform 0.6s ease 0.4s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .vinyl-active .song-annotation {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .song-annotation-arrow {
+            display: block;
+            width: 36px;
+            height: 30px;
+            margin-bottom: 0.15rem;
+        }
+        .song-annotation-text {
+            font-family: 'Caveat', cursive;
+            font-size: 1.35rem;
+            color: #D97757;
+            white-space: nowrap;
+            line-height: 1.25;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .song-annotation { bottom: -0.5rem; }
+            .song-annotation-text { font-size: 1.15rem; }
+        }
+
+        /* Smooth color transitions when toggling Claude mode */
+        body, nav, .hero, .card, section, footer,
+        .hero-name, .hero-tagline, .hero-subtitle, .accent,
+        .btn, .btn-primary, .btn-outline,
+        .nav-logo, .nav-links a, .nav-inner,
+        .section-label, .section-title, .section-desc,
+        .scroll-progress, .connector-line, .connector-node {
+            transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
+        }
 
         .hero-name {
             font-family: var(--heading);
@@ -294,9 +484,9 @@
             overflow: hidden;
             border: 3px solid var(--border);
             box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
             position: relative;
-            z-index: 1;
+            z-index: 5;
         }
         .profile-photo-wrapper:hover { border-color: var(--sf-blue); box-shadow: var(--shadow-lg); }
 
@@ -865,10 +1055,10 @@
             .hero-left { position: relative; z-index: 5; }
             .hero-subtitle { max-width: 100%; }
             .hero-actions { justify-content: center; }
-            .hero-terminal { justify-content: center; }
+            
             .hero-name { font-size: clamp(2.8rem, 12vw, 4rem); }
             .profile-photo-container { width: 280px; height: 280px; overflow: visible; }
-            .profile-photo-wrapper { width: 200px; height: 200px; position: relative; z-index: 3; }
+            .profile-photo-wrapper { width: 200px; height: 200px; position: relative; z-index: 5; }
             .photo-bg-3d {
                 position: absolute;
                 top: -42%; left: -32%;
@@ -938,11 +1128,6 @@
     <header class="hero" id="hero">
         <div class="hero-inner" id="heroContent">
             <div class="hero-left">
-                <div class="hero-terminal">
-                    <span class="terminal-prompt">~/solutions $</span>
-                    <span>run workflow --agent fernandogarciag</span>
-                    <span class="cursor-blink"></span>
-                </div>
                 <h1 class="hero-name">
                     FERNANDO<br><span class="accent">GARCÍA</span>
                 </h1>
@@ -965,8 +1150,18 @@
                         <iframe id="splineFrame" src="https://my.spline.design/pandemoniumchaosartwork-KjSeQ5Fwh0tOJv1twUQFefWC/?v=3" frameborder="0" loading="lazy" title="3D Background"></iframe>
                     </div>
                     <div class="photo-scroll-guard" id="scrollGuard"></div>
-                    <div class="profile-photo-wrapper">
+                    <div class="profile-photo-wrapper" id="vinylTrigger">
                         <img src="photo.png" alt="Fernando García" class="profile-photo">
+                    </div>
+                    <div class="song-annotation" id="songAnnotation">
+                        <svg class="song-annotation-arrow" viewBox="0 0 36 30" fill="none">
+                            <path d="M18 2 C18 8, 17 16, 18 24" stroke="#D97757" stroke-width="1.8" stroke-linecap="round" fill="none" stroke-dasharray="3 3"/>
+                            <path d="M13 19 L18 26 L23 19" stroke="#D97757" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                        <span class="song-annotation-text">
+                            Hatua Kwa Hatua<br>
+                            <span style="font-size:0.85em;opacity:0.7;">by Fernando García</span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -1551,6 +1746,11 @@
     })();
     </script>
 
+    <!-- Hidden Audio -->
+    <audio id="easterEggAudio" preload="auto">
+        <source src="Hatua Kwa Hatua (Remastered).mp3" type="audio/mpeg">
+    </audio>
+
     <!-- Book Chat Agent -->
     <div class="book-chat" id="bookChat">
         <div class="book-chat-header">
@@ -1843,6 +2043,75 @@
             }
             drawAurora();
         }
+    })();
+    </script>
+
+    <!-- Vinyl Easter Egg Script -->
+    <script>
+    (function() {
+        const audio = document.getElementById('easterEggAudio');
+        const container = document.getElementById('photoContainer');
+        const trigger = document.getElementById('vinylTrigger');
+        const FADE = 600;
+        const VOL = 0.6;
+        let playing = false;
+
+        audio.volume = VOL;
+
+        function fadeIn() {
+            audio.volume = 0;
+            audio.play().then(() => {
+                let s = 0; const n = 30;
+                const iv = setInterval(() => {
+                    s++;
+                    audio.volume = Math.min(VOL, (s / n) * VOL);
+                    if (s >= n) clearInterval(iv);
+                }, FADE / n);
+            }).catch(() => {});
+        }
+
+        function fadeOut(cb) {
+            const v0 = audio.volume;
+            if (v0 === 0) { audio.pause(); if (cb) cb(); return; }
+            let s = 0; const n = 20;
+            const iv = setInterval(() => {
+                s++;
+                audio.volume = Math.max(0, v0 * (1 - s / n));
+                if (s >= n) {
+                    clearInterval(iv);
+                    audio.pause();
+                    audio.volume = VOL;
+                    if (cb) cb();
+                }
+            }, FADE / n);
+        }
+
+        function activate() {
+            playing = true;
+            container.classList.add('vinyl-active');
+            document.body.classList.add('claude-mode');
+            fadeIn();
+        }
+
+        function deactivate() {
+            playing = false;
+            fadeOut(() => {
+                audio.currentTime = 0;
+                container.classList.remove('vinyl-active');
+                document.body.classList.remove('claude-mode');
+            });
+        }
+
+        trigger.addEventListener('click', e => {
+            e.stopPropagation();
+            playing ? deactivate() : activate();
+        });
+
+        audio.addEventListener('ended', () => {
+            container.classList.remove('vinyl-active');
+            document.body.classList.remove('claude-mode');
+            playing = false;
+        });
     })();
     </script>
 
