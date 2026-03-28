@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roho — Fernando García</title>
+    <meta name="robots" content="noindex">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg:        #FAF6F1;
+            --bg-2:      #F2EBE2;
+            --bg-card:   #EFE7DC;
+            --rust:      #D97757;
+            --rust-dark: #C4633F;
+            --rust-dim:  rgba(217,119,87,0.15);
+            --text:      #2D1A0E;
+            --text-2:    #7A5C48;
+            --text-3:    #A8866E;
+            --border:    rgba(217,119,87,0.2);
+            --nav-bg:    rgba(250,246,241,0.88);
+            --mono: 'JetBrains Mono', monospace;
+            --heading: 'Space Grotesk', sans-serif;
+            --body: 'Inter', sans-serif;
+            --hand: 'Covered By Your Grace', cursive;
+        }
+
+        .dark {
+            --bg:        #160C06;
+            --bg-2:      #1F1108;
+            --bg-card:   #2A1A0D;
+            --rust:      #D97757;
+            --rust-dark: #E8916E;
+            --rust-dim:  rgba(217,119,87,0.12);
+            --text:      #F2EAE0;
+            --text-2:    #C4A48A;
+            --text-3:    #896653;
+            --border:    rgba(217,119,87,0.18);
+            --nav-bg:    rgba(22,12,6,0.92);
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--body);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.5s ease, color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        /* ── Nav ── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: var(--nav-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-back {
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            color: var(--text-2);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.2s ease;
+            letter-spacing: 0.02em;
+        }
+        .nav-back:hover { color: var(--rust); }
+        .nav-back svg { width: 14px; height: 14px; }
+        .nav-title {
+            font-family: var(--hand);
+            font-size: 1.9rem;
+            color: var(--rust);
+            letter-spacing: 0.01em;
+        }
+        .dark-toggle {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-2);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .dark-toggle:hover { border-color: var(--rust); }
+
+        /* ── Hero ── */
+        .hero {
+            padding: 120px 2rem 60px;
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Geometric Swahili decorative pattern — CSS only */
+        .geo-pattern {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            opacity: 0.55;
+        }
+        .geo-diamond {
+            width: 10px; height: 10px;
+            background: var(--rust);
+            transform: rotate(45deg);
+        }
+        .geo-diamond.sm { width: 6px; height: 6px; }
+        .geo-line {
+            width: 48px; height: 1px;
+            background: var(--rust);
+        }
+        .geo-chevrons {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .geo-chevron {
+            width: 20px; height: 8px;
+            border-top: 1.5px solid var(--rust);
+            border-right: 1.5px solid var(--rust);
+            transform: rotate(45deg) skewX(-10deg);
+        }
+
+        .album-label {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--text-3);
+            margin-bottom: 1rem;
+        }
+        .album-title {
+            font-family: var(--hand);
+            font-size: clamp(5rem, 12vw, 9rem);
+            color: var(--rust);
+            line-height: 0.9;
+            margin-bottom: 1rem;
+        }
+        .album-by {
+            font-family: var(--body);
+            font-size: 0.95rem;
+            color: var(--text-2);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        .album-desc {
+            font-family: var(--hand);
+            font-size: 1.4rem;
+            color: var(--text-3);
+            margin-top: 1.2rem;
+            opacity: 0.8;
+        }
+
+        /* Divider */
+        .divider {
+            max-width: 1100px;
+            margin: 0 auto 3rem;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .divider-line { flex: 1; height: 1px; background: var(--border); }
+        .divider-node {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--rust);
+            opacity: 0.5;
+        }
+        .divider-label {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-3);
+        }
+
+        /* ── Vinyl Grid ── */
+        .grid-section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2rem 6rem;
+        }
+        .vinyl-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem 2rem;
+            justify-items: center;
+        }
+
+        /* ── Vinyl Card ── */
+        .vinyl-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+        .vinyl-card.coming-soon {
+            cursor: default;
+            opacity: 0.3;
+            filter: grayscale(1);
+            pointer-events: none;
+        }
+
+        /* Flip container */
+        .vinyl-flip {
+            width: 180px;
+            height: 180px;
+            perspective: 900px;
+        }
+        .vinyl-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+        }
+        .vinyl-card.flipped .vinyl-inner {
+            transform: rotateY(180deg);
+        }
+        .vinyl-face, .vinyl-back-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .vinyl-back-face {
+            transform: rotateY(180deg);
+        }
+
+        /* ── Vinyl disc CSS art ── */
+        .vinyl-disc {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle, transparent 93%, rgba(255,255,255,0.04) 93.5%, rgba(0,0,0,0.3) 96%, #1a1008 97%, transparent 97.5%),
+                conic-gradient(from 200deg at 50% 50%,
+                    transparent 0deg, rgba(255,255,255,0.06) 30deg, rgba(255,255,255,0.09) 50deg,
+                    transparent 80deg, transparent 360deg),
+                radial-gradient(circle, #2D1F14 0%, #2D1F14 15.5%, transparent 16%),
+                radial-gradient(circle, rgba(217,119,87,0.3) 16.5%, transparent 17%),
+                radial-gradient(circle, transparent 20%, rgba(217,119,87,0.07) 20.2%, transparent 20.8%),
+                radial-gradient(circle, transparent 23%, rgba(255,255,255,0.03) 23.2%, transparent 23.8%),
+                radial-gradient(circle, transparent 26%, rgba(217,119,87,0.06) 26.2%, transparent 26.8%),
+                radial-gradient(circle, transparent 29%, rgba(255,255,255,0.025) 29.2%, transparent 29.8%),
+                radial-gradient(circle, transparent 32%, rgba(217,119,87,0.055) 32.2%, transparent 32.8%),
+                radial-gradient(circle, transparent 35%, rgba(255,255,255,0.03) 35.2%, transparent 35.8%),
+                radial-gradient(circle, transparent 38%, rgba(217,119,87,0.05) 38.2%, transparent 38.8%),
+                radial-gradient(circle, transparent 41%, rgba(255,255,255,0.025) 41.2%, transparent 41.8%),
+                radial-gradient(circle, transparent 44%, rgba(217,119,87,0.05) 44.2%, transparent 44.8%),
+                radial-gradient(circle, transparent 47%, rgba(255,255,255,0.02) 47.2%, transparent 47.8%),
+                radial-gradient(circle, transparent 50%, rgba(217,119,87,0.045) 50.2%, transparent 50.8%),
+                radial-gradient(circle, transparent 53%, rgba(255,255,255,0.025) 53.2%, transparent 53.8%),
+                radial-gradient(circle, transparent 56%, rgba(217,119,87,0.04) 56.2%, transparent 56.8%),
+                radial-gradient(circle, transparent 59%, rgba(255,255,255,0.02) 59.2%, transparent 59.8%),
+                radial-gradient(circle, transparent 62%, rgba(217,119,87,0.04) 62.2%, transparent 62.8%),
+                radial-gradient(circle, transparent 65%, rgba(255,255,255,0.02) 65.2%, transparent 65.8%),
+                radial-gradient(circle, transparent 68%, rgba(217,119,87,0.035) 68.2%, transparent 68.8%),
+                radial-gradient(circle, transparent 71%, rgba(255,255,255,0.02) 71.2%, transparent 71.8%),
+                radial-gradient(circle, transparent 74%, rgba(217,119,87,0.035) 74.2%, transparent 74.8%),
+                radial-gradient(circle, transparent 77%, rgba(255,255,255,0.015) 77.2%, transparent 77.8%),
+                radial-gradient(circle, transparent 80%, rgba(217,119,87,0.03) 80.2%, transparent 80.8%),
+                radial-gradient(circle, transparent 83%, rgba(255,255,255,0.015) 83.2%, transparent 83.8%),
+                radial-gradient(circle, transparent 86%, rgba(217,119,87,0.025) 86.2%, transparent 86.8%),
+                radial-gradient(circle, transparent 89%, rgba(255,255,255,0.01) 89.2%, transparent 89.8%),
+                conic-gradient(from 0deg, #1a1008, #261a10, #1a1008, #2D1F14, #1a1008, #261a10, #1a1008, #2D1F14);
+            position: relative;
+        }
+
+        /* Center label on the disc */
+        .vinyl-disc::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 22%; height: 22%;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle, #1a1008 0%, #1a1008 10%, transparent 11%),
+                radial-gradient(circle at 35% 30%, rgba(255,255,255,0.18) 0%, transparent 45%),
+                radial-gradient(circle, #F0A882 0%, #D97757 35%, #C4633F 70%, #A8502E 100%);
+            box-shadow:
+                0 0 10px rgba(217,119,87,0.4),
+                inset 0 1px 3px rgba(255,255,255,0.15),
+                inset 0 -1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* Glow on front face for active vinyls */
+        .vinyl-card:not(.coming-soon) .vinyl-face .vinyl-disc {
+            box-shadow: 0 0 0 2px rgba(217,119,87,0.15), 0 4px 24px rgba(0,0,0,0.25);
+            transition: box-shadow 0.3s ease;
+        }
+        .vinyl-card:not(.coming-soon):hover .vinyl-face .vinyl-disc {
+            box-shadow: 0 0 0 2px rgba(217,119,87,0.4), 0 8px 32px rgba(217,119,87,0.2);
+        }
+
+        /* Spin animation on back face when playing */
+        @keyframes vinylSpin {
+            from { transform: rotateY(180deg) rotate(0deg); }
+            to   { transform: rotateY(180deg) rotate(360deg); }
+        }
+        .vinyl-card.playing .vinyl-inner {
+            animation: vinylSpin 3.5s linear infinite;
+        }
+
+        /* Track info below vinyl */
+        .track-info {
+            text-align: center;
+        }
+        .track-num {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.14em;
+            color: var(--text-3);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+        .track-name {
+            font-family: var(--hand);
+            font-size: 1.35rem;
+            color: var(--text);
+            line-height: 1.2;
+            transition: color 0.3s ease;
+        }
+        .vinyl-card.playing .track-name { color: var(--rust); }
+        .track-status {
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            letter-spacing: 0.1em;
+            color: var(--rust);
+            margin-top: 0.2rem;
+            height: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .vinyl-card.playing .track-status { opacity: 1; }
+
+        /* Back face title overlay */
+        .vinyl-back-face {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .vinyl-back-face .vinyl-disc {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+        }
+        .back-title {
+            position: relative;
+            z-index: 2;
+            font-family: var(--hand);
+            font-size: 1.05rem;
+            color: #F0A882;
+            text-align: center;
+            line-height: 1.3;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+            max-width: 70%;
+            pointer-events: none;
+        }
+
+        /* Coming soon label */
+        .coming-label {
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            letter-spacing: 0.12em;
+            color: var(--text-3);
+            text-transform: uppercase;
+            margin-top: 0.1rem;
+        }
+
+        /* ── Footer ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+        }
+        .footer-text {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            color: var(--text-3);
+            text-transform: uppercase;
+        }
+        .footer-text a {
+            color: var(--rust);
+            text-decoration: none;
+        }
+        .footer-text a:hover { text-decoration: underline; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .vinyl-grid { grid-template-columns: repeat(3, 1fr); gap: 2.5rem 1.5rem; }
+        }
+        @media (max-width: 620px) {
+            .vinyl-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem 1rem; }
+            .vinyl-flip { width: 140px; height: 140px; }
+            .album-title { font-size: clamp(4rem, 18vw, 7rem); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Nav -->
+    <nav>
+        <div class="nav-inner">
+            <a href="index.html" class="nav-back">
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 2L4 7l5 5"/>
+                </svg>
+                fernandogarciag.com
+            </a>
+            <span class="nav-title">Roho</span>
+            <button class="dark-toggle" id="darkToggle" aria-label="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="geo-pattern">
+            <div class="geo-diamond sm"></div>
+            <div class="geo-line"></div>
+            <div class="geo-chevrons">
+                <div class="geo-chevron"></div>
+                <div class="geo-chevron"></div>
+            </div>
+            <div class="geo-diamond"></div>
+            <div class="geo-chevrons">
+                <div class="geo-chevron"></div>
+                <div class="geo-chevron"></div>
+            </div>
+            <div class="geo-line"></div>
+            <div class="geo-diamond sm"></div>
+        </div>
+        <p class="album-label">// an album by</p>
+        <h1 class="album-title">Roho</h1>
+        <p class="album-by">Fernando García</p>
+        <p class="album-desc">soul, in sound</p>
+    </section>
+
+    <!-- Divider -->
+    <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-node"></div>
+        <span class="divider-label">tracks</span>
+        <div class="divider-node"></div>
+        <div class="divider-line"></div>
+    </div>
+
+    <!-- Grid -->
+    <section class="grid-section">
+        <div class="vinyl-grid" id="vinylGrid">
+
+            <!-- Track 01 — Hatua Kwa Hatua -->
+            <div class="vinyl-card" data-src="Hatua Kwa Hatua (Remastered).mp3" data-track="01">
+                <div class="vinyl-flip">
+                    <div class="vinyl-inner">
+                        <div class="vinyl-face">
+                            <div class="vinyl-disc"></div>
+                        </div>
+                        <div class="vinyl-back-face">
+                            <div class="vinyl-disc"></div>
+                            <span class="back-title">Hatua Kwa Hatua</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="track-info">
+                    <div class="track-num">01</div>
+                    <div class="track-name">Hatua Kwa Hatua</div>
+                    <div class="track-status">▶ playing</div>
+                </div>
+            </div>
+
+            <!-- Track 02 — Kuwa Hapa Sa -->
+            <div class="vinyl-card" data-src="Kuwa Hapa Sa.mp3" data-track="02">
+                <div class="vinyl-flip">
+                    <div class="vinyl-inner">
+                        <div class="vinyl-face">
+                            <div class="vinyl-disc"></div>
+                        </div>
+                        <div class="vinyl-back-face">
+                            <div class="vinyl-disc"></div>
+                            <span class="back-title">Kuwa Hapa Sa</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="track-info">
+                    <div class="track-num">02</div>
+                    <div class="track-name">Kuwa Hapa Sa</div>
+                    <div class="track-status">▶ playing</div>
+                </div>
+            </div>
+
+            <!-- Tracks 03–08 — Coming Soon -->
+            <div class="vinyl-card coming-soon">
+                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
+                <div class="track-info"><div class="track-num">03</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
+            </div>
+            <div class="vinyl-card coming-soon">
+                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
+                <div class="track-info"><div class="track-num">04</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
+            </div>
+            <div class="vinyl-card coming-soon">
+                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
+                <div class="track-info"><div class="track-num">05</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
+            </div>
+            <div class="vinyl-card coming-soon">
+                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
+                <div class="track-info"><div class="track-num">06</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
+            </div>
+            <div class="vinyl-card coming-soon">
+                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
+                <div class="track-info"><div class="track-num">07</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
+            </div>
+            <div class="vinyl-card coming-soon">
+                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
+                <div class="track-info"><div class="track-num">08</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p class="footer-text">
+            Roho · Fernando García ·
+            <a href="index.html">fernandogarciag.com</a>
+        </p>
+    </footer>
+
+    <!-- Hidden audio -->
+    <audio id="trackAudio" preload="none"></audio>
+
+    <script>
+    (function () {
+
+        /* ── Dark mode ── */
+        const body = document.body;
+        const toggle = document.getElementById('darkToggle');
+        const stored = localStorage.getItem('roho-dark');
+        if (stored === 'true' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            body.classList.add('dark');
+            toggle.textContent = '☀️';
+        }
+        toggle.addEventListener('click', () => {
+            const isDark = body.classList.toggle('dark');
+            toggle.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('roho-dark', isDark);
+        });
+
+        /* ── Vinyl playback ── */
+        const audio = document.getElementById('trackAudio');
+        const FADE = 500;
+        const VOL  = 0.7;
+        let current = null; // currently flipped card
+
+        function fadeIn() {
+            audio.volume = 0;
+            audio.play().catch(() => {});
+            let s = 0; const n = 25;
+            const iv = setInterval(() => {
+                s++;
+                audio.volume = Math.min(VOL, (s / n) * VOL);
+                if (s >= n) clearInterval(iv);
+            }, FADE / n);
+        }
+
+        function fadeOut(cb) {
+            const v0 = audio.volume;
+            if (v0 === 0) { audio.pause(); if (cb) cb(); return; }
+            let s = 0; const n = 20;
+            const iv = setInterval(() => {
+                s++;
+                audio.volume = Math.max(0, v0 * (1 - s / n));
+                if (s >= n) {
+                    clearInterval(iv);
+                    audio.pause();
+                    audio.volume = VOL;
+                    if (cb) cb();
+                }
+            }, FADE / n);
+        }
+
+        function deactivateCard(card) {
+            card.classList.remove('flipped', 'playing');
+        }
+
+        function activateCard(card) {
+            const src = card.dataset.src;
+            audio.src = src;
+            audio.load();
+            card.classList.add('flipped');
+            // slight delay to let the flip animate before playing
+            setTimeout(() => {
+                card.classList.add('playing');
+                fadeIn();
+            }, 500);
+        }
+
+        document.querySelectorAll('.vinyl-card:not(.coming-soon)').forEach(card => {
+            card.addEventListener('click', () => {
+                if (current === card) {
+                    // already playing — stop
+                    fadeOut(() => deactivateCard(card));
+                    current = null;
+                } else {
+                    if (current) {
+                        const prev = current;
+                        fadeOut(() => {
+                            deactivateCard(prev);
+                            current = card;
+                            activateCard(card);
+                        });
+                    } else {
+                        current = card;
+                        activateCard(card);
+                    }
+                }
+            });
+        });
+
+        audio.addEventListener('ended', () => {
+            if (current) {
+                deactivateCard(current);
+                current = null;
+            }
+        });
+
+    })();
+    </script>
+
+</body>
+</html>

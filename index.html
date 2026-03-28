@@ -380,6 +380,33 @@
             line-height: 1.25;
             text-align: left;
         }
+        /* ── Album invite ── */
+        .album-invite {
+            position: absolute;
+            top: 50%;
+            left: calc(50% + 140px);
+            transform: translateY(calc(-50% + 5.5rem)) translateX(8px);
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.6s ease 1.4s, transform 0.6s ease 1.4s;
+        }
+        .vinyl-active .album-invite {
+            opacity: 1;
+            transform: translateY(calc(-50% + 5.5rem)) translateX(0);
+            pointer-events: auto;
+        }
+        .album-invite a {
+            font-family: 'Covered By Your Grace', cursive;
+            font-size: 1.5rem;
+            color: #D97757;
+            text-decoration: none;
+            opacity: 0.75;
+            transition: opacity 0.2s ease;
+            display: inline-block;
+        }
+        .album-invite a:hover { opacity: 1; }
+
         @media (max-width: 768px) {
             .song-annotation {
                 top: auto;
@@ -397,6 +424,15 @@
             .arrow-vertical { display: block; }
             .song-annotation-arrow { width: 48px; height: 40px; }
             .song-annotation-text { font-size: 2.2rem; text-align: center; }
+            .album-invite {
+                top: auto;
+                left: 50%;
+                bottom: -9.5rem;
+                transform: translateX(-50%) translateY(8px);
+            }
+            .vinyl-active .album-invite {
+                transform: translateX(-50%) translateY(0);
+            }
         }
 
         /* Smooth color transitions when toggling Claude mode */
@@ -1186,6 +1222,9 @@
                         <div class="photo-face">
                             <img src="photo.png" alt="Fernando García" class="profile-photo">
                         </div>
+                    </div>
+                    <div class="album-invite" id="albumInvite">
+                        <a href="music.html" onclick="event.stopPropagation()">✦ Roho</a>
                     </div>
                     <div class="song-annotation" id="songAnnotation">
                         <svg class="song-annotation-arrow arrow-horizontal" viewBox="0 0 80 44" fill="none">
