@@ -491,10 +491,12 @@
             .song-annotation-arrow { width: 48px; height: 40px; }
             .song-annotation-text { font-size: 2.2rem; text-align: center; }
             .album-invite {
+                position: fixed;
                 top: auto;
                 left: 50%;
-                bottom: -9.5rem;
-                transform: translateX(-50%) translateY(8px);
+                bottom: 1.5rem;
+                transform: translateX(-50%) translateY(calc(100% + 2rem));
+                z-index: 150;
             }
             .vinyl-active .album-invite {
                 transform: translateX(-50%) translateY(0);
