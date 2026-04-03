@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboards | Fernando García</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --sf-blue: #0176D3;
+            --sf-blue-dark: #014486;
+            --sf-cyan: #1AD6FF;
+            --bg-primary: #F8FAFC;
+            --bg-secondary: #F1F5F9;
+            --border: #E2E8F0;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            --card-bg: #FFFFFF;
+            --nav-bg: rgba(255,255,255,0.88);
+            --radius: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 20px rgba(1,118,211,0.08);
+            --mono: 'JetBrains Mono', monospace;
+            --heading: 'Space Grotesk', sans-serif;
+            --body: 'Inter', sans-serif;
+        }
+
+        .dark {
+            --bg-primary: #0F172A;
+            --bg-secondary: #1E293B;
+            --border: #334155;
+            --text-primary: #F1F5F9;
+            --text-secondary: #CBD5E1;
+            --text-muted: #64748B;
+            --card-bg: #1E293B;
+            --nav-bg: rgba(15, 23, 42, 0.92);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.25);
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--body);
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.5s ease, color 0.4s ease;
+            min-height: 100vh;
+        }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: box-shadow 0.3s, background 0.5s ease;
+        }
+        .nav-inner {
+            max-width: 1100px; margin: 0 auto; padding: 0 2rem;
+            height: 60px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-logo {
+            font-family: var(--heading);
+            font-weight: 700; font-size: 0.95rem;
+            letter-spacing: -0.02em; color: var(--sf-blue);
+            text-decoration: none;
+        }
+        .nav-right { display: flex; align-items: center; gap: 2rem; }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-links a {
+            text-decoration: none;
+            font-family: var(--mono);
+            font-size: 0.68rem; font-weight: 500;
+            color: var(--text-muted);
+            transition: color 0.2s;
+            letter-spacing: 0.03em;
+        }
+        .nav-links a:hover { color: var(--sf-blue); }
+        .nav-links a.active { color: var(--sf-blue); }
+        .theme-toggle {
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--bg-secondary);
+            color: #F59E0B; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; transition: all 0.3s ease;
+        }
+        .dark .theme-toggle { color: #818CF8; }
+        .theme-toggle:hover { border-color: var(--sf-blue); }
+
+        /* Main */
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 7rem 2rem 4rem;
+        }
+
+        .page-header {
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-family: var(--heading);
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        /* Dashboard cards */
+        .dashboard-card {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--sf-blue);
+        }
+
+        .card-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-content h3 {
+            font-family: var(--heading);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .card-content p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.65;
+            max-width: 580px;
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.85rem;
+            flex-wrap: wrap;
+        }
+
+        .card-tag {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            font-weight: 500;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            background: var(--sf-blue);
+            color: white;
+            letter-spacing: 0.02em;
+        }
+
+        .card-arrow {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-left: 1.5rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .dashboard-card:hover .card-arrow {
+            transform: translateX(4px);
+            color: var(--sf-blue);
+        }
+
+        .card-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            color: #2E844A;
+            margin-top: 0.6rem;
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #2E844A;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .dark .card-status { color: #45C65A; }
+        .dark .status-dot { background: #45C65A; }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Back link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--sf-blue); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.8rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">fernandogarciag</a>
+            <div class="nav-right">
+                <div class="nav-links">
+                    <a href="index.html#about">about</a>
+                    <a href="index.html#experience">experience</a>
+                    <a href="index.html#agents">skills</a>
+                    <a href="index.html#skills">tools</a>
+                    <a href="index.html#education">education</a>
+                    <a href="index.html#contact">contact</a>
+                    <a href="dashboards.html" class="active">dashboards</a>
+                </div>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> back to portfolio</a>
+
+        <div class="page-header">
+            <h1>Dashboards</h1>
+            <p>Live data projects I've built.</p>
+        </div>
+
+        <a href="https://ai-race-dashboard.onrender.com" target="_blank" class="dashboard-card">
+            <div class="card-inner">
+                <div class="card-content">
+                    <h3>The AI Race</h3>
+                    <p>Who's winning the AI race? A live dashboard tracking benchmarks, pricing, open-source downloads, and capabilities across the top AI companies.</p>
+                    <div class="card-tags">
+                        <span class="card-tag">Python</span>
+                        <span class="card-tag">Dash</span>
+                        <span class="card-tag">Plotly</span>
+                        <span class="card-tag">Live Data</span>
+                    </div>
+                    <div class="card-status">
+                        <span class="status-dot"></span>
+                        live
+                    </div>
+                </div>
+                <i class="fas fa-arrow-right card-arrow"></i>
+            </div>
+        </a>
+    </main>
+
+    <script>
+        const toggle = document.getElementById('themeToggle');
+        const icon = toggle.querySelector('i');
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            icon.className = 'fas fa-moon';
+        }
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const dark = document.body.classList.contains('dark');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            icon.className = dark ? 'fas fa-moon' : 'fas fa-sun';
+        });
+    </script>
+
+</body>
+</html>
