@@ -1216,6 +1216,63 @@
                 border-radius: 16px 16px 0 0;
             }
         }
+
+        /* ── Playground / AI Agent Runner ── */
+        .game-wrap {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+            margin-top: 2rem;
+            box-shadow: var(--shadow-card);
+        }
+        .game-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .game-canvas-wrap canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .game-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+        .game-toolbar-left {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.08em;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+        }
+        .game-toolbar-right { display: flex; gap: 0.5rem; align-items: center; }
+        .game-mute-btn {
+            width: 30px; height: 30px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            background: transparent;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .game-mute-btn:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
+        @media (max-width: 768px) {
+            .game-canvas-wrap { height: 240px; }
+        }
     </style>
 </head>
 <body>
@@ -1257,6 +1314,7 @@
         <button class="side-dot" data-target="agents"><span class="side-dot-label">Skills</span></button>
         <button class="side-dot" data-target="skills"><span class="side-dot-label">Tools</span></button>
         <button class="side-dot" data-target="education"><span class="side-dot-label">Education</span></button>
+        <button class="side-dot" data-target="playground"><span class="side-dot-label">Play</span></button>
         <button class="side-dot" data-target="contact"><span class="side-dot-label">Contact</span></button>
     </div>
 
@@ -1706,6 +1764,48 @@
             </div>
         </div>
     </section>
+
+    <!-- Connector -->
+    <div class="blueprint-connector">
+        <div class="connector-line">
+            <div class="connector-dash"></div>
+            <div class="connector-node"></div>
+            <span>playground</span>
+            <div class="connector-node"></div>
+            <div class="connector-dash"></div>
+        </div>
+    </div>
+
+    <!-- Playground -->
+    <section id="playground" class="bg-primary">
+        <div class="section-inner">
+            <p class="section-label reveal">// playground</p>
+            <h2 class="section-title reveal">AI Agent Runner</h2>
+            <p class="section-desc reveal">An endless runner — dodge obstacles, collect stars, survive.</p>
+            <div class="game-wrap reveal">
+                <div class="game-canvas-wrap" id="gameCanvasWrap">
+                    <canvas id="gameCanvas"></canvas>
+                </div>
+                <div class="game-toolbar">
+                    <span class="game-toolbar-left" id="gameScoreBar">press space or tap to start</span>
+                    <div class="game-toolbar-right">
+                        <button class="game-mute-btn" id="gameMuteBtn" aria-label="Mute">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connector -->
+    <div class="blueprint-connector">
+        <div class="connector-line">
+            <div class="connector-dash"></div>
+            <div class="connector-node"></div>
+            <span>contact</span>
+            <div class="connector-node"></div>
+            <div class="connector-dash"></div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer id="contact">
@@ -2302,6 +2402,692 @@
                 }, 700);
             });
         }
+    })();
+    </script>
+
+    <!-- AI Agent Runner Game -->
+    <script>
+    (function() {
+        const wrap   = document.getElementById('gameCanvasWrap');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx    = canvas.getContext('2d');
+        const bar    = document.getElementById('gameScoreBar');
+        const muteBtn = document.getElementById('gameMuteBtn');
+
+        /* ── Theme colors (read live from CSS) ── */
+        function getColors() {
+            const s = getComputedStyle(document.documentElement);
+            const dark = document.body.classList.contains('dark');
+            return {
+                bg:     s.getPropertyValue('--bg-primary').trim() || (dark ? '#1C1210' : '#FAF6F1'),
+                fg:     '#D97757',
+                ground: dark ? '#F5EDE4' : '#2D1F14',
+                muted:  dark ? '#D4C4B0' : '#A69279',
+                dim:    dark ? '#3A2A1E' : '#E8DDD0',
+                text:   s.getPropertyValue('--text-primary').trim() || (dark ? '#F1F5F9' : '#0F172A'),
+                card:   s.getPropertyValue('--card-bg').trim() || (dark ? '#1E293B' : '#FFFFFF'),
+            };
+        }
+
+        /* ── Canvas sizing ── */
+        function resize() {
+            const rect = wrap.getBoundingClientRect();
+            canvas.width  = rect.width * devicePixelRatio;
+            canvas.height = rect.height * devicePixelRatio;
+            ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        const W = () => wrap.clientWidth;
+        const H = () => wrap.clientHeight;
+        const GROUND_PCT = 0.78; // ground at 78% from top
+
+        /* ── Pixel sprite helper ── */
+        function drawSprite(sprite, x, y, s, color) {
+            ctx.fillStyle = color;
+            for (let r = 0; r < sprite.length; r++)
+                for (let c = 0; c < sprite[r].length; c++)
+                    if (sprite[r][c] === 1)
+                        ctx.fillRect(x + c * s, y + r * s, s, s);
+        }
+
+        /* ── Sprites (1 = filled, 0 = empty) ── */
+        const SPR = {
+            // Robot standing — 10x14
+            stand: [
+                [0,0,0,0,1,1,0,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,0,1,1,0,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,0,1,0,0,1,0,0,0],
+                [0,0,1,1,0,0,1,1,0,0],
+                [0,0,1,1,0,0,1,1,0,0],
+            ],
+            // Robot run frame 2 — legs split
+            run2: [
+                [0,0,0,0,1,1,0,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,0,1,1,0,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,0,0,0,1,0,0],
+                [0,1,1,0,0,0,0,1,1,0],
+                [0,1,0,0,0,0,0,0,1,0],
+            ],
+            // Robot crouch — 10x9
+            crouch: [
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,0,1,1,0,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,1,1,0,0,0,0,1,1,0],
+                [0,1,0,0,0,0,0,0,1,0],
+            ],
+            // Robot jump — 10x14 (legs tucked)
+            jump: [
+                [0,0,0,0,1,1,0,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,0,1,1,0,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,0,1,0,0,1,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+            ],
+            // Grill (asador) — 12x10
+            grill: [
+                [0,1,0,1,0,1,0,1,0,1,0,0],
+                [1,1,1,1,1,1,1,1,1,1,1,0],
+                [1,0,1,0,1,0,1,0,1,0,1,0],
+                [1,1,1,1,1,1,1,1,1,1,1,0],
+                [0,1,1,1,1,1,1,1,1,1,0,0],
+                [0,0,1,0,0,0,0,0,1,0,0,0],
+                [0,0,1,0,0,0,0,0,1,0,0,0],
+                [0,0,1,0,0,0,0,0,1,0,0,0],
+                [0,1,1,1,0,0,0,1,1,1,0,0],
+                [0,1,0,1,0,0,0,1,0,1,0,0],
+            ],
+            // Soccer ball — 8x8
+            ball: [
+                [0,0,1,1,1,1,0,0],
+                [0,1,1,0,0,1,1,0],
+                [1,1,0,1,1,0,1,1],
+                [1,0,1,1,1,1,0,1],
+                [1,0,1,1,1,1,0,1],
+                [1,1,0,1,1,0,1,1],
+                [0,1,1,0,0,1,1,0],
+                [0,0,1,1,1,1,0,0],
+            ],
+            // Tent — 10x8
+            tent: [
+                [0,0,0,0,1,1,0,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,1,1,1,0,0,1,1,1,0],
+                [1,1,1,0,0,0,0,1,1,1],
+                [1,1,0,0,1,1,0,0,1,1],
+                [1,0,0,0,1,1,0,0,0,1],
+                [1,0,0,0,1,1,0,0,0,1],
+            ],
+            // Laptop — 10x7
+            laptop: [
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,0,1,0,1,0,0,1,0],
+                [0,1,0,0,1,0,1,0,1,0],
+                [0,1,0,1,0,0,0,1,1,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [1,1,1,1,1,1,1,1,1,1],
+                [0,1,1,1,1,1,1,1,1,0],
+            ],
+            // Flying book — 12x6
+            book: [
+                [0,1,0,0,0,0,0,0,0,0,1,0],
+                [1,1,1,1,1,1,1,1,1,1,1,1],
+                [0,1,1,0,1,0,1,0,1,1,1,0],
+                [0,1,1,0,0,1,0,1,0,1,1,0],
+                [0,1,1,1,1,1,1,1,1,1,1,0],
+                [0,0,1,1,1,1,1,1,1,1,0,0],
+            ],
+            // Bug — 8x6
+            bug: [
+                [1,0,0,0,0,0,0,1],
+                [0,1,0,1,1,0,1,0],
+                [0,0,1,1,1,1,0,0],
+                [1,0,1,1,1,1,0,1],
+                [0,0,1,1,1,1,0,0],
+                [0,1,0,0,0,0,1,0],
+            ],
+            // Dashboard — 10x8
+            dash: [
+                [1,1,1,1,1,1,1,1,1,1],
+                [1,0,0,0,0,0,0,0,0,1],
+                [1,0,1,0,1,0,0,1,0,1],
+                [1,0,1,0,1,0,1,1,0,1],
+                [1,0,1,0,1,0,1,1,0,1],
+                [1,0,1,1,1,0,1,1,0,1],
+                [1,0,0,0,0,0,0,0,0,1],
+                [1,1,1,1,1,1,1,1,1,1],
+            ],
+            // Padel ball — 6x6
+            padel: [
+                [0,0,1,1,0,0],
+                [0,1,0,0,1,0],
+                [1,0,1,0,0,1],
+                [1,0,0,1,0,1],
+                [0,1,0,0,1,0],
+                [0,0,1,1,0,0],
+            ],
+        };
+
+        /* ── Obstacle templates ── */
+        // type: 'ground' = must jump, 'air' = must crouch
+        const OBS_TEMPLATES = [
+            { name: 'grill',   spr: 'grill',  type: 'ground', scale: 3.5 },
+            { name: 'ball',    spr: 'ball',   type: 'ground', scale: 3   },
+            { name: 'tent',    spr: 'tent',   type: 'ground', scale: 3.5 },
+            { name: 'laptop',  spr: 'laptop', type: 'ground', scale: 3   },
+            { name: 'dash',    spr: 'dash',   type: 'ground', scale: 3   },
+            { name: 'padel',   spr: 'padel',  type: 'ground', scale: 3   },
+            { name: 'book',    spr: 'book',   type: 'air',    scale: 3   },
+            { name: 'bug',     spr: 'bug',    type: 'air',    scale: 3   },
+        ];
+
+        /* ── Game state ── */
+        const PX = 3; // character pixel scale
+        let state = 'idle'; // idle | running | over
+        let score = 0, hiScore = parseInt(localStorage.getItem('agentRunnerHi')) || 0;
+        let speed = 4, frame = 0;
+        let obstacles = [], particles = [], starObj = null;
+
+        // Character
+        let charX, charY, charVY, charW, charH, jumping, crouching, invincible, invTimer;
+        const GRAVITY = 0.55, JUMP_V = -10.5;
+
+        function groundY() { return H() * GROUND_PCT; }
+
+        function resetChar() {
+            charX = W() * 0.12;
+            crouching = false;
+            jumping = false;
+            charW = SPR.stand[0].length * PX;
+            charH = SPR.stand.length * PX;
+            charY = groundY() - charH;
+            charVY = 0;
+            invincible = false;
+            invTimer = 0;
+        }
+
+        /* ── Audio ── */
+        let muted = false;
+        const audioNash = new Audio('Nashukuru.mp3');
+        const audioKuwa = new Audio('Kuwa Hapa Sa.mp3');
+        audioNash.loop = true;
+        audioNash.volume = 0.5;
+        audioKuwa.volume = 0.5;
+        let nashSavedTime = 0;
+
+        // Web Audio API for sound effects
+        let audioCtx = null;
+        function sfx(freq, dur, type, vol) {
+            if (muted) return;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type || 'square';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(vol || 0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + dur);
+        }
+
+        function startMusic() {
+            if (muted) return;
+            audioNash.currentTime = 0;
+            audioNash.volume = 0.5;
+            audioNash.play().catch(() => {});
+        }
+        function stopMusic() {
+            audioNash.pause();
+            audioKuwa.pause();
+        }
+
+        function activateStar() {
+            invincible = true;
+            invTimer = 600; // 10 seconds at 60fps
+            sfx(880, 0.15, 'sine', 0.12);
+            sfx(1320, 0.2, 'sine', 0.1);
+            // crossfade: save nash position, switch to kuwa at 1:20
+            nashSavedTime = audioNash.currentTime;
+            audioNash.pause();
+            if (!muted) {
+                audioKuwa.currentTime = 80; // 1:20
+                audioKuwa.volume = 0;
+                audioKuwa.play().catch(() => {});
+                let s = 0; const n = 15;
+                const iv = setInterval(() => { s++; audioKuwa.volume = Math.min(0.5, (s/n)*0.5); if (s>=n) clearInterval(iv); }, 30);
+            }
+        }
+
+        function deactivateStar() {
+            invincible = false;
+            // crossfade back to nashukuru
+            let s = 0; const n = 20;
+            const iv = setInterval(() => {
+                s++;
+                audioKuwa.volume = Math.max(0, 0.5 * (1 - s/n));
+                if (s >= n) {
+                    clearInterval(iv);
+                    audioKuwa.pause();
+                    if (!muted) {
+                        audioNash.currentTime = nashSavedTime;
+                        audioNash.volume = 0;
+                        audioNash.play().catch(() => {});
+                        let s2 = 0;
+                        const iv2 = setInterval(() => { s2++; audioNash.volume = Math.min(0.5, (s2/15)*0.5); if (s2>=15) clearInterval(iv2); }, 30);
+                    }
+                }
+            }, 50);
+        }
+
+        muteBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            muted = !muted;
+            muteBtn.textContent = muted ? '🔇' : '🔊';
+            if (muted) { audioNash.pause(); audioKuwa.pause(); }
+            else if (state === 'running') { audioNash.play().catch(() => {}); }
+        });
+
+        /* ── Obstacle spawning ── */
+        let spawnTimer = 0, minSpawn = 80;
+
+        function spawnObstacle() {
+            const t = OBS_TEMPLATES[Math.floor(Math.random() * OBS_TEMPLATES.length)];
+            const spr = SPR[t.spr];
+            const sc = t.scale;
+            const w = spr[0].length * sc;
+            const h = spr.length * sc;
+            const gy = groundY();
+            let y;
+            if (t.type === 'ground') {
+                y = gy - h;
+            } else {
+                // air obstacles: between head height and crouch height
+                y = gy - SPR.stand.length * PX - h + (Math.random() * 10 - 5);
+            }
+            obstacles.push({ spr: t.spr, x: W() + 20, y, w, h, scale: sc, type: t.type });
+        }
+
+        /* ── Star spawning ── */
+        let starTimer = 0;
+        function spawnStar() {
+            const gy = groundY();
+            starObj = {
+                x: W() + 40,
+                y: gy - SPR.stand.length * PX * 1.5,
+                size: 12,
+                pulse: 0
+            };
+        }
+
+        /* ── Particles ── */
+        function burst(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.8) * 5,
+                    life: 20 + Math.random() * 15,
+                    color, size: 2 + Math.random() * 3,
+                });
+            }
+        }
+
+        /* ── Draw star shape ── */
+        function drawStar(cx, cy, r, color, glow) {
+            if (glow) {
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 12 + Math.sin(frame * 0.1) * 6;
+            }
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
+                const a2 = a + 2 * Math.PI / 5;
+                ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+                ctx.lineTo(cx + Math.cos(a2) * r * 0.4, cy + Math.sin(a2) * r * 0.4);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        /* ── Collision detection (forgiving hitbox) ── */
+        function collides(ax, ay, aw, ah, bx, by, bw, bh) {
+            const shrink = 4; // forgiveness pixels
+            return ax + shrink < bx + bw - shrink &&
+                   ax + aw - shrink > bx + shrink &&
+                   ay + shrink < by + bh - shrink &&
+                   ay + ah - shrink > by + shrink;
+        }
+
+        /* ── Start / Reset ── */
+        function startGame() {
+            state = 'running';
+            score = 0;
+            speed = 4;
+            frame = 0;
+            obstacles = [];
+            particles = [];
+            starObj = null;
+            spawnTimer = 60;
+            starTimer = 60 * 50; // first star after ~50 seconds
+            resetChar();
+            startMusic();
+        }
+
+        function gameOver() {
+            state = 'over';
+            sfx(200, 0.3, 'sawtooth', 0.1);
+            sfx(150, 0.4, 'sawtooth', 0.08);
+            if (score > hiScore) {
+                hiScore = score;
+                localStorage.setItem('agentRunnerHi', hiScore);
+            }
+            stopMusic();
+            invincible = false;
+        }
+
+        /* ── Input ── */
+        function doJump() {
+            if (state === 'idle' || state === 'over') { startGame(); return; }
+            if (!jumping && !crouching) {
+                jumping = true;
+                charVY = JUMP_V;
+                sfx(440, 0.1, 'square', 0.06);
+            }
+        }
+        function doCrouch(down) {
+            if (state !== 'running') return;
+            if (down && !jumping) {
+                crouching = true;
+                charH = SPR.crouch.length * PX;
+                charY = groundY() - charH;
+            } else {
+                crouching = false;
+                charH = SPR.stand.length * PX;
+                charY = groundY() - charH;
+            }
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); doJump(); }
+            if (e.code === 'ArrowDown') { e.preventDefault(); doCrouch(true); }
+        });
+        document.addEventListener('keyup', e => {
+            if (e.code === 'ArrowDown') doCrouch(false);
+        });
+
+        // Touch controls
+        wrap.addEventListener('touchstart', e => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = wrap.getBoundingClientRect();
+            const relY = (touch.clientY - rect.top) / rect.height;
+            if (relY < 0.5) doJump(); else doCrouch(true);
+        }, { passive: false });
+        wrap.addEventListener('touchend', e => { doCrouch(false); });
+        wrap.addEventListener('click', e => {
+            if (e.target.closest('.game-mute-btn')) return;
+            if (state === 'idle' || state === 'over') doJump();
+        });
+
+        /* ── Update ── */
+        function update() {
+            if (state !== 'running') return;
+            frame++;
+            score = Math.floor(frame / 4);
+
+            // Speed up every ~10 seconds (600 frames)
+            speed = Math.min(12, 4 + Math.floor(frame / 600) * 0.5);
+
+            // Character physics
+            if (jumping) {
+                charVY += GRAVITY;
+                charY += charVY;
+                if (charY >= groundY() - charH) {
+                    charY = groundY() - charH;
+                    charVY = 0;
+                    jumping = false;
+                }
+            }
+
+            // Invincibility timer
+            if (invincible) {
+                invTimer--;
+                if (invTimer <= 0) deactivateStar();
+            }
+
+            // Move obstacles
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= speed;
+                if (obstacles[i].x + obstacles[i].w < -20) { obstacles.splice(i, 1); continue; }
+
+                // Collision
+                if (collides(charX, charY, charW, charH, obstacles[i].x, obstacles[i].y, obstacles[i].w, obstacles[i].h)) {
+                    if (invincible) {
+                        burst(obstacles[i].x + obstacles[i].w/2, obstacles[i].y + obstacles[i].h/2, '#D97757', 8);
+                        obstacles.splice(i, 1);
+                    } else {
+                        gameOver();
+                        return;
+                    }
+                }
+            }
+
+            // Move star
+            if (starObj) {
+                starObj.x -= speed;
+                starObj.pulse += 0.08;
+                if (starObj.x < -30) { starObj = null; }
+                else {
+                    const sr = starObj.size;
+                    if (collides(charX, charY, charW, charH, starObj.x - sr, starObj.y - sr, sr*2, sr*2)) {
+                        burst(starObj.x, starObj.y, '#D97757', 12);
+                        sfx(660, 0.12, 'sine', 0.1);
+                        activateStar();
+                        starObj = null;
+                    }
+                }
+            }
+
+            // Spawn obstacles
+            spawnTimer--;
+            if (spawnTimer <= 0) {
+                spawnObstacle();
+                minSpawn = Math.max(40, 80 - Math.floor(frame / 300));
+                spawnTimer = minSpawn + Math.floor(Math.random() * 50);
+            }
+
+            // Spawn star (every ~45-60 seconds)
+            if (!starObj && !invincible) {
+                starTimer--;
+                if (starTimer <= 0) {
+                    spawnStar();
+                    starTimer = 60 * (45 + Math.random() * 15);
+                }
+            }
+
+            // Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2;
+                p.life--;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        /* ── Render ── */
+        function render() {
+            const w = W(), h = H(), gy = groundY();
+            const C = getColors();
+            resize();
+
+            // Background
+            ctx.fillStyle = C.bg;
+            ctx.fillRect(0, 0, w, h);
+
+            // Ground line
+            ctx.fillStyle = C.ground;
+            ctx.fillRect(0, gy, w, 1.5);
+
+            // Ground texture dots
+            ctx.fillStyle = C.dim;
+            for (let i = (frame * speed * 0.5) % 20 - 20; i < w; i += 20) {
+                ctx.fillRect(i, gy + 6, 2, 1);
+                ctx.fillRect(i + 10, gy + 12, 1, 1);
+            }
+
+            if (state === 'idle') {
+                // Start screen
+                ctx.fillStyle = C.fg;
+                ctx.font = "700 1.6rem 'Space Grotesk', sans-serif";
+                ctx.textAlign = 'center';
+                ctx.fillText('AI AGENT RUNNER', w/2, h * 0.35);
+                ctx.fillStyle = C.muted;
+                ctx.font = "0.85rem 'Space Grotesk', sans-serif";
+                ctx.fillText('Press SPACE or tap to start', w/2, h * 0.48);
+                ctx.font = "0.7rem 'JetBrains Mono', monospace";
+                ctx.fillText('↑ jump  ·  ↓ crouch', w/2, h * 0.58);
+                // Draw idle robot
+                const idleY = gy - SPR.stand.length * PX;
+                drawSprite(SPR.stand, w/2 - SPR.stand[0].length * PX / 2, idleY, PX, C.fg);
+                ctx.textAlign = 'start';
+                bar.textContent = hiScore > 0 ? 'high score: ' + hiScore : 'press space or tap to start';
+                return;
+            }
+
+            // Obstacles
+            obstacles.forEach(o => {
+                drawSprite(SPR[o.spr], o.x, o.y, o.scale, C.muted);
+            });
+
+            // Star
+            if (starObj) {
+                const pulse = 1 + Math.sin(starObj.pulse) * 0.2;
+                drawStar(starObj.x, starObj.y, starObj.size * pulse, C.fg, true);
+            }
+
+            // Character
+            let spr;
+            if (jumping) spr = SPR.jump;
+            else if (crouching) spr = SPR.crouch;
+            else spr = (Math.floor(frame / 6) % 2 === 0) ? SPR.stand : SPR.run2;
+
+            const charColor = invincible ? (Math.floor(frame / 3) % 2 === 0 ? C.fg : '#F0A882') : C.fg;
+
+            // Invincibility aura
+            if (invincible) {
+                ctx.fillStyle = 'rgba(217,119,87,0.12)';
+                ctx.beginPath();
+                ctx.arc(charX + charW/2, charY + charH/2, charW * 1.2 + Math.sin(frame * 0.15) * 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            drawSprite(spr, charX, charY, PX, charColor);
+
+            // Particles
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life / 30;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            });
+            ctx.globalAlpha = 1;
+
+            // Score
+            ctx.fillStyle = C.text;
+            ctx.font = "600 0.8rem 'JetBrains Mono', monospace";
+            ctx.textAlign = 'right';
+            ctx.fillText(String(score).padStart(5, '0'), w - 16, 24);
+            if (hiScore > 0) {
+                ctx.fillStyle = C.muted;
+                ctx.font = "0.6rem 'JetBrains Mono', monospace";
+                ctx.fillText('HI ' + String(hiScore).padStart(5, '0'), w - 16, 40);
+            }
+            ctx.textAlign = 'start';
+
+            // Invincibility bar
+            if (invincible) {
+                const barW = 60, barH = 4;
+                const barX = 16, barY = 20;
+                ctx.fillStyle = C.dim;
+                ctx.fillRect(barX, barY, barW, barH);
+                ctx.fillStyle = C.fg;
+                ctx.fillRect(barX, barY, barW * (invTimer / 600), barH);
+                drawStar(barX - 8, barY + 2, 5, C.fg, false);
+            }
+
+            bar.textContent = 'score: ' + score + (hiScore > 0 ? '  ·  hi: ' + hiScore : '');
+
+            if (state === 'over') {
+                // Game over overlay
+                ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = C.fg;
+                ctx.font = "700 1.5rem 'Space Grotesk', sans-serif";
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', w/2, h * 0.38);
+                ctx.fillStyle = '#fff';
+                ctx.font = "600 1rem 'JetBrains Mono', monospace";
+                ctx.fillText(String(score).padStart(5, '0'), w/2, h * 0.5);
+                if (score >= hiScore && score > 0) {
+                    ctx.fillStyle = C.fg;
+                    ctx.font = "0.7rem 'Space Grotesk', sans-serif";
+                    ctx.fillText('NEW HIGH SCORE!', w/2, h * 0.6);
+                }
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = "0.75rem 'Space Grotesk', sans-serif";
+                ctx.fillText('Tap or press SPACE to retry', w/2, h * 0.72);
+                ctx.textAlign = 'start';
+            }
+        }
+
+        /* ── Game loop ── */
+        function loop() {
+            update();
+            render();
+            requestAnimationFrame(loop);
+        }
+        resetChar();
+        loop();
     })();
     </script>
 
