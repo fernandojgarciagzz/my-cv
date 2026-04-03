@@ -1230,7 +1230,7 @@
         .game-canvas-wrap {
             position: relative;
             width: 100%;
-            height: 300px;
+            height: 420px;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
@@ -1273,19 +1273,25 @@
         /* Fullscreen game on mobile */
         .game-fullscreen {
             position: fixed !important;
-            inset: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100% !important;
+            height: 100vh !important;
+            height: 100dvh !important;
             z-index: 9999;
-            margin: 0;
+            margin: 0 !important;
             border: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;
+            display: flex;
+            flex-direction: column;
         }
         .game-fullscreen .game-canvas-wrap {
-            height: calc(100vh - 44px) !important;
-            height: calc(100dvh - 44px) !important;
+            flex: 1;
+            height: auto !important;
         }
         .game-fullscreen .game-toolbar {
             border-radius: 0;
+            flex-shrink: 0;
         }
         .game-fs-btn {
             display: none;
@@ -2907,17 +2913,36 @@
             if (e.code === 'ArrowDown') doCrouch(false);
         });
 
-        // Touch controls
+        // Touch controls — swipe up = jump, swipe down = crouch, tap = start/restart
+        let touchStartY = null;
+        const SWIPE_THRESHOLD = 20;
+
         wrap.addEventListener('touchstart', e => {
             e.preventDefault();
-            const touch = e.touches[0];
-            const rect = wrap.getBoundingClientRect();
-            const relY = (touch.clientY - rect.top) / rect.height;
-            if (relY < 0.5) doJump(); else doCrouch(true);
+            touchStartY = e.touches[0].clientY;
+            if (state === 'idle' || state === 'over') { doJump(); return; }
         }, { passive: false });
-        wrap.addEventListener('touchend', e => { doCrouch(false); });
+
+        wrap.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (touchStartY === null || state !== 'running') return;
+            const dy = e.touches[0].clientY - touchStartY;
+            if (dy < -SWIPE_THRESHOLD) {
+                doJump();
+                touchStartY = null;
+            } else if (dy > SWIPE_THRESHOLD) {
+                doCrouch(true);
+                touchStartY = null;
+            }
+        }, { passive: false });
+
+        wrap.addEventListener('touchend', e => {
+            touchStartY = null;
+            doCrouch(false);
+        });
+
         wrap.addEventListener('click', e => {
-            if (e.target.closest('.game-mute-btn')) return;
+            if (e.target.closest('.game-mute-btn') || e.target.closest('.game-fs-btn')) return;
             if (state === 'idle' || state === 'over') doJump();
         });
 
@@ -2968,7 +2993,7 @@
             if (starObj) {
                 starObj.x -= speed;
                 starObj.pulse += 0.08;
-                if (starObj.x < -30) { starObj = null; }
+                if (starObj.x < -30) { starObj.x = W() + 40; }
                 else {
                     const sr = starObj.size;
                     if (collides(charX, charY, charW, charH, starObj.x - sr, starObj.y - sr, sr*2, sr*2)) {
