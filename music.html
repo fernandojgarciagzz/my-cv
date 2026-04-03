@@ -909,13 +909,112 @@
             playerTime.textContent = '0:00';
         }
 
+        /* ── Generate vinyl artwork for MediaSession ── */
+        function generateArtwork(trackName) {
+            const size = 512;
+            const c = document.createElement('canvas');
+            c.width = size; c.height = size;
+            const ctx = c.getContext('2d');
+            const cx = size / 2, cy = size / 2, r = size / 2 - 4;
+
+            // background
+            ctx.fillStyle = '#160C06';
+            ctx.fillRect(0, 0, size, size);
+
+            // vinyl disc base
+            const discGrad = ctx.createConicGradient(0, cx, cy);
+            discGrad.addColorStop(0, '#1a1008');
+            discGrad.addColorStop(0.125, '#261a10');
+            discGrad.addColorStop(0.25, '#1a1008');
+            discGrad.addColorStop(0.375, '#2D1F14');
+            discGrad.addColorStop(0.5, '#1a1008');
+            discGrad.addColorStop(0.625, '#261a10');
+            discGrad.addColorStop(0.75, '#1a1008');
+            discGrad.addColorStop(0.875, '#2D1F14');
+            discGrad.addColorStop(1, '#1a1008');
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fillStyle = discGrad;
+            ctx.fill();
+
+            // grooves
+            for (let i = 0; i < 20; i++) {
+                const gr = r * (0.22 + i * 0.037);
+                ctx.beginPath();
+                ctx.arc(cx, cy, gr, 0, Math.PI * 2);
+                ctx.strokeStyle = i % 2 === 0 ? 'rgba(217,119,87,0.09)' : 'rgba(255,255,255,0.04)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
+            // center label
+            const lr = r * 0.16;
+            const labelGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, lr);
+            labelGrad.addColorStop(0, '#F0A882');
+            labelGrad.addColorStop(0.4, '#D97757');
+            labelGrad.addColorStop(0.8, '#C4633F');
+            labelGrad.addColorStop(1, '#A8502E');
+            ctx.beginPath();
+            ctx.arc(cx, cy, lr, 0, Math.PI * 2);
+            ctx.fillStyle = labelGrad;
+            ctx.fill();
+
+            // spindle hole
+            ctx.beginPath();
+            ctx.arc(cx, cy, lr * 0.12, 0, Math.PI * 2);
+            ctx.fillStyle = '#1a1008';
+            ctx.fill();
+
+            // sticker label
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(-3 * Math.PI / 180);
+            const maxW = r * 0.7;
+            let fontSize = 28;
+            ctx.font = '500 ' + fontSize + 'px "Covered By Your Grace", cursive';
+            while (ctx.measureText(trackName).width > maxW && fontSize > 12) {
+                fontSize--;
+                ctx.font = '500 ' + fontSize + 'px "Covered By Your Grace", cursive';
+            }
+            const tw = ctx.measureText(trackName).width;
+            const th = fontSize;
+            const px = 14, py = 6;
+            const sx = -tw / 2 - px;
+            const sy = lr + 16;
+
+            // sticker bg
+            ctx.fillStyle = '#F5E6D8';
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 6;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            const stickerW = tw + px * 2;
+            const stickerH = th + py * 2;
+            ctx.beginPath();
+            ctx.roundRect(sx, sy, stickerW, stickerH, 3);
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
+
+            // sticker text
+            ctx.fillStyle = '#2D1F14';
+            ctx.textBaseline = 'top';
+            ctx.fillText(trackName, -tw / 2, sy + py);
+            ctx.restore();
+
+            return c.toDataURL('image/png');
+        }
+
         function updateMediaSession(card) {
             if (!('mediaSession' in navigator)) return;
             const name = getTrackName(card);
+            const artworkUrl = generateArtwork(name);
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: name,
                 artist: 'Fernando García',
-                album: 'Roho'
+                album: 'Roho',
+                artwork: [
+                    { src: artworkUrl, sizes: '512x512', type: 'image/png' }
+                ]
             });
             navigator.mediaSession.setActionHandler('play', () => { audio.play(); paused = false; btnPlay.innerHTML = ICON_PAUSE; if (current) current.classList.add('playing'); });
             navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); paused = true; btnPlay.innerHTML = ICON_PLAY; if (current) current.classList.remove('playing'); });
@@ -1102,6 +1201,33 @@
             const pct = (e.clientX - rect.left) / rect.width;
             audio.currentTime = pct * audio.duration;
         });
+
+        /* ── Touch drag seek ── */
+        function addTouchSeek(el, fill) {
+            let dragging = false;
+            function seekFromTouch(e) {
+                if (!audio.duration) return;
+                const touch = e.touches[0];
+                const rect = el.getBoundingClientRect();
+                const pct = Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width));
+                audio.currentTime = pct * audio.duration;
+                fill.style.width = (pct * 100) + '%';
+            }
+            el.addEventListener('touchstart', e => {
+                dragging = true;
+                seekFromTouch(e);
+                e.preventDefault();
+            }, { passive: false });
+            el.addEventListener('touchmove', e => {
+                if (!dragging) return;
+                seekFromTouch(e);
+                e.preventDefault();
+            }, { passive: false });
+            el.addEventListener('touchend', () => { dragging = false; });
+            el.addEventListener('touchcancel', () => { dragging = false; });
+        }
+        addTouchSeek(progressWrap, progressFill);
+        addTouchSeek(expandedWrap, expandedFill);
 
         /* ── Mobile expand toggle ── */
         playerInner.addEventListener('click', e => {
