@@ -500,6 +500,8 @@
         // Star power track (plays over bg during invincibility)
         const starTrack = new Audio('Kuwa Hapa Sa.mp3');
         starTrack.volume = 0.5;
+        // Prevent starTrack from doing anything when it ends — it's only for star power
+        starTrack.addEventListener('ended', () => { starTrack.pause(); starTrack.currentTime = 80; });
         let savedBgTime = 0;
         let savedBgSrc = '';
 
@@ -519,19 +521,15 @@
             osc.stop(audioCtx.currentTime + dur);
         }
 
+        let starUnlocked = false;
         function startMusic() {
             if (muted) return;
             if (!musicStarted) {
                 // First time — start from beginning
                 bgMusic.currentTime = 0;
                 bgMusic.play().catch(() => {});
-                // Unlock starTrack for mobile — play silently then pause
-                starTrack.volume = 0;
-                starTrack.play().then(() => {
-                    starTrack.pause();
-                    starTrack.volume = 0.5;
-                    starTrack.currentTime = 0;
-                }).catch(() => {});
+                // Unlock starTrack for mobile — load only, don't play
+                starTrack.load();
                 musicStarted = true;
             } else if (bgMusic.paused) {
                 // Resume where it left off
@@ -554,11 +552,16 @@
             savedBgSrc = bgMusic.src;
             bgMusic.pause();
             if (!muted) {
+                starTrack.pause();
                 starTrack.currentTime = 80;
                 starTrack.volume = 0;
-                starTrack.play().catch(() => {});
-                let s = 0; const n = 15;
-                const iv = setInterval(() => { s++; starTrack.volume = Math.min(0.5, (s/n)*0.5); if (s>=n) clearInterval(iv); }, 30);
+                const playPromise = starTrack.play();
+                if (playPromise) {
+                    playPromise.then(() => {
+                        let s = 0; const n = 15;
+                        const iv = setInterval(() => { s++; starTrack.volume = Math.min(0.5, (s/n)*0.5); if (s>=n) clearInterval(iv); }, 30);
+                    }).catch(() => {});
+                }
             }
         }
 
