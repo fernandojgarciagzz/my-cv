@@ -525,6 +525,13 @@
                 // First time — start from beginning
                 bgMusic.currentTime = 0;
                 bgMusic.play().catch(() => {});
+                // Unlock starTrack for mobile — play silently then pause
+                starTrack.volume = 0;
+                starTrack.play().then(() => {
+                    starTrack.pause();
+                    starTrack.volume = 0.5;
+                    starTrack.currentTime = 0;
+                }).catch(() => {});
                 musicStarted = true;
             } else if (bgMusic.paused) {
                 // Resume where it left off
@@ -759,7 +766,8 @@
 
         wrap.addEventListener('touchend', e => {
             touchStartY = null;
-            doCrouch(false);
+            // Only uncrouch if actually crouching — don't interfere with jumps
+            if (crouching) doCrouch(false);
         });
 
         wrap.addEventListener('click', e => {
@@ -868,17 +876,21 @@
             }
 
             if (state === 'idle') {
+                const titleSize = Math.max(18, Math.min(32, w * 0.028));
+                const subSize = Math.max(12, Math.min(16, w * 0.014));
+                const hintSize = Math.max(10, Math.min(14, w * 0.012));
+                const handSize = Math.max(14, Math.min(22, w * 0.02));
+
                 ctx.fillStyle = C.fg;
-                ctx.font = "700 1.8rem 'Space Grotesk', sans-serif";
+                ctx.font = `700 ${titleSize}px 'Space Grotesk', sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.fillText('AI AGENT RUNNER', w/2, h * 0.3);
                 ctx.fillStyle = C.muted;
-                ctx.font = "0.9rem 'Space Grotesk', sans-serif";
+                ctx.font = `${subSize}px 'Space Grotesk', sans-serif`;
                 ctx.fillText('Press SPACE or tap to start', w/2, h * 0.42);
-                ctx.font = "0.75rem 'JetBrains Mono', monospace";
+                ctx.font = `${hintSize}px 'JetBrains Mono', monospace`;
                 ctx.fillText('\u2191 jump  \u00b7  \u2193 crouch', w/2, h * 0.52);
-                // Handwritten subtitle
-                ctx.font = "1.3rem 'Covered By Your Grace', cursive";
+                ctx.font = `${handSize}px 'Covered By Your Grace', cursive`;
                 ctx.fillStyle = C.fg;
                 ctx.globalAlpha = 0.5;
                 ctx.fillText('dodge, duck, survive', w/2, h * 0.62);
@@ -928,15 +940,19 @@
             });
             ctx.globalAlpha = 1;
 
-            // Score overlay
+            // Score overlay — scale with canvas size
+            const scoreFontSize = Math.max(14, Math.min(20, w * 0.018));
+            const hiFontSize = Math.max(10, Math.min(14, w * 0.013));
+            const pad = Math.max(12, w * 0.015);
+
             ctx.fillStyle = C.text;
-            ctx.font = "600 0.9rem 'JetBrains Mono', monospace";
+            ctx.font = `600 ${scoreFontSize}px 'JetBrains Mono', monospace`;
             ctx.textAlign = 'right';
-            ctx.fillText(String(score).padStart(5, '0'), w - 20, 30);
+            ctx.fillText(String(score).padStart(5, '0'), w - pad, scoreFontSize + 10);
             if (hiScore > 0) {
                 ctx.fillStyle = C.muted;
-                ctx.font = "0.65rem 'JetBrains Mono', monospace";
-                ctx.fillText('HI ' + String(hiScore).padStart(5, '0'), w - 20, 48);
+                ctx.font = `${hiFontSize}px 'JetBrains Mono', monospace`;
+                ctx.fillText('HI ' + String(hiScore).padStart(5, '0'), w - pad, scoreFontSize + hiFontSize + 16);
             }
             ctx.textAlign = 'start';
 
@@ -954,22 +970,26 @@
             bar.textContent = 'score: ' + score + (hiScore > 0 ? '  \u00b7  hi: ' + hiScore : '');
 
             if (state === 'over') {
+                const goTitleSize = Math.max(18, Math.min(32, w * 0.028));
+                const goScoreSize = Math.max(14, Math.min(22, w * 0.02));
+                const goSubSize = Math.max(10, Math.min(14, w * 0.012));
+
                 ctx.fillStyle = 'rgba(0,0,0,0.45)';
                 ctx.fillRect(0, 0, w, h);
                 ctx.fillStyle = C.fg;
-                ctx.font = "700 1.8rem 'Space Grotesk', sans-serif";
+                ctx.font = `700 ${goTitleSize}px 'Space Grotesk', sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.fillText('GAME OVER', w/2, h * 0.34);
                 ctx.fillStyle = '#fff';
-                ctx.font = "600 1.2rem 'JetBrains Mono', monospace";
+                ctx.font = `600 ${goScoreSize}px 'JetBrains Mono', monospace`;
                 ctx.fillText(String(score).padStart(5, '0'), w/2, h * 0.46);
                 if (score >= hiScore && score > 0) {
                     ctx.fillStyle = C.fg;
-                    ctx.font = "0.8rem 'Space Grotesk', sans-serif";
+                    ctx.font = `${goSubSize}px 'Space Grotesk', sans-serif`;
                     ctx.fillText('NEW HIGH SCORE!', w/2, h * 0.56);
                 }
                 ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                ctx.font = "0.8rem 'Space Grotesk', sans-serif";
+                ctx.font = `${goSubSize}px 'Space Grotesk', sans-serif`;
                 ctx.fillText('Tap or press SPACE to retry', w/2, h * 0.68);
                 ctx.textAlign = 'start';
             }
