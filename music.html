@@ -10,6 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&display=swap" rel="stylesheet">
     <style>
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
@@ -1261,6 +1267,22 @@
             btnRepeat.classList.toggle('repeat-one', repeatMode === 1);
         });
 
+    })();
+    </script>
+
+    <!-- Anti-copy protection -->
+    <script>
+    (function(){
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12') { e.preventDefault(); return; }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'u') { e.preventDefault(); return; }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); return; }
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) { e.preventDefault(); return; }
+        });
+        if (window.top !== window.self) { window.top.location = window.self.location; }
+        console.log('%c⚠ This site is protected. Unauthorized copying is prohibited.', 'color: #D97757; font-size: 16px; font-weight: bold;');
+        console.log('%c© Fernando García González — fernandogarciag.com', 'color: #0176D3; font-size: 12px;');
     })();
     </script>
 

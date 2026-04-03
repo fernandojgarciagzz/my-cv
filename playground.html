@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Playground — Fernando García</title>
+    <meta name="robots" content="noindex">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&display=swap" rel="stylesheet">
+    <style>
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg:        #FAF6F1;
+            --bg-2:      #F2EBE2;
+            --bg-card:   #EFE7DC;
+            --rust:      #D97757;
+            --rust-dark: #C4633F;
+            --rust-light:#F0A882;
+            --rust-dim:  rgba(217,119,87,0.15);
+            --rust-alpha:rgba(217,119,87,0.12);
+            --text:      #2D1A0E;
+            --text-2:    #7A5C48;
+            --text-3:    #A8866E;
+            --border:    rgba(217,119,87,0.2);
+            --nav-bg:    rgba(250,246,241,0.88);
+            --mono: 'JetBrains Mono', monospace;
+            --heading: 'Space Grotesk', sans-serif;
+            --body: 'Inter', sans-serif;
+            --hand: 'Covered By Your Grace', cursive;
+        }
+
+        .dark {
+            --bg:        #160C06;
+            --bg-2:      #1F1108;
+            --bg-card:   #2A1A0D;
+            --rust:      #D97757;
+            --rust-dark: #E8916E;
+            --rust-light:#F0A882;
+            --rust-dim:  rgba(217,119,87,0.12);
+            --rust-alpha:rgba(217,119,87,0.12);
+            --text:      #F2EAE0;
+            --text-2:    #C4A48A;
+            --text-3:    #896653;
+            --border:    rgba(217,119,87,0.18);
+            --nav-bg:    rgba(22,12,6,0.92);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
+            font-family: var(--body);
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.5s ease, color 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Nav ── */
+        nav {
+            position: relative;
+            z-index: 100;
+            background: var(--nav-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            transition: background 0.4s ease, border-color 0.4s ease;
+            flex-shrink: 0;
+        }
+        .nav-inner {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 1.2rem;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-back {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--text-2);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s ease;
+            letter-spacing: 0.02em;
+        }
+        .nav-back:hover { color: var(--rust); }
+        .nav-back svg { width: 14px; height: 14px; }
+        .nav-title {
+            font-family: var(--hand);
+            font-size: 1.6rem;
+            color: var(--rust);
+            letter-spacing: 0.01em;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nav-btn {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-2);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+            color: var(--text-3);
+            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        .nav-btn:hover { border-color: var(--rust); color: var(--rust); }
+        .nav-btn.active { background: var(--rust-dim); border-color: var(--rust); color: var(--rust); }
+
+        /* Sound wave icon (SVG inside button) */
+        .nav-btn svg {
+            width: 16px; height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        /* ── Game canvas — fills remaining space ── */
+        .game-area {
+            flex: 1;
+            position: relative;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+        }
+        .game-area canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ── Geometric Swahili pattern (from Roho) ── */
+        .geo-corner {
+            position: absolute;
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .geo-corner.top-left { top: 8px; left: 8px; }
+        .geo-corner.bottom-right { bottom: 8px; right: 8px; transform: rotate(180deg); }
+        .geo-corner .geo-diamond {
+            width: 8px; height: 8px;
+            background: var(--rust);
+            transform: rotate(45deg);
+            display: inline-block;
+            margin: 2px;
+        }
+        .geo-corner .geo-diamond.sm { width: 5px; height: 5px; }
+
+        /* ── Score bar at bottom ── */
+        .score-bar {
+            position: relative;
+            z-index: 10;
+            flex-shrink: 0;
+            padding: 0.4rem 1.2rem;
+            background: var(--bg-2);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            letter-spacing: 0.06em;
+            color: var(--text-3);
+            text-transform: uppercase;
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <a href="index.html" class="nav-back">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                portfolio
+            </a>
+            <span class="nav-title">Playground</span>
+            <div class="nav-controls">
+                <button class="nav-btn" id="muteBtn" aria-label="Toggle sound">
+                    <svg id="soundOn" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
+                    <svg id="soundOff" viewBox="0 0 24 24" style="display:none"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                </button>
+                <button class="nav-btn" id="darkToggle" aria-label="Toggle dark mode">&#x1F319;</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="game-area" id="gameArea">
+        <div class="geo-corner top-left">
+            <span class="geo-diamond sm"></span>
+            <span class="geo-diamond"></span>
+            <span class="geo-diamond sm"></span>
+        </div>
+        <div class="geo-corner bottom-right">
+            <span class="geo-diamond sm"></span>
+            <span class="geo-diamond"></span>
+            <span class="geo-diamond sm"></span>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div class="score-bar">
+        <span id="gameScoreBar">press space or tap to start</span>
+    </div>
+
+    <!-- Dark mode toggle -->
+    <script>
+    (function(){
+        const btn = document.getElementById('darkToggle');
+        const dark = localStorage.getItem('dark') === 'true';
+        if (dark) { document.body.classList.add('dark'); btn.innerHTML = '&#x2600;'; }
+        btn.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            btn.innerHTML = isDark ? '&#x2600;' : '&#x1F319;';
+            localStorage.setItem('dark', isDark);
+        });
+    })();
+    </script>
+
+    <!-- Anti-copy protection -->
+    <script>
+    (function(){
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12') { e.preventDefault(); return; }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'u') { e.preventDefault(); return; }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); return; }
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) { e.preventDefault(); return; }
+        });
+        if (window.top !== window.self) { window.top.location = window.self.location; }
+    })();
+    </script>
+
+    <!-- AI Agent Runner Game -->
+    <script>
+    (function() {
+        const wrap   = document.getElementById('gameArea');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx    = canvas.getContext('2d');
+        const bar    = document.getElementById('gameScoreBar');
+        const muteBtn = document.getElementById('muteBtn');
+        const soundOn = document.getElementById('soundOn');
+        const soundOff = document.getElementById('soundOff');
+
+        /* ── Theme colors — always warm/orange ── */
+        function getColors() {
+            const dark = document.body.classList.contains('dark');
+            return {
+                bg:      dark ? '#160C06' : '#FAF6F1',
+                fg:      '#D97757',
+                fgLight: '#F0A882',
+                fgAlpha: 'rgba(217,119,87,0.12)',
+                ground:  dark ? '#F2EAE0' : '#2D1A0E',
+                muted:   dark ? '#C4A48A' : '#A8866E',
+                dim:     dark ? '#2A1A0D' : '#EFE7DC',
+                text:    dark ? '#F2EAE0' : '#2D1A0E',
+                card:    dark ? '#2A1A0D' : '#FFFFFF',
+            };
+        }
+
+        /* ── Canvas sizing — fills game area ── */
+        function resize() {
+            const rect = wrap.getBoundingClientRect();
+            canvas.width  = rect.width * devicePixelRatio;
+            canvas.height = rect.height * devicePixelRatio;
+            ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        const W = () => wrap.clientWidth;
+        const H = () => wrap.clientHeight;
+        const GROUND_PCT = 0.80;
+
+        /* ── Pixel sprite helper ── */
+        function drawSprite(sprite, x, y, s, color) {
+            ctx.fillStyle = color;
+            for (let r = 0; r < sprite.length; r++)
+                for (let c = 0; c < sprite[r].length; c++)
+                    if (sprite[r][c] === 1)
+                        ctx.fillRect(x + c * s, y + r * s, s, s);
+        }
+
+        /* ── Sprites ── */
+        const SPR = {
+            stand: [
+                [0,0,0,0,1,1,0,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,0,1,1,0,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,0,1,0,0,1,0,0,0],
+                [0,0,1,1,0,0,1,1,0,0],
+                [0,0,1,1,0,0,1,1,0,0],
+            ],
+            run2: [
+                [0,0,0,0,1,1,0,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,0,1,1,0,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,0,0,0,1,0,0],
+                [0,1,1,0,0,0,0,1,1,0],
+                [0,1,0,0,0,0,0,0,1,0],
+            ],
+            crouch: [
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,0,1,1,0,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,1,1,0,0,0,0,1,1,0],
+                [0,1,0,0,0,0,0,0,1,0],
+            ],
+            jump: [
+                [0,0,0,0,1,1,0,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,0,1,1,0,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,0,1,0,0,1,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0],
+            ],
+            grill: [
+                [0,1,0,1,0,1,0,1,0,1,0,0],
+                [1,1,1,1,1,1,1,1,1,1,1,0],
+                [1,0,1,0,1,0,1,0,1,0,1,0],
+                [1,1,1,1,1,1,1,1,1,1,1,0],
+                [0,1,1,1,1,1,1,1,1,1,0,0],
+                [0,0,1,0,0,0,0,0,1,0,0,0],
+                [0,0,1,0,0,0,0,0,1,0,0,0],
+                [0,0,1,0,0,0,0,0,1,0,0,0],
+                [0,1,1,1,0,0,0,1,1,1,0,0],
+                [0,1,0,1,0,0,0,1,0,1,0,0],
+            ],
+            ball: [
+                [0,0,1,1,1,1,0,0],
+                [0,1,1,0,0,1,1,0],
+                [1,1,0,1,1,0,1,1],
+                [1,0,1,1,1,1,0,1],
+                [1,0,1,1,1,1,0,1],
+                [1,1,0,1,1,0,1,1],
+                [0,1,1,0,0,1,1,0],
+                [0,0,1,1,1,1,0,0],
+            ],
+            tent: [
+                [0,0,0,0,1,1,0,0,0,0],
+                [0,0,0,1,1,1,1,0,0,0],
+                [0,0,1,1,1,1,1,1,0,0],
+                [0,1,1,1,0,0,1,1,1,0],
+                [1,1,1,0,0,0,0,1,1,1],
+                [1,1,0,0,1,1,0,0,1,1],
+                [1,0,0,0,1,1,0,0,0,1],
+                [1,0,0,0,1,1,0,0,0,1],
+            ],
+            laptop: [
+                [0,1,1,1,1,1,1,1,1,0],
+                [0,1,0,1,0,1,0,0,1,0],
+                [0,1,0,0,1,0,1,0,1,0],
+                [0,1,0,1,0,0,0,1,1,0],
+                [0,1,1,1,1,1,1,1,1,0],
+                [1,1,1,1,1,1,1,1,1,1],
+                [0,1,1,1,1,1,1,1,1,0],
+            ],
+            book: [
+                [0,1,0,0,0,0,0,0,0,0,1,0],
+                [1,1,1,1,1,1,1,1,1,1,1,1],
+                [0,1,1,0,1,0,1,0,1,1,1,0],
+                [0,1,1,0,0,1,0,1,0,1,1,0],
+                [0,1,1,1,1,1,1,1,1,1,1,0],
+                [0,0,1,1,1,1,1,1,1,1,0,0],
+            ],
+            bug: [
+                [1,0,0,0,0,0,0,1],
+                [0,1,0,1,1,0,1,0],
+                [0,0,1,1,1,1,0,0],
+                [1,0,1,1,1,1,0,1],
+                [0,0,1,1,1,1,0,0],
+                [0,1,0,0,0,0,1,0],
+            ],
+            dash: [
+                [1,1,1,1,1,1,1,1,1,1],
+                [1,0,0,0,0,0,0,0,0,1],
+                [1,0,1,0,1,0,0,1,0,1],
+                [1,0,1,0,1,0,1,1,0,1],
+                [1,0,1,0,1,0,1,1,0,1],
+                [1,0,1,1,1,0,1,1,0,1],
+                [1,0,0,0,0,0,0,0,0,1],
+                [1,1,1,1,1,1,1,1,1,1],
+            ],
+            padel: [
+                [0,0,1,1,0,0],
+                [0,1,0,0,1,0],
+                [1,0,1,0,0,1],
+                [1,0,0,1,0,1],
+                [0,1,0,0,1,0],
+                [0,0,1,1,0,0],
+            ],
+        };
+
+        /* ── Obstacle templates ── */
+        const OBS_TEMPLATES = [
+            { name: 'grill',   spr: 'grill',  type: 'ground', scale: 3.5 },
+            { name: 'ball',    spr: 'ball',   type: 'ground', scale: 3   },
+            { name: 'tent',    spr: 'tent',   type: 'ground', scale: 3.5 },
+            { name: 'laptop',  spr: 'laptop', type: 'ground', scale: 3   },
+            { name: 'dash',    spr: 'dash',   type: 'ground', scale: 3   },
+            { name: 'padel',   spr: 'padel',  type: 'ground', scale: 3   },
+            { name: 'book',    spr: 'book',   type: 'air',    scale: 3   },
+            { name: 'bug',     spr: 'bug',    type: 'air',    scale: 3   },
+        ];
+
+        /* ── Game state ── */
+        const PX = 3;
+        let state = 'idle'; // idle | running | over
+        let score = 0, hiScore = parseInt(localStorage.getItem('agentRunnerHi')) || 0;
+        let speed = 3.5, frame = 0;
+        let obstacles = [], particles = [], starObj = null;
+
+        let charX, charY, charVY, charW, charH, jumping, crouching, invincible, invTimer;
+        const GRAVITY = 0.55, JUMP_V = -10.5;
+
+        function groundY() { return H() * GROUND_PCT; }
+
+        function resetChar() {
+            charX = W() * 0.12;
+            crouching = false;
+            jumping = false;
+            charW = SPR.stand[0].length * PX;
+            charH = SPR.stand.length * PX;
+            charY = groundY() - charH;
+            charVY = 0;
+            invincible = false;
+            invTimer = 0;
+        }
+
+        /* ── Audio — album playlist that persists across games ── */
+        let muted = false;
+        const ALBUM = ['Nashukuru.mp3', 'Kuwa Hapa Sa.mp3', 'Kuwa Hapa Sa V2.mp3', 'Tiririka.mp3'];
+        let trackIdx = 0;
+        let musicStarted = false;
+
+        const bgMusic = new Audio(ALBUM[0]);
+        bgMusic.volume = 0.5;
+
+        // When a track ends, play the next one
+        bgMusic.addEventListener('ended', () => {
+            trackIdx = (trackIdx + 1) % ALBUM.length;
+            bgMusic.src = ALBUM[trackIdx];
+            bgMusic.volume = 0.5;
+            if (!muted) bgMusic.play().catch(() => {});
+        });
+
+        // Star power track (plays over bg during invincibility)
+        const starTrack = new Audio('Kuwa Hapa Sa.mp3');
+        starTrack.volume = 0.5;
+        let savedBgTime = 0;
+        let savedBgSrc = '';
+
+        let audioCtx = null;
+        function sfx(freq, dur, type, vol) {
+            if (muted) return;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type || 'square';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(vol || 0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + dur);
+        }
+
+        function startMusic() {
+            if (muted) return;
+            if (!musicStarted) {
+                // First time — start from beginning
+                bgMusic.currentTime = 0;
+                bgMusic.play().catch(() => {});
+                musicStarted = true;
+            } else if (bgMusic.paused) {
+                // Resume where it left off
+                bgMusic.play().catch(() => {});
+            }
+        }
+        function pauseMusic() {
+            // Just pause — don't reset position
+            bgMusic.pause();
+            starTrack.pause();
+        }
+
+        function activateStar() {
+            invincible = true;
+            invTimer = 600;
+            sfx(880, 0.15, 'sine', 0.12);
+            sfx(1320, 0.2, 'sine', 0.1);
+            // Crossfade: save bg position, switch to star track
+            savedBgTime = bgMusic.currentTime;
+            savedBgSrc = bgMusic.src;
+            bgMusic.pause();
+            if (!muted) {
+                starTrack.currentTime = 80;
+                starTrack.volume = 0;
+                starTrack.play().catch(() => {});
+                let s = 0; const n = 15;
+                const iv = setInterval(() => { s++; starTrack.volume = Math.min(0.5, (s/n)*0.5); if (s>=n) clearInterval(iv); }, 30);
+            }
+        }
+
+        function deactivateStar() {
+            invincible = false;
+            let s = 0; const n = 20;
+            const iv = setInterval(() => {
+                s++;
+                starTrack.volume = Math.max(0, 0.5 * (1 - s/n));
+                if (s >= n) {
+                    clearInterval(iv);
+                    starTrack.pause();
+                    if (!muted) {
+                        bgMusic.currentTime = savedBgTime;
+                        bgMusic.volume = 0;
+                        bgMusic.play().catch(() => {});
+                        let s2 = 0;
+                        const iv2 = setInterval(() => { s2++; bgMusic.volume = Math.min(0.5, (s2/15)*0.5); if (s2>=15) clearInterval(iv2); }, 30);
+                    }
+                }
+            }, 50);
+        }
+
+        function updateMuteUI() {
+            soundOn.style.display = muted ? 'none' : 'block';
+            soundOff.style.display = muted ? 'block' : 'none';
+            muteBtn.classList.toggle('active', !muted);
+        }
+        updateMuteUI();
+
+        muteBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            muted = !muted;
+            updateMuteUI();
+            if (muted) { bgMusic.pause(); starTrack.pause(); }
+            else if (state === 'running') { bgMusic.play().catch(() => {}); }
+        });
+
+        /* ── Obstacle spawning ── */
+        let spawnTimer = 0, minSpawn = 90;
+
+        function spawnObstacle() {
+            const t = OBS_TEMPLATES[Math.floor(Math.random() * OBS_TEMPLATES.length)];
+            const spr = SPR[t.spr];
+            const sc = t.scale;
+            const w = spr[0].length * sc;
+            const h = spr.length * sc;
+            const gy = groundY();
+            let y;
+            if (t.type === 'ground') {
+                y = gy - h;
+            } else {
+                // Air obstacles overlap standing body but clear crouching body
+                // Standing height = 14*3 = 42px, crouching = 9*3 = 27px
+                // Place so bottom edge is above crouch height but overlaps standing torso
+                const standH = SPR.stand.length * PX;
+                const crouchH = SPR.crouch.length * PX;
+                // Bottom of obstacle should be between crouchH and standH from ground
+                const minY = gy - standH + 4;  // overlaps standing head/torso
+                const maxY = gy - crouchH - h;  // clears crouching robot
+                y = maxY + Math.random() * Math.max(0, minY - maxY);
+            }
+            obstacles.push({ spr: t.spr, x: W() + 20, y, w, h, scale: sc, type: t.type });
+        }
+
+        /* ── Star spawning ── */
+        let starTimer = 0;
+        function spawnStar() {
+            const gy = groundY();
+            starObj = {
+                x: W() + 40,
+                y: gy - SPR.stand.length * PX * 1.5,
+                size: 12,
+                pulse: 0
+            };
+        }
+
+        /* ── Particles ── */
+        function burst(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.8) * 5,
+                    life: 20 + Math.random() * 15,
+                    color, size: 2 + Math.random() * 3,
+                });
+            }
+        }
+
+        /* ── Draw star shape ── */
+        function drawStar(cx, cy, r, color, glow) {
+            if (glow) {
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 12 + Math.sin(frame * 0.1) * 6;
+            }
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
+                const a2 = a + 2 * Math.PI / 5;
+                ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+                ctx.lineTo(cx + Math.cos(a2) * r * 0.4, cy + Math.sin(a2) * r * 0.4);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        /* ── Collision (forgiving hitbox) ── */
+        function collides(ax, ay, aw, ah, bx, by, bw, bh) {
+            const shrink = 4;
+            return ax + shrink < bx + bw - shrink &&
+                   ax + aw - shrink > bx + shrink &&
+                   ay + shrink < by + bh - shrink &&
+                   ay + ah - shrink > by + shrink;
+        }
+
+        /* ── Start / Reset ── */
+        function startGame() {
+            state = 'running';
+            score = 0;
+            speed = 3.5;
+            frame = 0;
+            obstacles = [];
+            particles = [];
+            starObj = null;
+            spawnTimer = 70;
+            starTimer = 60 * 50;
+            resetChar();
+            startMusic();
+        }
+
+        function gameOver() {
+            state = 'over';
+            sfx(200, 0.3, 'sawtooth', 0.1);
+            sfx(150, 0.4, 'sawtooth', 0.08);
+            if (score > hiScore) {
+                hiScore = score;
+                localStorage.setItem('agentRunnerHi', hiScore);
+            }
+            // Music keeps playing — don't stop it
+            invincible = false;
+            // If star power was active, fade star track back to bg
+            if (starTrack && !starTrack.paused) {
+                deactivateStar();
+            }
+        }
+
+        /* ── Input ── */
+        function doJump() {
+            if (state === 'idle' || state === 'over') { startGame(); return; }
+            if (!jumping && !crouching) {
+                jumping = true;
+                charVY = JUMP_V;
+                sfx(440, 0.1, 'square', 0.06);
+            }
+        }
+        function doCrouch(down) {
+            if (state !== 'running') return;
+            if (down && !jumping) {
+                crouching = true;
+                charH = SPR.crouch.length * PX;
+                charY = groundY() - charH;
+            } else {
+                crouching = false;
+                charH = SPR.stand.length * PX;
+                charY = groundY() - charH;
+            }
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            // Any key starts the game when idle or game over
+            if (state === 'idle' || state === 'over') { e.preventDefault(); doJump(); return; }
+            if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); doJump(); }
+            if (e.code === 'ArrowDown') { e.preventDefault(); doCrouch(true); }
+        });
+        document.addEventListener('keyup', e => {
+            if (e.code === 'ArrowDown') doCrouch(false);
+        });
+
+        // Touch controls
+        let touchStartY = null;
+        const SWIPE_THRESHOLD = 20;
+
+        wrap.addEventListener('touchstart', e => {
+            e.preventDefault();
+            touchStartY = e.touches[0].clientY;
+            if (state === 'idle' || state === 'over') { doJump(); return; }
+        }, { passive: false });
+
+        wrap.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (touchStartY === null || state !== 'running') return;
+            const dy = e.touches[0].clientY - touchStartY;
+            if (dy < -SWIPE_THRESHOLD) {
+                doJump();
+                touchStartY = null;
+            } else if (dy > SWIPE_THRESHOLD) {
+                doCrouch(true);
+                touchStartY = null;
+            }
+        }, { passive: false });
+
+        wrap.addEventListener('touchend', e => {
+            touchStartY = null;
+            doCrouch(false);
+        });
+
+        wrap.addEventListener('click', e => {
+            if (state === 'idle' || state === 'over') doJump();
+        });
+
+        /* ── Update ── */
+        function update() {
+            if (state !== 'running') return;
+            frame++;
+            score = Math.floor(frame / 4);
+
+            // Gentler speed curve: +0.3 every ~15 seconds, max 9
+            speed = Math.min(9, 3.5 + Math.floor(frame / 900) * 0.3);
+
+            if (jumping) {
+                charVY += GRAVITY;
+                charY += charVY;
+                if (charY >= groundY() - charH) {
+                    charY = groundY() - charH;
+                    charVY = 0;
+                    jumping = false;
+                }
+            }
+
+            if (invincible) {
+                invTimer--;
+                if (invTimer <= 0) deactivateStar();
+            }
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= speed;
+                if (obstacles[i].x + obstacles[i].w < -20) { obstacles.splice(i, 1); continue; }
+
+                if (collides(charX, charY, charW, charH, obstacles[i].x, obstacles[i].y, obstacles[i].w, obstacles[i].h)) {
+                    if (invincible) {
+                        burst(obstacles[i].x + obstacles[i].w/2, obstacles[i].y + obstacles[i].h/2, getColors().fg, 8);
+                        obstacles.splice(i, 1);
+                    } else {
+                        gameOver();
+                        return;
+                    }
+                }
+            }
+
+            if (starObj) {
+                starObj.x -= speed;
+                starObj.pulse += 0.08;
+                if (starObj.x < -30) { starObj.x = W() + 40; }
+                else {
+                    const sr = starObj.size;
+                    if (collides(charX, charY, charW, charH, starObj.x - sr, starObj.y - sr, sr*2, sr*2)) {
+                        burst(starObj.x, starObj.y, getColors().fg, 12);
+                        sfx(660, 0.12, 'sine', 0.1);
+                        activateStar();
+                        starObj = null;
+                    }
+                }
+            }
+
+            // Spawn obstacles — gentler curve
+            spawnTimer--;
+            if (spawnTimer <= 0) {
+                spawnObstacle();
+                minSpawn = Math.max(50, 90 - Math.floor(frame / 500));
+                spawnTimer = minSpawn + Math.floor(Math.random() * 60);
+            }
+
+            if (!starObj && !invincible) {
+                starTimer--;
+                if (starTimer <= 0) {
+                    spawnStar();
+                    starTimer = 60 * (45 + Math.random() * 15);
+                }
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2;
+                p.life--;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        /* ── Render ── */
+        function render() {
+            const w = W(), h = H(), gy = groundY();
+            const C = getColors();
+            resize();
+
+            // Background
+            ctx.fillStyle = C.bg;
+            ctx.fillRect(0, 0, w, h);
+
+            // Ground line
+            ctx.fillStyle = C.ground;
+            ctx.fillRect(0, gy, w, 1.5);
+
+            // Ground texture dots
+            ctx.fillStyle = C.dim;
+            for (let i = (frame * speed * 0.5) % 20 - 20; i < w; i += 20) {
+                ctx.fillRect(i, gy + 6, 2, 1);
+                ctx.fillRect(i + 10, gy + 12, 1, 1);
+            }
+
+            if (state === 'idle') {
+                ctx.fillStyle = C.fg;
+                ctx.font = "700 1.8rem 'Space Grotesk', sans-serif";
+                ctx.textAlign = 'center';
+                ctx.fillText('AI AGENT RUNNER', w/2, h * 0.3);
+                ctx.fillStyle = C.muted;
+                ctx.font = "0.9rem 'Space Grotesk', sans-serif";
+                ctx.fillText('Press SPACE or tap to start', w/2, h * 0.42);
+                ctx.font = "0.75rem 'JetBrains Mono', monospace";
+                ctx.fillText('\u2191 jump  \u00b7  \u2193 crouch', w/2, h * 0.52);
+                // Handwritten subtitle
+                ctx.font = "1.3rem 'Covered By Your Grace', cursive";
+                ctx.fillStyle = C.fg;
+                ctx.globalAlpha = 0.5;
+                ctx.fillText('dodge, duck, survive', w/2, h * 0.62);
+                ctx.globalAlpha = 1;
+                // Draw idle robot
+                const idleY = gy - SPR.stand.length * PX;
+                drawSprite(SPR.stand, w/2 - SPR.stand[0].length * PX / 2, idleY, PX, C.fg);
+                ctx.textAlign = 'start';
+                bar.textContent = hiScore > 0 ? 'high score: ' + hiScore : 'press space or tap to start';
+                return;
+            }
+
+            // Obstacles
+            obstacles.forEach(o => {
+                drawSprite(SPR[o.spr], o.x, o.y, o.scale, C.muted);
+            });
+
+            // Star
+            if (starObj) {
+                const pulse = 1 + Math.sin(starObj.pulse) * 0.2;
+                drawStar(starObj.x, starObj.y, starObj.size * pulse, C.fg, true);
+            }
+
+            // Character
+            let spr;
+            if (jumping) spr = SPR.jump;
+            else if (crouching) spr = SPR.crouch;
+            else spr = (Math.floor(frame / 6) % 2 === 0) ? SPR.stand : SPR.run2;
+
+            const charColor = invincible ? (Math.floor(frame / 3) % 2 === 0 ? C.fg : C.fgLight) : C.fg;
+
+            // Invincibility aura
+            if (invincible) {
+                ctx.fillStyle = C.fgAlpha;
+                ctx.beginPath();
+                ctx.arc(charX + charW/2, charY + charH/2, charW * 1.2 + Math.sin(frame * 0.15) * 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            drawSprite(spr, charX, charY, PX, charColor);
+
+            // Particles
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life / 30;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            });
+            ctx.globalAlpha = 1;
+
+            // Score overlay
+            ctx.fillStyle = C.text;
+            ctx.font = "600 0.9rem 'JetBrains Mono', monospace";
+            ctx.textAlign = 'right';
+            ctx.fillText(String(score).padStart(5, '0'), w - 20, 30);
+            if (hiScore > 0) {
+                ctx.fillStyle = C.muted;
+                ctx.font = "0.65rem 'JetBrains Mono', monospace";
+                ctx.fillText('HI ' + String(hiScore).padStart(5, '0'), w - 20, 48);
+            }
+            ctx.textAlign = 'start';
+
+            // Invincibility bar
+            if (invincible) {
+                const barW = 70, barH = 5;
+                const barX = 20, barY = 26;
+                ctx.fillStyle = C.dim;
+                ctx.fillRect(barX, barY, barW, barH);
+                ctx.fillStyle = C.fg;
+                ctx.fillRect(barX, barY, barW * (invTimer / 600), barH);
+                drawStar(barX - 8, barY + 2, 6, C.fg, false);
+            }
+
+            bar.textContent = 'score: ' + score + (hiScore > 0 ? '  \u00b7  hi: ' + hiScore : '');
+
+            if (state === 'over') {
+                ctx.fillStyle = 'rgba(0,0,0,0.45)';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = C.fg;
+                ctx.font = "700 1.8rem 'Space Grotesk', sans-serif";
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', w/2, h * 0.34);
+                ctx.fillStyle = '#fff';
+                ctx.font = "600 1.2rem 'JetBrains Mono', monospace";
+                ctx.fillText(String(score).padStart(5, '0'), w/2, h * 0.46);
+                if (score >= hiScore && score > 0) {
+                    ctx.fillStyle = C.fg;
+                    ctx.font = "0.8rem 'Space Grotesk', sans-serif";
+                    ctx.fillText('NEW HIGH SCORE!', w/2, h * 0.56);
+                }
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = "0.8rem 'Space Grotesk', sans-serif";
+                ctx.fillText('Tap or press SPACE to retry', w/2, h * 0.68);
+                ctx.textAlign = 'start';
+            }
+        }
+
+        /* ── Game loop ── */
+        function loop() {
+            update();
+            render();
+            requestAnimationFrame(loop);
+        }
+        resetChar();
+        loop();
+    })();
+    </script>
+
+</body>
+</html>
