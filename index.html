@@ -1270,8 +1270,39 @@
             transition: color 0.2s, border-color 0.2s;
         }
         .game-mute-btn:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
+        /* Fullscreen game on mobile */
+        .game-fullscreen {
+            position: fixed !important;
+            inset: 0;
+            z-index: 9999;
+            margin: 0;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        .game-fullscreen .game-canvas-wrap {
+            height: calc(100vh - 44px) !important;
+            height: calc(100dvh - 44px) !important;
+        }
+        .game-fullscreen .game-toolbar {
+            border-radius: 0;
+        }
+        .game-fs-btn {
+            display: none;
+            width: 30px; height: 30px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            background: transparent;
+            cursor: pointer;
+            align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .game-fs-btn:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
         @media (max-width: 768px) {
             .game-canvas-wrap { height: 240px; }
+            .game-fs-btn { display: flex; }
         }
     </style>
 </head>
@@ -1790,6 +1821,7 @@
                     <span class="game-toolbar-left" id="gameScoreBar">press space or tap to start</span>
                     <div class="game-toolbar-right">
                         <button class="game-mute-btn" id="gameMuteBtn" aria-label="Mute">🔊</button>
+                        <button class="game-fs-btn" id="gameFsBtn" aria-label="Fullscreen">⛶</button>
                     </div>
                 </div>
             </div>
@@ -2413,6 +2445,26 @@
         const ctx    = canvas.getContext('2d');
         const bar    = document.getElementById('gameScoreBar');
         const muteBtn = document.getElementById('gameMuteBtn');
+        const fsBtn  = document.getElementById('gameFsBtn');
+        const gameWrap = document.querySelector('.game-wrap');
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+        function goFullscreen() {
+            gameWrap.classList.add('game-fullscreen');
+            fsBtn.textContent = '✕';
+            document.body.style.overflow = 'hidden';
+            setTimeout(resize, 50);
+        }
+        function exitFullscreen() {
+            gameWrap.classList.remove('game-fullscreen');
+            fsBtn.textContent = '⛶';
+            document.body.style.overflow = '';
+            setTimeout(resize, 50);
+        }
+        fsBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            gameWrap.classList.contains('game-fullscreen') ? exitFullscreen() : goFullscreen();
+        });
 
         /* ── Theme colors (read live from CSS) ── */
         function getColors() {
@@ -2798,6 +2850,7 @@
 
         /* ── Start / Reset ── */
         function startGame() {
+            if (isMobile && !gameWrap.classList.contains('game-fullscreen')) goFullscreen();
             state = 'running';
             score = 0;
             speed = 4;
