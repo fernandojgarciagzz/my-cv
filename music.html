@@ -379,16 +379,22 @@
             border-radius: 50%;
         }
         .back-title {
-            position: relative;
+            position: absolute;
             z-index: 2;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-3deg);
             font-family: var(--hand);
-            font-size: 1.05rem;
-            color: #F0A882;
+            font-size: 0.6rem;
+            color: #2D1F14;
             text-align: center;
-            line-height: 1.3;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
-            max-width: 70%;
+            white-space: nowrap;
             pointer-events: none;
+            background: linear-gradient(145deg, #F5E6D8, #EDD8C6);
+            padding: 0.15rem 0.45rem;
+            border-radius: 2px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.25);
+            line-height: 1.2;
         }
 
         /* Coming soon label */
@@ -661,9 +667,48 @@
                 </div>
             </div>
 
-            <!-- Tracks 03–08 — Coming Soon -->
-            <!-- Track 03 — Kuwa Hapa Sa V2 -->
-            <div class="vinyl-card" data-src="Kuwa Hapa Sa V2.mp3" data-track="03">
+            <!-- Track 03 — Tiririka -->
+            <div class="vinyl-card" data-src="Tiririka.mp3" data-track="03">
+                <div class="vinyl-flip">
+                    <div class="vinyl-inner">
+                        <div class="vinyl-face">
+                            <div class="vinyl-disc"></div>
+                        </div>
+                        <div class="vinyl-back-face">
+                            <div class="vinyl-disc"></div>
+                            <span class="back-title">Tiririka</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="track-info">
+                    <div class="track-num">03</div>
+                    <div class="track-name">Tiririka</div>
+                    <div class="track-status">▶ playing</div>
+                </div>
+            </div>
+
+            <!-- Track 04 — Nahukura Nafunguka -->
+            <div class="vinyl-card" data-src="Nahukura Nafunguka.mp3" data-track="04">
+                <div class="vinyl-flip">
+                    <div class="vinyl-inner">
+                        <div class="vinyl-face">
+                            <div class="vinyl-disc"></div>
+                        </div>
+                        <div class="vinyl-back-face">
+                            <div class="vinyl-disc"></div>
+                            <span class="back-title">Nahukura Nafunguka</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="track-info">
+                    <div class="track-num">04</div>
+                    <div class="track-name">Nahukura Nafunguka</div>
+                    <div class="track-status">▶ playing</div>
+                </div>
+            </div>
+
+            <!-- Track 05 — Kuwa Hapa Sa V2 -->
+            <div class="vinyl-card" data-src="Kuwa Hapa Sa V2.mp3" data-track="05">
                 <div class="vinyl-flip">
                     <div class="vinyl-inner">
                         <div class="vinyl-face">
@@ -676,18 +721,10 @@
                     </div>
                 </div>
                 <div class="track-info">
-                    <div class="track-num">03</div>
+                    <div class="track-num">05</div>
                     <div class="track-name">Kuwa Hapa Sa V2</div>
                     <div class="track-status">▶ playing</div>
                 </div>
-            </div>
-            <div class="vinyl-card coming-soon">
-                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
-                <div class="track-info"><div class="track-num">04</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
-            </div>
-            <div class="vinyl-card coming-soon">
-                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
-                <div class="track-info"><div class="track-num">05</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
             </div>
             <div class="vinyl-card coming-soon">
                 <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
@@ -696,10 +733,6 @@
             <div class="vinyl-card coming-soon">
                 <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
                 <div class="track-info"><div class="track-num">07</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
-            </div>
-            <div class="vinyl-card coming-soon">
-                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
-                <div class="track-info"><div class="track-num">08</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
             </div>
 
         </div>
