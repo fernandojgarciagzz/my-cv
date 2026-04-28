@@ -1026,7 +1026,13 @@
             navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); paused = true; btnPlay.innerHTML = ICON_PLAY; if (current) current.classList.remove('playing'); });
             navigator.mediaSession.setActionHandler('nexttrack', () => playNext());
             navigator.mediaSession.setActionHandler('previoustrack', () => playPrev());
-            navigator.mediaSession.setActionHandler('seekto', (d) => { if (d.seekTime != null) audio.currentTime = d.seekTime; });
+            navigator.mediaSession.setActionHandler('seekto', (d) => {
+                if (d.seekTime != null && d.fastSeek !== true) {
+                    // Only accept explicit user seeks — ignore stale OS position reports on resume
+                    const diff = Math.abs(audio.currentTime - d.seekTime);
+                    if (diff > 1) audio.currentTime = d.seekTime;
+                }
+            });
         }
 
         /* ── Fade ── */
@@ -1172,6 +1178,7 @@
         });
 
         /* ── Progress bar update ── */
+        let lastPositionSync = 0;
         audio.addEventListener('timeupdate', () => {
             if (!audio.duration) return;
             const pct = (audio.currentTime / audio.duration) * 100;
@@ -1180,8 +1187,10 @@
             playerTime.textContent = fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
             playerTimeCurrent.textContent = fmt(audio.currentTime);
             playerTimeTotal.textContent = fmt(audio.duration);
-            // update MediaSession position state for CarPlay scrubber
-            if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
+            // update MediaSession position state for CarPlay scrubber (throttled to ~1/sec)
+            const now = Date.now();
+            if ('mediaSession' in navigator && navigator.mediaSession.setPositionState && now - lastPositionSync > 1000) {
+                lastPositionSync = now;
                 try {
                     navigator.mediaSession.setPositionState({
                         duration: audio.duration,
