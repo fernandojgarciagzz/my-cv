@@ -116,15 +116,6 @@
         .reveal-d3 { transition-delay: 0.3s; }
         .reveal-d4 { transition-delay: 0.4s; }
 
-        /* --- CANVAS NODE NETWORK --- */
-        #nodeCanvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
         /* --- NAV --- */
         nav {
             position: fixed; top: 0; width: 100%; z-index: 100;
@@ -1281,9 +1272,6 @@
 </head>
 <body>
 
-    <!-- Animated node network background -->
-    <canvas id="nodeCanvas"></canvas>
-
     <!-- Scroll progress -->
     <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -1382,6 +1370,13 @@
             </div>
         </div>
     </header>
+
+    <!-- Agent showcase: sticky scroll-driven 3D morph -->
+    <section class="agent-showcase" id="agentShowcase">
+        <div class="agent-showcase-pin">
+            <canvas id="agentShowcaseCanvas"></canvas>
+        </div>
+    </section>
 
     <!-- Connector -->
     <div class="blueprint-connector">
@@ -1905,87 +1900,6 @@
                 spot.style.background = 'radial-gradient(circle 180px at ' + x + 'px ' + y + 'px, rgba(1,118,211,' + alpha + '), transparent)';
             });
         });
-
-        // --- ANIMATED NODE NETWORK BACKGROUND ---
-        const canvas = document.getElementById('nodeCanvas');
-        const ctx = canvas.getContext('2d');
-        let w, h, nodes = [], mouse = { x: -1000, y: -1000 };
-        const NODE_COUNT = 50;
-        const CONNECT_DIST = 180;
-        const MOUSE_DIST = 200;
-
-        function resize() {
-            w = canvas.width = window.innerWidth;
-            h = canvas.height = window.innerHeight;
-        }
-        resize();
-        window.addEventListener('resize', resize);
-
-        for (let i = 0; i < NODE_COUNT; i++) {
-            nodes.push({
-                x: Math.random() * w,
-                y: Math.random() * h,
-                vx: (Math.random() - 0.5) * 0.3,
-                vy: (Math.random() - 0.5) * 0.3,
-                r: Math.random() * 2 + 1.5
-            });
-        }
-
-        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
-
-        function drawNodes() {
-            ctx.clearRect(0, 0, w, h);
-            var isDark = document.body.classList.contains('dark');
-            var baseAlpha = isDark ? 0.2 : 0.12;
-            var lineAlpha = isDark ? 0.08 : 0.04;
-            var mouseAlpha = isDark ? 0.2 : 0.1;
-            var sy = window.scrollY * -0.05;
-
-            for (var i = 0; i < nodes.length; i++) {
-                var n = nodes[i];
-                n.x += n.vx;
-                n.y += n.vy;
-                if (n.x < 0 || n.x > w) n.vx *= -1;
-                if (n.y < 0 || n.y > h) n.vy *= -1;
-
-                ctx.beginPath();
-                ctx.arc(n.x, n.y + sy, n.r, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(1, 118, 211, ' + baseAlpha + ')';
-                ctx.fill();
-            }
-
-            for (var i = 0; i < nodes.length; i++) {
-                for (var j = i + 1; j < nodes.length; j++) {
-                    var dx = nodes[i].x - nodes[j].x;
-                    var dy = nodes[i].y - nodes[j].y;
-                    var dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < CONNECT_DIST) {
-                        var a = (1 - dist / CONNECT_DIST) * lineAlpha;
-                        ctx.beginPath();
-                        ctx.moveTo(nodes[i].x, nodes[i].y + sy);
-                        ctx.lineTo(nodes[j].x, nodes[j].y + sy);
-                        ctx.strokeStyle = 'rgba(1, 118, 211, ' + a + ')';
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-                    }
-                }
-                var mdx = nodes[i].x - mouse.x;
-                var mdy = nodes[i].y - (mouse.y + window.scrollY * 0.05);
-                var mDist = Math.sqrt(mdx * mdx + mdy * mdy);
-                if (mDist < MOUSE_DIST) {
-                    var a = (1 - mDist / MOUSE_DIST) * mouseAlpha;
-                    ctx.beginPath();
-                    ctx.moveTo(nodes[i].x, nodes[i].y + sy);
-                    ctx.lineTo(mouse.x, mouse.y);
-                    ctx.strokeStyle = 'rgba(1, 118, 211, ' + a + ')';
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-                }
-            }
-
-            requestAnimationFrame(drawNodes);
-        }
-        drawNodes();
 
     })();
     </script>
@@ -2711,6 +2625,12 @@
         observer.observe(container, { attributes: true, attributeFilter: ['class'] });
     })();
     </script>
+
+    <!-- Three.js node graph background -->
+    <script src="assets/js/animations.js"></script>
+
+    <!-- Agent showcase morph -->
+    <script src="assets/js/showcase.js"></script>
 
 </body>
 </html>
