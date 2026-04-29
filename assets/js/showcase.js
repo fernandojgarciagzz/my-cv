@@ -307,9 +307,12 @@
         const pointMat = new THREE.PointsMaterial({
             size: 0.19,
             map: glowTex,
-            color: 0x0176d3,
+            color: 0x3B5775,
             transparent: true,
-            blending: THREE.AdditiveBlending,
+            // NormalBlending so each dot composites as a real slate mark
+            // against the page (not an additive glow that washes out toward
+            // white). This is what makes the dots read as "darker."
+            blending: THREE.NormalBlending,
             depthWrite: false,
             sizeAttenuation: true,
             opacity: 1.0
@@ -320,12 +323,21 @@
 
         function updateColors() {
             const styles = getComputedStyle(document.body);
-            const blue = (styles.getPropertyValue('--sf-blue') || '#0176D3').trim();
+            const blue = (styles.getPropertyValue('--sf-blue') || '#3B5775').trim();
             try {
                 pointMat.color.set(blue);
-                // Darken slightly so the figure reads as a deeper, more
-                // saturated blue against the background.
-                pointMat.color.multiplyScalar(0.82);
+                // Light mode: darken further so the dots read as deep slate
+                // ink against the cement bg. Dark mode: leave the accent
+                // closer to its lifted variant so the figure stays visible
+                // against the dark page.
+                const isDarkBg = document.body.classList.contains('dark');
+                const hsl = {};
+                pointMat.color.getHSL(hsl);
+                pointMat.color.setHSL(
+                    hsl.h,
+                    hsl.s * 0.65,
+                    isDarkBg ? hsl.l * 1.05 : hsl.l * 0.75
+                );
             } catch (e) { /* keep prev */ }
             const isDark = document.body.classList.contains('dark');
             pointMat.opacity = isDark ? 1.0 : 0.95;

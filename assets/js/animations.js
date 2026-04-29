@@ -101,7 +101,7 @@
             transparent: true,
             depthWrite: false,
             uniforms: {
-                uColor:      { value: new THREE.Color(0x0176d3) },
+                uColor:      { value: new THREE.Color(0x3B5775) },
                 uOpacity:    { value: 0.22 },
                 uPulse:      { value: 0.0 },
                 uRipple:     { value: 0.0 },
@@ -152,15 +152,14 @@
 
         function updateColors() {
             const styles = getComputedStyle(document.body);
-            const blue = (styles.getPropertyValue('--sf-blue') || '#0176D3').trim();
+            const blue = (styles.getPropertyValue('--sf-blue') || '#3B5775').trim();
             const isDark = document.body.classList.contains('dark');
             try {
                 gridMat.uniforms.uColor.value.set(blue);
-                gridMat.uniforms.uColor.value.multiplyScalar(0.82);
             } catch (e) { /* invalid color string — keep previous */ }
             // Slightly lower base opacity in light mode so it doesn't
             // dominate the page; keep it readable in dark.
-            gridMat.uniforms.uOpacity.value = isDark ? 0.26 : 0.18;
+            gridMat.uniforms.uOpacity.value = isDark ? 0.30 : 0.24;
         }
         updateColors();
 

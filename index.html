@@ -29,39 +29,40 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --sf-blue: #0176D3;
-            --sf-blue-dark: #014486;
-            --sf-blue-light: #00A1E0;
-            --sf-cyan: #1AD6FF;
-            --sf-navy: #032D60;
-            --sf-green: #2E844A;
-            --sf-green-light: #45C65A;
+            /* Cool concrete + slate palette — muted, premium, less royal-blue */
+            --sf-blue: #3B5775;
+            --sf-blue-dark: #243A52;
+            --sf-blue-light: #5B7895;
+            --sf-cyan: #7EA0BB;
+            --sf-navy: #1A2A3D;
+            --sf-green: #4A6F58;
+            --sf-green-light: #6B8F77;
 
-            --bg-primary: #F8FAFC;
-            --bg-secondary: #F1F5F9;
-            --bg-tertiary: #E8EDF2;
-            --border: #E2E8F0;
-            --border-light: #F1F5F9;
-            --text-primary: #0F172A;
-            --text-secondary: #475569;
-            --text-tertiary: #64748B;
-            --text-muted: #94A3B8;
-            --card-bg: #FFFFFF;
-            --nav-bg: rgba(255,255,255,0.88);
-            --node-color: rgba(1, 118, 211, 0.08);
-            --node-line: rgba(1, 118, 211, 0.06);
+            --bg-primary: #E5E5E7;
+            --bg-secondary: #EFEFF1;
+            --bg-tertiary: #D8D8DB;
+            --border: #CCCDD0;
+            --border-light: #E0E0E3;
+            --text-primary: #2D3748;
+            --text-secondary: #4A5568;
+            --text-tertiary: #5D6779;
+            --text-muted: #8A92A0;
+            --card-bg: #FAFAFB;
+            --nav-bg: rgba(229,229,231,0.85);
+            --node-color: rgba(59, 87, 117, 0.10);
+            --node-line: rgba(59, 87, 117, 0.07);
             --dot-active: var(--sf-blue);
-            --dot-inactive: #CBD5E1;
-            --toggle-bg: #F1F5F9;
-            --toggle-icon: #F59E0B;
-            --footer-bg: #0F172A;
-            --footer-text: #64748B;
+            --dot-inactive: #B8BABE;
+            --toggle-bg: #DCDCE0;
+            --toggle-icon: #B8860B;
+            --footer-bg: #1F2731;
+            --footer-text: #8A92A0;
 
             --radius: 12px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 20px rgba(1,118,211,0.08);
-            --shadow-lg: 0 12px 40px rgba(1,118,211,0.12);
-            --shadow-card: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+            --shadow-md: 0 4px 20px rgba(59,87,117,0.10);
+            --shadow-lg: 0 12px 40px rgba(59,87,117,0.14);
+            --shadow-card: 0 1px 3px rgba(0,0,0,0.05);
 
             --mono: 'JetBrains Mono', monospace;
             --heading: 'Space Grotesk', sans-serif;
@@ -69,28 +70,35 @@
         }
 
         .dark {
-            --bg-primary: #0F172A;
-            --bg-secondary: #1E293B;
-            --bg-tertiary: #334155;
-            --border: #334155;
-            --border-light: #1E293B;
-            --text-primary: #F1F5F9;
-            --text-secondary: #CBD5E1;
-            --text-tertiary: #94A3B8;
-            --text-muted: #64748B;
-            --card-bg: #1E293B;
-            --nav-bg: rgba(15, 23, 42, 0.92);
-            --node-color: rgba(1, 118, 211, 0.12);
-            --node-line: rgba(1, 118, 211, 0.08);
-            --dot-inactive: #475569;
-            --toggle-bg: #334155;
+            /* Cement-coordinated dark mode — deep slate concrete with a
+             * lifted accent so the slate blue still reads on dark bg */
+            --sf-blue: #6B8AAD;
+            --sf-blue-dark: #4A6481;
+            --sf-blue-light: #8BA9C8;
+            --sf-cyan: #A4BFD4;
+
+            --bg-primary: #1A1F26;
+            --bg-secondary: #252B33;
+            --bg-tertiary: #2F3741;
+            --border: #3A4250;
+            --border-light: #2A3038;
+            --text-primary: #E2E8F0;
+            --text-secondary: #B0BAC8;
+            --text-tertiary: #8995A5;
+            --text-muted: #6B7585;
+            --card-bg: #252B33;
+            --nav-bg: rgba(26, 31, 38, 0.92);
+            --node-color: rgba(107, 138, 173, 0.14);
+            --node-line: rgba(107, 138, 173, 0.10);
+            --dot-inactive: #4A5260;
+            --toggle-bg: #374050;
             --toggle-icon: #818CF8;
-            --footer-bg: #0B1120;
-            --footer-text: #475569;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
-            --shadow-md: 0 4px 20px rgba(0,0,0,0.25);
-            --shadow-lg: 0 12px 40px rgba(0,0,0,0.3);
-            --shadow-card: 0 1px 3px rgba(0,0,0,0.3);
+            --footer-bg: #141821;
+            --footer-text: #6B7585;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.25);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.30);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.35);
+            --shadow-card: 0 1px 3px rgba(0,0,0,0.35);
         }
 
         html { scroll-behavior: smooth; }
@@ -337,12 +345,17 @@
             to { transform: rotateY(180deg) rotate(360deg); }
         }
 
-        /* Shift Spline 3D background to warm tones */
-        .vinyl-active .photo-bg-3d iframe {
-            filter: sepia(0.6) hue-rotate(5deg) saturate(1.5) brightness(0.9);
+        /* Default: desaturate + cool-shift Spline so it harmonizes with the
+         * concrete + slate palette. Vinyl mode overrides with warm sepia. */
+        .photo-bg-3d iframe {
+            filter: saturate(0.42) hue-rotate(-12deg) brightness(0.88) contrast(1.05);
             transition: filter 1s ease;
         }
-        .photo-bg-3d iframe {
+        .dark .photo-bg-3d iframe {
+            filter: saturate(0.38) hue-rotate(-15deg) brightness(0.72) contrast(1.05);
+        }
+        .vinyl-active .photo-bg-3d iframe {
+            filter: sepia(0.6) hue-rotate(5deg) saturate(1.5) brightness(0.9);
             transition: filter 1s ease;
         }
 
@@ -602,14 +615,14 @@
         }
         .btn-primary {
             background: var(--sf-blue); color: #FFFFFF; border: none;
-            box-shadow: 0 2px 8px rgba(1,118,211,0.25);
+            box-shadow: 0 2px 8px rgba(59,87,117,0.25);
         }
-        .btn-primary:hover { box-shadow: 0 4px 20px rgba(1,118,211,0.35); transform: translateY(-2px); }
+        .btn-primary:hover { box-shadow: 0 4px 20px rgba(59,87,117,0.35); transform: translateY(-2px); }
         .btn-outline {
             background: transparent; color: var(--sf-blue);
             border: 1.5px solid var(--border);
         }
-        .btn-outline:hover { border-color: var(--sf-blue); background: rgba(1,118,211,0.04); }
+        .btn-outline:hover { border-color: var(--sf-blue); background: rgba(59,87,117,0.04); }
 
         /* Profile photo */
         .profile-photo {
@@ -739,7 +752,7 @@
         .stat-card:hover {
             transform: translateY(-3px);
             box-shadow: var(--shadow-md);
-            border-color: rgba(1, 118, 211, 0.25);
+            border-color: rgba(59, 87, 117, 0.25);
         }
         .stat-value {
             font-family: var(--heading);
@@ -802,7 +815,7 @@
             display: flex; align-items: center; justify-content: center;
         }
         .timeline-dot.active {
-            background: rgba(1, 118, 211, 0.15);
+            background: rgba(59, 87, 117, 0.15);
             border: 2px solid var(--sf-blue);
         }
         .timeline-dot.active::after {
@@ -837,7 +850,7 @@
             font-size: 0.55rem; font-weight: 600;
             letter-spacing: 0.06em; text-transform: uppercase;
             padding: 0.15rem 0.5rem; border-radius: 4px;
-            background: rgba(1, 118, 211, 0.08); color: var(--sf-blue);
+            background: rgba(59, 87, 117, 0.08); color: var(--sf-blue);
         }
         .workflow-status {
             font-family: var(--mono); font-size: 0.55rem;
@@ -876,7 +889,7 @@
         .agent-card:hover {
             transform: translateY(-3px);
             box-shadow: var(--shadow-md);
-            border-color: rgba(1, 118, 211, 0.25);
+            border-color: rgba(59, 87, 117, 0.25);
         }
         .agent-card::before {
             content: '';
@@ -905,7 +918,7 @@
         .agent-card-inner, .edu-card-inner { position: relative; z-index: 1; }
         .agent-icon {
             width: 36px; height: 36px; border-radius: 8px;
-            background: rgba(1, 118, 211, 0.08);
+            background: rgba(59, 87, 117, 0.08);
             display: flex; align-items: center; justify-content: center;
             color: var(--sf-blue); font-size: 0.85rem; margin-bottom: 1rem;
         }
@@ -997,7 +1010,7 @@
         .edu-card:hover {
             transform: translateY(-3px);
             box-shadow: var(--shadow-md);
-            border-color: rgba(1, 118, 211, 0.25);
+            border-color: rgba(59, 87, 117, 0.25);
         }
         .edu-card h3 {
             font-family: var(--heading);
@@ -1031,7 +1044,7 @@
         .hobby-card:hover {
             border-color: var(--sf-blue);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(1, 118, 211, 0.08);
+            box-shadow: 0 6px 20px rgba(59, 87, 117, 0.08);
         }
         .hobby-card-icon {
             width: 38px; height: 38px; flex-shrink: 0;
@@ -1071,6 +1084,71 @@
 
         @media (max-width: 600px) {
             .hobbies-featured { grid-template-columns: 1fr; }
+        }
+
+        /* --- DASHBOARDS --- */
+        .dashboard-list {
+            display: grid; grid-template-columns: 1fr; gap: 1rem;
+        }
+        .dashboard-card {
+            display: flex; align-items: center; gap: 1.5rem;
+            text-decoration: none; color: inherit;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.75rem;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            box-shadow: var(--shadow-card);
+        }
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--sf-blue);
+        }
+        .dashboard-card-content { flex: 1; min-width: 0; }
+        .dashboard-card h3 {
+            font-family: var(--heading);
+            font-size: 1.1rem; font-weight: 600;
+            color: var(--text-primary); margin-bottom: 0.4rem;
+        }
+        .dashboard-card p {
+            font-size: 0.85rem; color: var(--text-tertiary);
+            line-height: 1.6; max-width: 580px;
+        }
+        .dashboard-tags {
+            display: flex; flex-wrap: wrap; gap: 0.4rem;
+            margin-top: 0.85rem;
+        }
+        .dashboard-tag {
+            font-family: var(--mono); font-size: 0.6rem; font-weight: 500;
+            padding: 0.18rem 0.55rem; border-radius: 50px;
+            background: rgba(59, 87, 117, 0.08); color: var(--sf-blue);
+            letter-spacing: 0.04em;
+        }
+        .dark .dashboard-tag { background: rgba(107, 138, 173, 0.14); }
+        .dashboard-status {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-family: var(--mono); font-size: 0.62rem;
+            color: #2E844A; margin-top: 0.7rem;
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .dark .dashboard-status { color: #45C65A; }
+        .dashboard-status-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #2E844A;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        .dark .dashboard-status-dot { background: #45C65A; }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .dashboard-card-arrow {
+            font-size: 0.95rem; color: var(--text-muted);
+            transition: transform 0.25s ease, color 0.25s ease;
+            flex-shrink: 0;
+        }
+        .dashboard-card:hover .dashboard-card-arrow {
+            transform: translate(3px, -3px);
+            color: var(--sf-blue);
         }
 
         /* --- BOOK CHAT AGENT --- */
@@ -1130,7 +1208,7 @@
         @keyframes chatIn { to { opacity: 1; transform: translateY(0); } }
         .chat-av {
             width: 26px; height: 26px; border-radius: 50%;
-            background: rgba(1,118,211,0.1);
+            background: rgba(59,87,117,0.1);
             display: flex; align-items: center; justify-content: center;
             font-size: 0.65rem; flex-shrink: 0; color: var(--sf-blue);
         }
@@ -1201,38 +1279,13 @@
         }
         .book-chat-btn:hover {
             background: var(--sf-blue-light); transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(1,118,211,0.3);
+            box-shadow: 0 4px 12px rgba(59,87,117,0.3);
         }
         .book-chat-btn:disabled {
             opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
         }
         .chat-row.faded { opacity: 0.4; transition: opacity 0.4s; }
         .chat-row.faded:hover, .chat-typing.faded:hover { opacity: 1; }
-
-        /* --- SIDE DOTS --- */
-        .side-dots {
-            position: fixed; right: 1.25rem; top: 50%;
-            transform: translateY(-50%); z-index: 90;
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        .side-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: var(--dot-inactive);
-            cursor: pointer; transition: all 0.3s ease;
-            border: none; padding: 0; position: relative;
-        }
-        .side-dot.active {
-            background: var(--dot-active);
-            box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.15);
-        }
-        .side-dot-label {
-            position: absolute; right: 18px; top: 50%;
-            transform: translateY(-50%);
-            font-family: var(--mono); font-size: 0.58rem; font-weight: 500;
-            color: var(--text-muted); white-space: nowrap;
-            opacity: 0; pointer-events: none; transition: opacity 0.2s;
-        }
-        .side-dot:hover .side-dot-label { opacity: 1; }
 
         /* --- FOOTER --- */
         footer {
@@ -1302,7 +1355,6 @@
             .agent-grid { grid-template-columns: 1fr; }
             .agent-card::before, .agent-card::after { display: none; }
             .edu-grid { grid-template-columns: 1fr; }
-            .side-dots { display: none; }
             .skill-name { min-width: 0; width: 45%; flex-shrink: 0; font-size: 0.65rem; }
             .skill-row { gap: 0.5rem; }
             .book-chat {
@@ -1333,8 +1385,8 @@
                     <a href="#agents">skills</a>
                     <a href="#skills">tools</a>
                     <a href="#education">education</a>
+                    <a href="#dashboards">dashboards</a>
                     <a href="#contact">contact</a>
-                    <a href="dashboards.html">dashboards</a>
                 </div>
                 <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
                     <i class="fas fa-sun"></i>
@@ -1342,17 +1394,6 @@
             </div>
         </div>
     </nav>
-
-    <!-- Side dots -->
-    <div class="side-dots" id="sideDots">
-        <button class="side-dot active" data-target="hero"><span class="side-dot-label">Top</span></button>
-        <button class="side-dot" data-target="about"><span class="side-dot-label">About</span></button>
-        <button class="side-dot" data-target="experience"><span class="side-dot-label">Experience</span></button>
-        <button class="side-dot" data-target="agents"><span class="side-dot-label">Skills</span></button>
-        <button class="side-dot" data-target="skills"><span class="side-dot-label">Tools</span></button>
-        <button class="side-dot" data-target="education"><span class="side-dot-label">Education</span></button>
-        <button class="side-dot" data-target="contact"><span class="side-dot-label">Contact</span></button>
-    </div>
 
     <!-- HERO -->
     <header class="hero" id="hero">
@@ -1805,7 +1846,7 @@
                     </span>
                     <i class="fas fa-arrow-right hobby-card-arrow"></i>
                 </a>
-                <a class="hobby-card" id="musicTrigger" role="button" tabindex="0">
+                <a class="hobby-card" href="music.html">
                     <span class="hobby-card-icon"><i class="fas fa-music"></i></span>
                     <span class="hobby-card-text">
                         <span class="hobby-card-title">Music</span>
@@ -1824,6 +1865,45 @@
                 <span class="hobby-tag"><i class="fas fa-mountain"></i> Outdoors</span>
                 <span class="hobby-tag"><i class="fas fa-microchip"></i> AI</span>
                 <span class="hobby-tag"><i class="fas fa-spa"></i> Mindfulness</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connector -->
+    <div class="blueprint-connector">
+        <div class="connector-line">
+            <div class="connector-dash"></div>
+            <div class="connector-node"></div>
+            <span>live data</span>
+            <div class="connector-node"></div>
+            <div class="connector-dash"></div>
+        </div>
+    </div>
+
+    <!-- Dashboards -->
+    <section id="dashboards" class="bg-primary">
+        <div class="section-inner">
+            <p class="section-label reveal">// live_data</p>
+            <h2 class="section-title reveal">Dashboards</h2>
+            <p class="section-desc reveal">Live data projects I've built.</p>
+            <div class="dashboard-list reveal" style="margin-top: 2rem;">
+                <a href="https://ai-race-dashboard.onrender.com" target="_blank" rel="noopener" class="dashboard-card">
+                    <div class="dashboard-card-content">
+                        <h3>The AI Race</h3>
+                        <p>A live tracker of benchmarks, pricing, open-source downloads, and capabilities across the top AI companies.</p>
+                        <div class="dashboard-tags">
+                            <span class="dashboard-tag">Python</span>
+                            <span class="dashboard-tag">Dash</span>
+                            <span class="dashboard-tag">Plotly</span>
+                            <span class="dashboard-tag">Live Data</span>
+                        </div>
+                        <div class="dashboard-status">
+                            <span class="dashboard-status-dot"></span>
+                            live
+                        </div>
+                    </div>
+                    <i class="fas fa-arrow-up-right-from-square dashboard-card-arrow"></i>
+                </a>
             </div>
         </div>
     </section>
@@ -1926,25 +2006,6 @@
         }, { threshold: 0.25 });
         bars.forEach(b => barObs.observe(b));
 
-        // --- SIDE DOTS ---
-        const sectionIds = ['hero','about','experience','agents','skills','education','contact'];
-        const dots = document.querySelectorAll('.side-dot');
-        dots.forEach(d => d.addEventListener('click', () => {
-            const el = document.getElementById(d.dataset.target);
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }));
-        const dotObs = new IntersectionObserver((entries) => {
-            entries.forEach(e => {
-                if (e.isIntersecting) {
-                    dots.forEach(d => d.classList.toggle('active', d.dataset.target === e.target.id));
-                }
-            });
-        }, { threshold: 0.25, rootMargin: '-15% 0px -55% 0px' });
-        sectionIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) dotObs.observe(el);
-        });
-
         // --- SPOTLIGHT CARDS ---
         document.querySelectorAll('.magnetic').forEach(card => {
             const spot = document.createElement('div');
@@ -1957,7 +2018,7 @@
                 const y = e.clientY - rect.top;
                 const isDark = document.body.classList.contains('dark');
                 const alpha = isDark ? 0.12 : 0.08;
-                spot.style.background = 'radial-gradient(circle 180px at ' + x + 'px ' + y + 'px, rgba(1,118,211,' + alpha + '), transparent)';
+                spot.style.background = 'radial-gradient(circle 180px at ' + x + 'px ' + y + 'px, rgba(59,87,117,' + alpha + '), transparent)';
             });
         });
 
@@ -2342,17 +2403,6 @@
             playing = false;
         });
 
-        /* ── Music hobby tag trigger ── */
-        const musicTrigger = document.getElementById('musicTrigger');
-        if (musicTrigger) {
-            musicTrigger.addEventListener('click', () => {
-                const hero = document.getElementById('hero');
-                hero.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => {
-                    if (!playing) activate();
-                }, 700);
-            });
-        }
     })();
     </script>
 
@@ -2383,7 +2433,7 @@
 
         // Console warning
         console.log('%c⚠ This site is protected. Unauthorized copying or reproduction is prohibited.', 'color: #D97757; font-size: 16px; font-weight: bold;');
-        console.log('%c© Fernando García González — fernandogarciag.com', 'color: #0176D3; font-size: 12px;');
+        console.log('%c© Fernando García González — fernandogarciag.com', 'color: #3B5775; font-size: 12px;');
     })();
     </script>
 
