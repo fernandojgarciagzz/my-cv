@@ -1016,18 +1016,62 @@
         .edu-detail li { margin-bottom: 0.2rem; }
 
         /* --- HOBBIES --- */
-        .hobbies-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-        .hobby-tag {
-            display: inline-flex; align-items: center; gap: 0.35rem;
-            padding: 0.45rem 0.9rem;
-            background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: 100px;
-            font-size: 0.78rem; color: var(--text-secondary); font-weight: 500;
-            transition: all 0.25s ease; cursor: default;
+        .hobbies-featured {
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem;
         }
+        .hobby-card {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 1rem 1.2rem;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 12px; text-decoration: none; color: inherit;
+            transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+            cursor: pointer;
+        }
+        .hobby-card:hover {
+            border-color: var(--sf-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(1, 118, 211, 0.08);
+        }
+        .hobby-card-icon {
+            width: 38px; height: 38px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--sf-blue), var(--sf-blue-dark));
+            color: #FFF; font-size: 1rem;
+        }
+        .hobby-card-text { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; }
+        .hobby-card-title {
+            font-family: var(--font-display); font-weight: 600;
+            font-size: 0.95rem; color: var(--text-primary);
+        }
+        .hobby-card-sub {
+            font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.04em;
+            color: var(--text-muted); text-transform: uppercase;
+        }
+        .hobby-card-arrow {
+            color: var(--text-muted); font-size: 0.85rem; flex-shrink: 0;
+            transition: transform 0.25s ease, color 0.25s ease;
+        }
+        .hobby-card:hover .hobby-card-arrow { color: var(--sf-blue); transform: translateX(3px); }
+
+        .hobbies-grid { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+        .hobby-tag {
+            display: inline-flex; align-items: center; gap: 0.45rem;
+            padding: 0.4rem 0.85rem;
+            background: transparent; border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.72rem; color: var(--text-muted); font-weight: 500;
+            letter-spacing: 0.02em;
+            transition: border-color 0.25s ease, color 0.25s ease;
+            cursor: default;
+        }
+        .hobby-tag i { font-size: 0.72rem; opacity: 0.85; }
         .hobby-tag:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
-        .hobby-tag-secret { cursor: pointer; }
-        .hobby-tag-secret:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
+
+        @media (max-width: 600px) {
+            .hobbies-featured { grid-template-columns: 1fr; }
+        }
 
         /* --- BOOK CHAT AGENT --- */
         .book-chat {
@@ -1752,18 +1796,34 @@
         <div class="section-inner">
             <p class="section-label reveal">// beyond_work</p>
             <h2 class="section-title reveal">Hobbies & Interests</h2>
-            <div class="hobbies-grid reveal" style="margin-top: 2rem;">
-                <span class="hobby-tag hobby-tag-secret" id="bookTrigger">📖 Books</span>
-                <span class="hobby-tag hobby-tag-secret" id="musicTrigger">🎵 Music</span>
-                <span class="hobby-tag">⚽ Soccer</span>
-                <span class="hobby-tag">✈️ Travel</span>
-                <span class="hobby-tag">🏃 Running</span>
-                <span class="hobby-tag">🏋️ Hyrox / Gym</span>
-                <span class="hobby-tag">🥩 Cooking</span>
-                <span class="hobby-tag">🎾 Padel</span>
-                <span class="hobby-tag">🏕️ Outdoors</span>
-                <span class="hobby-tag">🤖 AI</span>
-                <span class="hobby-tag">🧘 Mindfulness</span>
+            <div class="hobbies-featured reveal" style="margin-top: 2rem;">
+                <a class="hobby-card" id="bookTrigger" role="button" tabindex="0">
+                    <span class="hobby-card-icon"><i class="fas fa-book-open"></i></span>
+                    <span class="hobby-card-text">
+                        <span class="hobby-card-title">Books</span>
+                        <span class="hobby-card-sub">Chat for recommendations</span>
+                    </span>
+                    <i class="fas fa-arrow-right hobby-card-arrow"></i>
+                </a>
+                <a class="hobby-card" id="musicTrigger" role="button" tabindex="0">
+                    <span class="hobby-card-icon"><i class="fas fa-music"></i></span>
+                    <span class="hobby-card-text">
+                        <span class="hobby-card-title">Music</span>
+                        <span class="hobby-card-sub">Listen to Roho</span>
+                    </span>
+                    <i class="fas fa-arrow-right hobby-card-arrow"></i>
+                </a>
+            </div>
+            <div class="hobbies-grid reveal" style="margin-top: 1rem;">
+                <span class="hobby-tag"><i class="fas fa-futbol"></i> Soccer</span>
+                <span class="hobby-tag"><i class="fas fa-plane"></i> Travel</span>
+                <span class="hobby-tag"><i class="fas fa-person-running"></i> Running</span>
+                <span class="hobby-tag"><i class="fas fa-dumbbell"></i> Hyrox / Gym</span>
+                <span class="hobby-tag"><i class="fas fa-utensils"></i> Cooking</span>
+                <span class="hobby-tag"><i class="fas fa-table-tennis-paddle-ball"></i> Padel</span>
+                <span class="hobby-tag"><i class="fas fa-mountain"></i> Outdoors</span>
+                <span class="hobby-tag"><i class="fas fa-microchip"></i> AI</span>
+                <span class="hobby-tag"><i class="fas fa-spa"></i> Mindfulness</span>
             </div>
         </div>
     </section>
