@@ -269,8 +269,17 @@
         }
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-        const camRadius = 11;
+        const CAM_FOV = 50;
+        const camera = new THREE.PerspectiveCamera(CAM_FOV, 1, 0.1, 100);
+        // Min distance for wide viewports — desktop look. On portrait we
+        // dolly out from this baseline so the wider forms (4-bust square,
+        // brain side-on during the orbit) don't clip the left/right edges.
+        const CAM_RADIUS_BASE = 11;
+        // Half-extent the horizontal frustum must accommodate at z=0. The
+        // 4-bust agents form sits at sqRadius=2.0 + bust width — call it
+        // 3.0 with comfortable margin for orbit swing.
+        const TARGET_HALF_EXTENT = 3.5;
+        let camRadius = CAM_RADIUS_BASE;
         camera.position.set(0, 0, camRadius);
 
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
@@ -281,8 +290,16 @@
             const rect = canvas.getBoundingClientRect();
             if (rect.width <= 0 || rect.height <= 0) return;
             renderer.setSize(rect.width, rect.height, false);
-            camera.aspect = rect.width / rect.height;
+            const aspect = rect.width / rect.height;
+            camera.aspect = aspect;
             camera.updateProjectionMatrix();
+            // PerspectiveCamera.fov is the VERTICAL angle, so horizontal
+            // half-FOV = atan(tan(fov/2) * aspect). On portrait, that gets
+            // small fast — pull the camera back so horizontal half-extent
+            // at z=0 is at least TARGET_HALF_EXTENT.
+            const fovRad = CAM_FOV * Math.PI / 180;
+            const required = TARGET_HALF_EXTENT / (Math.tan(fovRad / 2) * aspect);
+            camRadius = Math.max(CAM_RADIUS_BASE, required);
         }
         fitRenderer();
 
@@ -305,7 +322,10 @@
         }
 
         const pointMat = new THREE.PointsMaterial({
-            size: 0.19,
+            // Mobile: bigger dots to compensate for the camera being pulled
+            // further back on portrait viewports (sizeAttenuation shrinks
+            // dots with distance, so without this the figure reads tiny).
+            size: isMobile ? 0.28 : 0.19,
             map: glowTex,
             color: 0x3B5775,
             transparent: true,

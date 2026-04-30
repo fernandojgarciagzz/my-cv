@@ -573,7 +573,7 @@
         .btn, .btn-primary, .btn-outline,
         .nav-logo, .nav-links a, .nav-inner,
         .section-label, .section-title, .section-desc,
-        .scroll-progress, .connector-line, .connector-node {
+        .scroll-progress, .section-divider, .section-divider-glyph {
             transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
         }
 
@@ -688,28 +688,30 @@
         }
         .profile-photo-wrapper:hover { border-color: var(--sf-blue); box-shadow: var(--shadow-lg); }
 
-        /* --- BLUEPRINT CONNECTOR --- */
-        .blueprint-connector {
+        /* --- SECTION DIVIDER --- */
+        .section-divider {
             display: flex; align-items: center; justify-content: center;
-            padding: 2rem 0; position: relative; z-index: 1;
+            gap: 1.1rem;
+            padding: 2.4rem 2rem;
+            max-width: 1100px; margin: 0 auto;
+            position: relative; z-index: 1;
             background: transparent;
-            transition: background 0.5s ease;
         }
-        .connector-line {
-            display: flex; align-items: center; gap: 0.75rem;
-            color: var(--text-muted); font-family: var(--mono); font-size: 0.6rem;
-            letter-spacing: 0.1em; text-transform: uppercase;
-        }
-        .connector-dash {
-            width: 60px; height: 1px;
-            border-top: 2px dashed var(--border);
-            transition: border-color 0.4s ease;
-        }
-        .connector-node {
-            width: 8px; height: 8px; border-radius: 50%;
-            border: 2px solid var(--sf-blue);
-            background: var(--bg-primary);
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1; max-width: 220px;
+            height: 1px;
+            background: var(--border);
             transition: background 0.4s ease;
+        }
+        .section-divider-glyph {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            line-height: 1;
+            transition: color 0.4s ease;
         }
 
         /* --- SECTIONS --- */
@@ -1030,7 +1032,7 @@
 
         /* --- HOBBIES --- */
         .hobbies-featured {
-            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+            display: grid; grid-template-columns: 1fr;
             gap: 0.9rem;
         }
         .hobby-card {
@@ -1081,10 +1083,6 @@
         }
         .hobby-tag i { font-size: 0.72rem; opacity: 0.85; }
         .hobby-tag:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
-
-        @media (max-width: 600px) {
-            .hobbies-featured { grid-template-columns: 1fr; }
-        }
 
         /* --- DASHBOARDS --- */
         .dashboard-list {
@@ -1151,141 +1149,176 @@
             color: var(--sf-blue);
         }
 
-        /* --- BOOK CHAT AGENT --- */
-        .book-chat {
-            position: fixed; bottom: 1.5rem; right: 1.5rem;
-            width: 380px; height: 520px; max-height: calc(100vh - 3rem);
-            border-radius: 16px; z-index: 999; overflow: hidden;
+        /* --- KINDLE READER --- */
+        .kindle-frame {
+            margin: 2.5rem auto 0;
+            max-width: 940px;
+            background: linear-gradient(160deg, #3F4D5E, #2A3340);
+            border-radius: 26px;
+            padding: 18px 18px 38px;
+            box-shadow:
+                0 28px 64px rgba(28, 38, 52, 0.22),
+                0 8px 18px rgba(28, 38, 52, 0.10),
+                inset 0 1px 0 rgba(255, 255, 255, 0.10),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.20);
+            position: relative;
+        }
+        .kindle-frame::after {
+            content: '';
+            position: absolute;
+            bottom: 14px; left: 50%;
+            width: 56px; height: 6px; border-radius: 4px;
+            background: rgba(255, 255, 255, 0.16);
+            transform: translateX(-50%);
+        }
+        .kindle-screen {
+            background: #F1EAD9;
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            min-height: 480px;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+        }
+        .dark .kindle-screen { background: #1C232C; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04); }
+
+        .kindle-toc {
+            border-right: 1px solid rgba(28, 38, 52, 0.10);
+            padding: 1.4rem 0.7rem 1.4rem 1.3rem;
+            display: flex; flex-direction: column; min-width: 0;
+        }
+        .dark .kindle-toc { border-right-color: rgba(255, 255, 255, 0.06); }
+
+        .kindle-toc-header {
+            font-family: var(--mono);
+            font-size: 0.6rem; letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(28, 38, 52, 0.55);
+            display: flex; align-items: center; gap: 0.55rem;
+            margin-bottom: 1rem;
+            padding: 0 0.55rem;
+        }
+        .dark .kindle-toc-header { color: rgba(232, 228, 220, 0.45); }
+        .kindle-toc-header-rule {
+            flex: 1; height: 1px; background: currentColor; opacity: 0.3;
+        }
+
+        .kindle-toc-list {
+            list-style: none; padding: 0; margin: 0;
+            display: flex; flex-direction: column; gap: 1px;
+            overflow-y: auto;
+        }
+        .kindle-toc-item {
+            display: flex; gap: 0.7rem; align-items: flex-start;
+            padding: 0.7rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #1C2632;
+            transition: background 0.18s ease;
+            border: none; background: transparent; text-align: left; width: 100%;
+            font-family: inherit;
+        }
+        .dark .kindle-toc-item { color: #E8E4DC; }
+        .kindle-toc-item:hover { background: rgba(28, 38, 52, 0.05); }
+        .dark .kindle-toc-item:hover { background: rgba(255, 255, 255, 0.04); }
+        .kindle-toc-item.active { background: rgba(59, 87, 117, 0.10); }
+        .dark .kindle-toc-item.active { background: rgba(107, 138, 173, 0.18); }
+        .kindle-toc-item:focus-visible {
+            outline: 2px solid var(--sf-blue); outline-offset: -2px;
+        }
+        .kindle-toc-num {
+            font-family: var(--mono); font-size: 0.62rem;
+            color: var(--sf-blue);
+            letter-spacing: 0.06em;
+            padding-top: 3px; flex-shrink: 0;
+        }
+        .kindle-toc-title {
+            font-family: var(--heading);
+            font-size: 0.88rem; font-weight: 500;
+            line-height: 1.4; letter-spacing: -0.01em;
+        }
+
+        .kindle-reader-pane {
+            padding: 2.4rem 2.6rem 2rem;
             display: flex; flex-direction: column;
-            background: var(--bg-primary); border: 1px solid var(--border);
-            box-shadow: 0 12px 48px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08);
-            transform: translateY(20px) scale(0.96); opacity: 0; pointer-events: none;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+            color: #1C2632; min-width: 0;
         }
-        .book-chat.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: all; }
-        .book-chat-header {
-            display: flex; align-items: center; gap: 10px;
-            padding: 14px 16px; flex-shrink: 0;
-            background: linear-gradient(135deg, var(--sf-blue), var(--sf-blue-dark));
-            color: #FFF;
+        .dark .kindle-reader-pane { color: #E8E4DC; }
+        .kindle-reader-meta {
+            font-family: var(--mono);
+            font-size: 0.6rem; letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(28, 38, 52, 0.5);
+            margin-bottom: 1.1rem;
         }
-        .book-chat-avatar {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem; flex-shrink: 0;
+        .dark .kindle-reader-meta { color: rgba(232, 228, 220, 0.4); }
+        .kindle-reader-title {
+            font-family: var(--heading);
+            font-size: 1.55rem; font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 0.45rem;
+            color: inherit;
         }
-        .book-chat-header-info { flex: 1; }
-        .book-chat-header-name {
-            font-family: var(--heading); font-size: 0.88rem;
-            font-weight: 600; letter-spacing: -0.01em;
+        .kindle-reader-author {
+            font-family: var(--mono);
+            font-size: 0.68rem; letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--sf-blue);
+            margin-bottom: 1.6rem;
         }
-        .book-chat-header-status {
-            font-family: var(--mono); font-size: 0.6rem;
-            opacity: 0.8; letter-spacing: 0.03em;
+        .kindle-reader-rule {
+            border: none; border-top: 1px solid rgba(28, 38, 52, 0.12);
+            margin: 0 0 1.5rem;
         }
-        .book-chat-close {
-            background: rgba(255,255,255,0.15); border: none; color: #FFF;
-            width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem; transition: background 0.2s; flex-shrink: 0;
+        .dark .kindle-reader-rule { border-top-color: rgba(255, 255, 255, 0.10); }
+        .kindle-reader-note {
+            font-family: var(--heading);
+            font-size: 1rem; line-height: 1.75;
+            font-style: italic;
+            color: #2A3340;
+            max-width: 540px;
         }
-        .book-chat-close:hover { background: rgba(255,255,255,0.25); }
-        .book-chat-messages {
-            flex: 1; overflow-y: auto; padding: 16px;
-            display: flex; flex-direction: column; gap: 10px;
+        .dark .kindle-reader-note { color: #D2CDC3; }
+        .kindle-reader-note::before {
+            content: '\201C'; color: var(--sf-blue);
+            font-size: 1.5em; line-height: 0;
+            vertical-align: -0.15em; margin-right: 2px;
         }
-        .book-chat-messages::-webkit-scrollbar { width: 4px; }
-        .book-chat-messages::-webkit-scrollbar-track { background: transparent; }
-        .book-chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        .chat-row {
-            display: flex; gap: 8px; align-items: flex-end; max-width: 88%;
-            opacity: 0; transform: translateY(8px);
-            animation: chatIn 0.3s ease forwards;
+        .kindle-reader-note::after {
+            content: '\201D'; color: var(--sf-blue);
+            font-size: 1.5em; line-height: 0;
+            vertical-align: -0.4em; margin-left: 2px;
         }
-        .chat-row.agent { align-self: flex-start; }
-        .chat-row.user { align-self: flex-end; flex-direction: row-reverse; }
-        @keyframes chatIn { to { opacity: 1; transform: translateY(0); } }
-        .chat-av {
-            width: 26px; height: 26px; border-radius: 50%;
-            background: rgba(59,87,117,0.1);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.65rem; flex-shrink: 0; color: var(--sf-blue);
+        .kindle-page-indicator {
+            margin-top: auto;
+            padding-top: 2rem;
+            font-family: var(--mono);
+            font-size: 0.58rem; letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(28, 38, 52, 0.4);
+            display: flex; justify-content: space-between; gap: 1rem;
         }
-        .chat-row.user .chat-av { display: none; }
-        .chat-bubble {
-            padding: 10px 14px; border-radius: 16px;
-            font-size: 0.82rem; line-height: 1.55; word-wrap: break-word;
+        .dark .kindle-page-indicator { color: rgba(232, 228, 220, 0.3); }
+
+        @media (max-width: 720px) {
+            .kindle-frame { padding: 12px 12px 28px; border-radius: 18px; }
+            .kindle-frame::after { width: 44px; height: 5px; bottom: 10px; }
+            .kindle-screen {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+            .kindle-toc {
+                border-right: none;
+                border-bottom: 1px solid rgba(28, 38, 52, 0.10);
+                padding: 1rem 0.6rem 0.9rem 0.9rem;
+                max-height: 260px;
+            }
+            .dark .kindle-toc { border-bottom-color: rgba(255, 255, 255, 0.06); }
+            .kindle-reader-pane { padding: 1.6rem 1.4rem 1.4rem; }
+            .kindle-reader-title { font-size: 1.25rem; }
+            .kindle-reader-note { font-size: 0.92rem; }
         }
-        .chat-row.agent .chat-bubble {
-            background: var(--bg-tertiary); color: var(--text-primary);
-            border-bottom-left-radius: 4px;
-        }
-        .chat-row.user .chat-bubble {
-            background: var(--sf-blue); color: #FFF;
-            border-bottom-right-radius: 4px;
-        }
-        .chat-typing {
-            display: flex; gap: 8px; align-items: flex-end;
-            align-self: flex-start; max-width: 88%;
-            opacity: 0; transform: translateY(8px);
-            animation: chatIn 0.3s ease forwards;
-        }
-        .typing-dots {
-            display: flex; gap: 4px; padding: 12px 16px;
-            background: var(--bg-tertiary); border-radius: 16px;
-            border-bottom-left-radius: 4px;
-        }
-        .typing-dots span {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: var(--text-muted);
-            animation: dotBounce 1.4s ease-in-out infinite;
-        }
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes dotBounce {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-            30% { transform: translateY(-6px); opacity: 1; }
-        }
-        .book-card-chat {
-            background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: 12px; overflow: hidden;
-            box-shadow: var(--shadow-sm); max-width: 260px;
-        }
-        .book-card-accent { height: 4px; width: 100%; }
-        .book-card-body { padding: 14px; }
-        .book-card-title {
-            font-family: var(--heading); font-size: 0.9rem; font-weight: 600;
-            color: var(--text-primary); margin-bottom: 2px; letter-spacing: -0.01em;
-        }
-        .book-card-author {
-            font-family: var(--mono); font-size: 0.6rem; color: var(--sf-blue);
-            letter-spacing: 0.04em; margin-bottom: 10px; text-transform: uppercase;
-        }
-        .book-card-note {
-            font-size: 0.78rem; color: var(--text-secondary);
-            line-height: 1.65; font-style: italic;
-        }
-        .book-card-note::before { content: '\201C'; color: var(--sf-blue); font-weight: 600; }
-        .book-card-note::after { content: '\201D'; color: var(--sf-blue); font-weight: 600; }
-        .book-chat-footer {
-            padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
-        }
-        .book-chat-btn {
-            width: 100%; padding: 10px; border-radius: 10px; border: none;
-            background: var(--sf-blue); color: #FFF;
-            font-family: var(--mono); font-size: 0.75rem; font-weight: 600;
-            letter-spacing: 0.02em; cursor: pointer; transition: all 0.2s;
-        }
-        .book-chat-btn:hover {
-            background: var(--sf-blue-light); transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59,87,117,0.3);
-        }
-        .book-chat-btn:disabled {
-            opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
-        }
-        .chat-row.faded { opacity: 0.4; transition: opacity 0.4s; }
-        .chat-row.faded:hover, .chat-typing.faded:hover { opacity: 1; }
 
         /* --- FOOTER --- */
         footer {
@@ -1350,18 +1383,14 @@
                 transition: opacity 0.8s ease;
             }
             .photo-scroll-guard { display: none; }
-            .blueprint-connector { padding: 4.5rem 0; }
+            .section-divider { padding: 1.8rem 1.5rem; }
+            .section-divider::before, .section-divider::after { max-width: 90px; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .agent-grid { grid-template-columns: 1fr; }
             .agent-card::before, .agent-card::after { display: none; }
             .edu-grid { grid-template-columns: 1fr; }
             .skill-name { min-width: 0; width: 45%; flex-shrink: 0; font-size: 0.65rem; }
             .skill-row { gap: 0.5rem; }
-            .book-chat {
-                bottom: 0; right: 0; width: 100%;
-                height: 75vh; max-height: 75vh;
-                border-radius: 16px 16px 0 0;
-            }
         }
 
     </style>
@@ -1464,14 +1493,8 @@
     </section>
 
     <!-- Connector -->
-    <div class="blueprint-connector">
-        <div class="connector-line">
-            <div class="connector-dash"></div>
-            <div class="connector-node"></div>
-            <span>metrics</span>
-            <div class="connector-node"></div>
-            <div class="connector-dash"></div>
-        </div>
+    <div class="section-divider" aria-hidden="true">
+        <span class="section-divider-glyph">//</span>
     </div>
 
     <!-- Stats -->
@@ -1499,14 +1522,8 @@
     </section>
 
     <!-- Connector -->
-    <div class="blueprint-connector">
-        <div class="connector-line">
-            <div class="connector-dash"></div>
-            <div class="connector-node"></div>
-            <span>about</span>
-            <div class="connector-node"></div>
-            <div class="connector-dash"></div>
-        </div>
+    <div class="section-divider" aria-hidden="true">
+        <span class="section-divider-glyph">//</span>
     </div>
 
     <!-- About -->
@@ -1527,14 +1544,8 @@
     </section>
 
     <!-- Connector -->
-    <div class="blueprint-connector">
-        <div class="connector-line">
-            <div class="connector-dash"></div>
-            <div class="connector-node"></div>
-            <span>workflow log</span>
-            <div class="connector-node"></div>
-            <div class="connector-dash"></div>
-        </div>
+    <div class="section-divider" aria-hidden="true">
+        <span class="section-divider-glyph">//</span>
     </div>
 
     <!-- Experience -->
@@ -1656,14 +1667,8 @@
     </section>
 
     <!-- Connector -->
-    <div class="blueprint-connector">
-        <div class="connector-line">
-            <div class="connector-dash"></div>
-            <div class="connector-node"></div>
-            <span>skills</span>
-            <div class="connector-node"></div>
-            <div class="connector-dash"></div>
-        </div>
+    <div class="section-divider" aria-hidden="true">
+        <span class="section-divider-glyph">//</span>
     </div>
 
     <!-- Core Competencies (Agent Nodes) -->
@@ -1720,14 +1725,8 @@
     </section>
 
     <!-- Connector -->
-    <div class="blueprint-connector">
-        <div class="connector-line">
-            <div class="connector-dash"></div>
-            <div class="connector-node"></div>
-            <span>tools</span>
-            <div class="connector-node"></div>
-            <div class="connector-dash"></div>
-        </div>
+    <div class="section-divider" aria-hidden="true">
+        <span class="section-divider-glyph">//</span>
     </div>
 
     <!-- Skills -->
@@ -1783,14 +1782,8 @@
     </section>
 
     <!-- Connector -->
-    <div class="blueprint-connector">
-        <div class="connector-line">
-            <div class="connector-dash"></div>
-            <div class="connector-node"></div>
-            <span>credentials</span>
-            <div class="connector-node"></div>
-            <div class="connector-dash"></div>
-        </div>
+    <div class="section-divider" aria-hidden="true">
+        <span class="section-divider-glyph">//</span>
     </div>
 
     <!-- Education -->
@@ -1822,14 +1815,8 @@
     </section>
 
     <!-- Connector -->
-    <div class="blueprint-connector">
-        <div class="connector-line">
-            <div class="connector-dash"></div>
-            <div class="connector-node"></div>
-            <span>idle tasks</span>
-            <div class="connector-node"></div>
-            <div class="connector-dash"></div>
-        </div>
+    <div class="section-divider" aria-hidden="true">
+        <span class="section-divider-glyph">//</span>
     </div>
 
     <!-- Hobbies -->
@@ -1838,14 +1825,6 @@
             <p class="section-label reveal">// beyond_work</p>
             <h2 class="section-title reveal">Hobbies & Interests</h2>
             <div class="hobbies-featured reveal" style="margin-top: 2rem;">
-                <a class="hobby-card" id="bookTrigger" role="button" tabindex="0">
-                    <span class="hobby-card-icon"><i class="fas fa-book-open"></i></span>
-                    <span class="hobby-card-text">
-                        <span class="hobby-card-title">Books</span>
-                        <span class="hobby-card-sub">Chat for recommendations</span>
-                    </span>
-                    <i class="fas fa-arrow-right hobby-card-arrow"></i>
-                </a>
                 <a class="hobby-card" href="music.html">
                     <span class="hobby-card-icon"><i class="fas fa-music"></i></span>
                     <span class="hobby-card-text">
@@ -1870,14 +1849,36 @@
     </section>
 
     <!-- Connector -->
-    <div class="blueprint-connector">
-        <div class="connector-line">
-            <div class="connector-dash"></div>
-            <div class="connector-node"></div>
-            <span>live data</span>
-            <div class="connector-node"></div>
-            <div class="connector-dash"></div>
+    <div class="section-divider" aria-hidden="true">
+        <span class="section-divider-glyph">//</span>
+    </div>
+
+    <!-- Books -->
+    <section class="bg-primary">
+        <div class="section-inner">
+            <p class="section-label reveal">// reading_list</p>
+            <h2 class="section-title reveal">Books I Recommend</h2>
+            <p class="section-desc reveal">Seven books that shaped how I think about mind, work, and growth. Tap a title to read why.</p>
+            <div class="kindle-frame reveal">
+                <div class="kindle-screen">
+                    <div class="kindle-toc">
+                        <div class="kindle-toc-header">
+                            <i class="fas fa-book"></i>
+                            <span>Library</span>
+                            <span class="kindle-toc-header-rule"></span>
+                            <span id="kindleCount">07</span>
+                        </div>
+                        <ul class="kindle-toc-list" id="kindleTocList" role="listbox" aria-label="Book list"></ul>
+                    </div>
+                    <div class="kindle-reader-pane" id="kindleReaderPane" aria-live="polite"></div>
+                </div>
+            </div>
         </div>
+    </section>
+
+    <!-- Connector -->
+    <div class="section-divider" aria-hidden="true">
+        <span class="section-divider-glyph">//</span>
     </div>
 
     <!-- Dashboards -->
@@ -1909,14 +1910,8 @@
     </section>
 
     <!-- Connector -->
-    <div class="blueprint-connector">
-        <div class="connector-line">
-            <div class="connector-dash"></div>
-            <div class="connector-node"></div>
-            <span>contact</span>
-            <div class="connector-node"></div>
-            <div class="connector-dash"></div>
-        </div>
+    <div class="section-divider" aria-hidden="true">
+        <span class="section-divider-glyph">//</span>
     </div>
 
     <!-- Footer -->
@@ -2030,179 +2025,8 @@
         <source src="Hatua Kwa Hatua (Remastered).mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Book Chat Agent -->
-    <div class="book-chat" id="bookChat">
-        <div class="book-chat-header">
-            <div class="book-chat-avatar">📚</div>
-            <div class="book-chat-header-info">
-                <div class="book-chat-header-name">Fercho's Book Agent</div>
-                <div class="book-chat-header-status">online</div>
-            </div>
-            <button class="book-chat-close" id="bookChatClose">✕</button>
-        </div>
-        <div class="book-chat-messages" id="bookChatMessages"></div>
-        <div class="book-chat-footer">
-            <button class="book-chat-btn" id="bookChatBtn" style="display:none;">🔄 Another one!</button>
-        </div>
-    </div>
-
     <script>
     (function() {
-        var books = [
-            { title: 'The Power of Your Subconscious Mind', author: 'Joseph Murphy', gradient: 'linear-gradient(135deg, #667eea, #764ba2)', note: 'This was the first book that showed me how our inner thoughts create our reality. It taught me how to \u201Creprogram\u201D my brain to stop holding me back and start helping me grow.' },
-            { title: 'The Power of Now', author: 'Eckhart Tolle', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', note: 'This book is a total life-changer and my personal favorite. It made me question everything and you can feel the truth in every single word. It helped me understand that true power comes from staying focused on the present moment.' },
-            { title: 'A New Earth', author: 'Eckhart Tolle', gradient: 'linear-gradient(135deg, #10b981, #059669)', note: 'I recommend this for anyone who wants to understand their ego and find a deeper purpose. It shows how changing your mind is the first step to changing the entire world.' },
-            { title: 'Secrets of the Millionaire Mind', author: 'T. Harv Eker', gradient: 'linear-gradient(135deg, #f97316, #eab308)', note: 'This book explains that wealth is a \u201Cmental game\u201D before it is a financial one. It helped me identify and fix the old, negative beliefs I had about success.' },
-            { title: 'Think and Grow Rich', author: 'Napoleon Hill', gradient: 'linear-gradient(135deg, #ef4444, #be123c)', note: 'A classic that proves success is a science, not a matter of luck. It shows that if you can control your thoughts and your desire, you can achieve any goal.' },
-            { title: 'The Almanack of Naval Ravikant', author: 'Eric Jorgenson', gradient: 'linear-gradient(135deg, #0ea5e9, #6366f1)', note: 'This is a modern guide on using logic and clear thinking to build a happy life. It\u2019s a great book for learning how to use your mind as a tool for wealth and peace.' },
-            { title: 'Manifest', author: 'Roxie Nafousi', gradient: 'linear-gradient(135deg, #ec4899, #f43f5e)', note: 'I love this book because it turns big spiritual ideas into simple, daily steps. It\u2019s a practical manual for using your mind to attract the life you actually want.' }
-        ];
-
-        var introLines = [
-            'Oh, this one is special. You\u2019re gonna love it.',
-            'I\u2019ve been waiting for someone to ask about this one.',
-            'Perfect timing \u2014 this is exactly what you need right now.',
-            'This book literally changed my perspective.',
-            'Here\u2019s one that hits different every time you read it.',
-            'I keep coming back to this one. Trust me.',
-            'This one stays with you long after you finish it.'
-        ];
-
-        var chatEl = document.getElementById('bookChat');
-        var msgsEl = document.getElementById('bookChatMessages');
-        var trigger = document.getElementById('bookTrigger');
-        var closeBtn = document.getElementById('bookChatClose');
-        var actionBtn = document.getElementById('bookChatBtn');
-        var firstVisit = true, animating = false, count = 0;
-        var sDeck = [], iDeck = [], lastBook = null;
-
-        function shuffle(a) {
-            var c = a.slice();
-            for (var i = c.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var tmp = c[i]; c[i] = c[j]; c[j] = tmp;
-            }
-            return c;
-        }
-        function nextBook() {
-            if (!sDeck.length) {
-                sDeck = shuffle(books);
-                if (lastBook && sDeck[sDeck.length - 1].title === lastBook.title) {
-                    var si = Math.floor(Math.random() * (sDeck.length - 1));
-                    var tmp = sDeck[sDeck.length - 1]; sDeck[sDeck.length - 1] = sDeck[si]; sDeck[si] = tmp;
-                }
-            }
-            lastBook = sDeck[sDeck.length - 1];
-            return sDeck.pop();
-        }
-        function nextIntro() {
-            if (!iDeck.length) iDeck = shuffle(introLines);
-            return iDeck.pop();
-        }
-        function wait(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
-        function scrollDown() { msgsEl.scrollTop = msgsEl.scrollHeight; }
-
-        function fadeOlder() {
-            var rows = msgsEl.querySelectorAll('.chat-row, .chat-typing');
-            if (rows.length > 8) {
-                for (var i = 0; i < rows.length; i++) {
-                    if (i < rows.length - 8) rows[i].classList.add('faded');
-                    else rows[i].classList.remove('faded');
-                }
-            }
-        }
-
-        function agentMsg(text) {
-            var d = document.createElement('div');
-            d.className = 'chat-row agent';
-            d.innerHTML = '<div class="chat-av">\uD83D\uDCDA</div><div class="chat-bubble">' + text + '</div>';
-            msgsEl.appendChild(d); scrollDown();
-        }
-        function userMsg(text) {
-            var d = document.createElement('div');
-            d.className = 'chat-row user';
-            d.innerHTML = '<div class="chat-bubble">' + text + '</div>';
-            msgsEl.appendChild(d); scrollDown();
-        }
-        function showTyping() {
-            var d = document.createElement('div');
-            d.className = 'chat-typing';
-            d.innerHTML = '<div class="chat-av">\uD83D\uDCDA</div><div class="typing-dots"><span></span><span></span><span></span></div>';
-            msgsEl.appendChild(d); scrollDown();
-            return d;
-        }
-        function hideTyping(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
-
-        function bookCard(book) {
-            var d = document.createElement('div');
-            d.className = 'chat-row agent';
-            d.innerHTML = '<div class="chat-av">\uD83D\uDCDA</div>' +
-                '<div class="book-card-chat">' +
-                '<div class="book-card-accent" style="background:' + book.gradient + '"></div>' +
-                '<div class="book-card-body">' +
-                '<div class="book-card-title">' + book.title + '</div>' +
-                '<div class="book-card-author">by ' + book.author + '</div>' +
-                '<div class="book-card-note">' + book.note + '</div>' +
-                '</div></div>';
-            msgsEl.appendChild(d); scrollDown();
-        }
-
-        function openChat() { chatEl.classList.add('open'); if (firstVisit) runGreeting(); }
-        function closeChat() { chatEl.classList.remove('open'); }
-
-        trigger.addEventListener('click', function() {
-            chatEl.classList.contains('open') ? closeChat() : openChat();
-        });
-        closeBtn.addEventListener('click', closeChat);
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && chatEl.classList.contains('open')) closeChat(); });
-
-        async function runGreeting() {
-            firstVisit = false; animating = true;
-            actionBtn.style.display = 'none';
-
-            var t = showTyping(); await wait(1000); hideTyping(t);
-            agentMsg('Hey! \uD83D\uDC4B I\u2019m Fercho\u2019s Book Agent.');
-            await wait(600);
-
-            t = showTyping(); await wait(800); hideTyping(t);
-            agentMsg('I have access to Fernando\u2019s personal library \u2014 want me to pick something meaningful for you?');
-            await wait(800);
-
-            userMsg('Recommend me a book \uD83D\uDCD6');
-            await wait(600);
-
-            await recommend();
-            animating = false;
-            actionBtn.style.display = 'block';
-            actionBtn.disabled = false;
-        }
-
-        async function recommend() {
-            if (count > 0 && count % books.length === 0) {
-                var t = showTyping(); await wait(1200); hideTyping(t);
-                agentMsg('You\u2019ve gone through my top 7! Let me revisit one\u2026');
-                await wait(800);
-            }
-
-            var t = showTyping(); await wait(1000); hideTyping(t);
-            agentMsg(nextIntro());
-            await wait(400);
-
-            t = showTyping(); await wait(600); hideTyping(t);
-            bookCard(nextBook());
-            count++;
-            fadeOlder();
-        }
-
-        actionBtn.addEventListener('click', async function() {
-            if (animating) return;
-            animating = true; actionBtn.disabled = true;
-            userMsg('Another one! \uD83D\uDD04');
-            await wait(400);
-            await recommend();
-            animating = false; actionBtn.disabled = false;
-        });
-
         // --- SPLINE: scroll guard with hover pass-through ---
         const scrollGuard = document.getElementById('scrollGuard');
         if (scrollGuard) {
@@ -2322,6 +2146,85 @@
             }
             drawAurora();
         }
+    })();
+    </script>
+
+    <!-- Kindle Reader -->
+    <script>
+    (function() {
+        var books = [
+            { title: 'The Power of Your Subconscious Mind', author: 'Joseph Murphy', note: 'This was the first book that showed me how our inner thoughts create our reality. It taught me how to \u201Creprogram\u201D my brain to stop holding me back and start helping me grow.' },
+            { title: 'The Power of Now', author: 'Eckhart Tolle', note: 'This book is a total life-changer and my personal favorite. It made me question everything and you can feel the truth in every single word. It helped me understand that true power comes from staying focused on the present moment.' },
+            { title: 'A New Earth', author: 'Eckhart Tolle', note: 'I recommend this for anyone who wants to understand their ego and find a deeper purpose. It shows how changing your mind is the first step to changing the entire world.' },
+            { title: 'Secrets of the Millionaire Mind', author: 'T. Harv Eker', note: 'This book explains that wealth is a \u201Cmental game\u201D before it is a financial one. It helped me identify and fix the old, negative beliefs I had about success.' },
+            { title: 'Think and Grow Rich', author: 'Napoleon Hill', note: 'A classic that proves success is a science, not a matter of luck. It shows that if you can control your thoughts and your desire, you can achieve any goal.' },
+            { title: 'The Almanack of Naval Ravikant', author: 'Eric Jorgenson', note: 'This is a modern guide on using logic and clear thinking to build a happy life. It\u2019s a great book for learning how to use your mind as a tool for wealth and peace.' },
+            { title: 'Manifest', author: 'Roxie Nafousi', note: 'I love this book because it turns big spiritual ideas into simple, daily steps. It\u2019s a practical manual for using your mind to attract the life you actually want.' }
+        ];
+
+        var tocList = document.getElementById('kindleTocList');
+        var pane = document.getElementById('kindleReaderPane');
+        var countEl = document.getElementById('kindleCount');
+        if (!tocList || !pane) return;
+
+        var current = 0;
+        function pad(n) { return n < 10 ? '0' + n : '' + n; }
+        function esc(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function renderToc() {
+            tocList.innerHTML = books.map(function(b, i) {
+                return '<li><button class="kindle-toc-item' + (i === current ? ' active' : '') +
+                    '" type="button" data-i="' + i + '" role="option"' +
+                    (i === current ? ' aria-selected="true"' : '') + '>' +
+                    '<span class="kindle-toc-num">' + pad(i + 1) + '</span>' +
+                    '<span class="kindle-toc-title">' + esc(b.title) + '</span>' +
+                    '</button></li>';
+            }).join('');
+        }
+
+        function renderPane() {
+            var b = books[current];
+            pane.innerHTML =
+                '<div class="kindle-reader-meta">Book ' + pad(current + 1) + ' of ' + pad(books.length) + '</div>' +
+                '<h3 class="kindle-reader-title">' + esc(b.title) + '</h3>' +
+                '<div class="kindle-reader-author">by ' + esc(b.author) + '</div>' +
+                '<hr class="kindle-reader-rule"/>' +
+                '<p class="kindle-reader-note">' + esc(b.note) + '</p>' +
+                '<div class="kindle-page-indicator">' +
+                '<span>fernando&rsquo;s library</span>' +
+                '<span>' + pad(current + 1) + ' / ' + pad(books.length) + '</span>' +
+                '</div>';
+        }
+
+        function select(i) {
+            if (i < 0 || i >= books.length || i === current) return;
+            current = i;
+            renderToc();
+            renderPane();
+        }
+
+        tocList.addEventListener('click', function(e) {
+            var btn = e.target.closest('.kindle-toc-item');
+            if (!btn) return;
+            select(parseInt(btn.dataset.i, 10));
+        });
+
+        tocList.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowDown') { e.preventDefault(); select(Math.min(current + 1, books.length - 1)); focusActive(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); select(Math.max(current - 1, 0)); focusActive(); }
+        });
+
+        function focusActive() {
+            var el = tocList.querySelector('.kindle-toc-item.active');
+            if (el) el.focus();
+        }
+
+        if (countEl) countEl.textContent = pad(books.length);
+        renderToc();
+        renderPane();
     })();
     </script>
 
