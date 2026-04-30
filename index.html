@@ -573,7 +573,7 @@
         .btn, .btn-primary, .btn-outline,
         .nav-logo, .nav-links a, .nav-inner,
         .section-label, .section-title, .section-desc,
-        .scroll-progress, .section-divider, .section-divider-glyph {
+        .scroll-progress {
             transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
         }
 
@@ -687,32 +687,6 @@
             -webkit-backface-visibility: hidden;
         }
         .profile-photo-wrapper:hover { border-color: var(--sf-blue); box-shadow: var(--shadow-lg); }
-
-        /* --- SECTION DIVIDER --- */
-        .section-divider {
-            display: flex; align-items: center; justify-content: center;
-            gap: 1.1rem;
-            padding: 2.4rem 2rem;
-            max-width: 1100px; margin: 0 auto;
-            position: relative; z-index: 1;
-            background: transparent;
-        }
-        .section-divider::before,
-        .section-divider::after {
-            content: '';
-            flex: 1; max-width: 220px;
-            height: 1px;
-            background: var(--border);
-            transition: background 0.4s ease;
-        }
-        .section-divider-glyph {
-            font-family: var(--mono);
-            font-size: 0.7rem;
-            letter-spacing: 0.1em;
-            color: var(--text-muted);
-            line-height: 1;
-            transition: color 0.4s ease;
-        }
 
         /* --- SECTIONS --- */
         section {
@@ -1383,8 +1357,6 @@
                 transition: opacity 0.8s ease;
             }
             .photo-scroll-guard { display: none; }
-            .section-divider { padding: 1.8rem 1.5rem; }
-            .section-divider::before, .section-divider::after { max-width: 90px; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .agent-grid { grid-template-columns: 1fr; }
             .agent-card::before, .agent-card::after { display: none; }
@@ -1493,9 +1465,6 @@
     </section>
 
     <!-- Connector -->
-    <div class="section-divider" aria-hidden="true">
-        <span class="section-divider-glyph">//</span>
-    </div>
 
     <!-- Stats -->
     <section class="bg-primary" style="padding: 2rem 2rem 3.5rem;">
@@ -1522,9 +1491,6 @@
     </section>
 
     <!-- Connector -->
-    <div class="section-divider" aria-hidden="true">
-        <span class="section-divider-glyph">//</span>
-    </div>
 
     <!-- About -->
     <section id="about" class="bg-primary">
@@ -1544,9 +1510,6 @@
     </section>
 
     <!-- Connector -->
-    <div class="section-divider" aria-hidden="true">
-        <span class="section-divider-glyph">//</span>
-    </div>
 
     <!-- Experience -->
     <section id="experience" class="bg-primary">
@@ -1667,9 +1630,6 @@
     </section>
 
     <!-- Connector -->
-    <div class="section-divider" aria-hidden="true">
-        <span class="section-divider-glyph">//</span>
-    </div>
 
     <!-- Core Competencies (Agent Nodes) -->
     <section id="agents" class="bg-primary">
@@ -1725,9 +1685,6 @@
     </section>
 
     <!-- Connector -->
-    <div class="section-divider" aria-hidden="true">
-        <span class="section-divider-glyph">//</span>
-    </div>
 
     <!-- Skills -->
     <section id="skills" class="bg-primary">
@@ -1782,9 +1739,6 @@
     </section>
 
     <!-- Connector -->
-    <div class="section-divider" aria-hidden="true">
-        <span class="section-divider-glyph">//</span>
-    </div>
 
     <!-- Education -->
     <section id="education" class="bg-primary">
@@ -1815,9 +1769,6 @@
     </section>
 
     <!-- Connector -->
-    <div class="section-divider" aria-hidden="true">
-        <span class="section-divider-glyph">//</span>
-    </div>
 
     <!-- Hobbies -->
     <section class="bg-primary">
@@ -1849,9 +1800,6 @@
     </section>
 
     <!-- Connector -->
-    <div class="section-divider" aria-hidden="true">
-        <span class="section-divider-glyph">//</span>
-    </div>
 
     <!-- Books -->
     <section class="bg-primary">
@@ -1877,9 +1825,6 @@
     </section>
 
     <!-- Connector -->
-    <div class="section-divider" aria-hidden="true">
-        <span class="section-divider-glyph">//</span>
-    </div>
 
     <!-- Dashboards -->
     <section id="dashboards" class="bg-primary">
@@ -1910,9 +1855,6 @@
     </section>
 
     <!-- Connector -->
-    <div class="section-divider" aria-hidden="true">
-        <span class="section-divider-glyph">//</span>
-    </div>
 
     <!-- Footer -->
     <footer id="contact">
