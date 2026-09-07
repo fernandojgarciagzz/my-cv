@@ -171,22 +171,21 @@
         /* ==========================================================
            HERO — name at the edges, galaxy in the middle, pinned
            ========================================================== */
-        .hero { height: 190vh; position: relative; }
-        .hero-pin { position: sticky; top: 0; height: 100vh; overflow: hidden; touch-action: pan-y; }
+        .hero { height: 100vh; position: relative; }
+        .hero-pin { position: relative; height: 100vh; overflow: hidden; touch-action: pan-y; }
         .hero-pin.grab { cursor: grab; }
         .hero-pin.grabbing { cursor: grabbing; }
         .hero-name {
             margin: 0; font-family: var(--font-display); font-weight: 600; font-size: var(--t-display);
             letter-spacing: -0.02em; line-height: 1; text-transform: uppercase; color: var(--ink);
         }
-        .hero-first, .hero-last { position: absolute; top: 50%; will-change: transform, opacity; pointer-events: none; }
-        .hero-first { left: var(--gutter); transform: translate(calc(var(--hp, 0) * -16vw), -50%); opacity: calc(1 - var(--hp, 0) * 1.7); }
-        .hero-last  { right: var(--gutter); transform: translate(calc(var(--hp, 0) * 16vw), -50%); opacity: calc(1 - var(--hp, 0) * 1.7); }
+        .hero-first, .hero-last { position: absolute; top: 50%; transform: translateY(-50%); pointer-events: none; }
+        .hero-first { left: var(--gutter); }
+        .hero-last  { right: var(--gutter); }
         .hero-hint {
             position: absolute; left: 50%; bottom: 2.2rem; transform: translateX(-50%);
             display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
             font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3);
-            opacity: calc(1 - var(--hp, 0) * 4);
         }
         .hero-hint i { display: block; width: 1px; height: 2.6rem; background: linear-gradient(var(--ink-3), transparent); transform-origin: top; animation: hintDrop 2.2s ease-in-out infinite; }
         @keyframes hintDrop { 0% { transform: scaleY(0); opacity: 0; } 30% { opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
@@ -499,13 +498,9 @@
            ========================================================== */
         html.light #space, html.light .space-glow, html.light .space-fallback, html.light .interlude, html.light .hero-hint,
         html.light .photo::before, html.light .chapters::before, html.light .intro::before, html.light .timeline::after { display: none; }
-        html.light .hero { height: 100vh; }
         html.light .rail { display: none; }
         html.light .timeline { --tl: 1 !important; }
         html.light .timeline-bullets li, html.light .timeline-item { opacity: 1; transform: none; }
-        html.light .hero-first, html.light .hero-last { opacity: 1 !important; }
-        html.light .hero-first { transform: translate(0, -50%) !important; }
-        html.light .hero-last { transform: translate(0, -50%) !important; }
         html.light .hero-pin { cursor: default !important; }
         html.light .reveal, html.light .reveal-media { opacity: 1; transform: none; transition: none; }
         html.light *, html.light *::before, html.light *::after { animation: none !important; transition: none !important; }
@@ -535,8 +530,8 @@
             .nav-links { display: none; }
             .nav-menu { display: inline-flex; }
             .nav-links.open { display: flex; flex-direction: column; gap: 1rem; position: absolute; top: var(--nav-h); left: 0; right: 0; padding: 1.25rem var(--gutter) 1.5rem; background: var(--nav-bg); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); }
-            .hero-first { top: 24%; transform: translate(calc(var(--hp, 0) * -10vw), 0); }
-            .hero-last { top: auto; bottom: 22%; transform: translate(calc(var(--hp, 0) * 10vw), 0); }
+            .hero-first { top: 24%; transform: none; }
+            .hero-last { top: auto; bottom: 22%; transform: none; }
             .intro { padding-top: calc(var(--nav-h) + 4vh); }
             .intro-inner { grid-template-columns: 1fr; gap: 3rem; }
             .display { max-width: none; }
@@ -570,8 +565,6 @@
             html { scroll-behavior: auto; }
             *, *::before, *::after { animation: none !important; transition: none !important; }
             .reveal, .reveal-media { opacity: 1; transform: none; }
-            .hero { height: 100vh; }
-            .hero-first, .hero-last, .hero-hint { opacity: 1; }
             .hero-hint i { display: none; }
             .morph { height: auto; }
             .morph-pin { position: static; height: 70vh; }
@@ -1056,18 +1049,13 @@
             Object.keys(dots).forEach(function (id) { var el = d.getElementById(id); if (el) ro.observe(el); });
         }
 
-        // Hero progress (--hp) + nav state, one rAF-throttled scroll handler
-        var hero = d.querySelector('.hero'), ticking = false;
+        // Nav state, timeline draw and rail, one rAF-throttled scroll handler
+        var ticking = false;
         function onScroll() {
             if (ticking) return; ticking = true;
             requestAnimationFrame(function () {
                 ticking = false;
                 nav.classList.toggle('scrolled', window.scrollY > 8);
-                if (!reduce && hero) {
-                    var range = hero.offsetHeight - window.innerHeight;
-                    var p = range > 0 ? Math.max(0, Math.min(1, window.scrollY / range)) : 0;
-                    hero.style.setProperty('--hp', p.toFixed(3));
-                }
                 if (morphSteps) morphProgress();
                 if (tl && !reduce) {
                     var tr = tl.getBoundingClientRect();

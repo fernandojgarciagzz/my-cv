@@ -6,9 +6,10 @@
  * field and the dust layer stay for the whole page (the dust rides with the
  * camera and streams past as you scroll), so you are always still in space.
  *
- * Interaction: drag anywhere in the hero to spin and tilt the galaxy (with
- * inertia); move the cursor and nearby galaxy particles and dust are pushed
- * aside. Touch devices scroll normally; horizontal drags rotate.
+ * Interaction: the whole galaxy tilts and turns toward the cursor (a 3D
+ * hover, no particle effects), and you can drag anywhere in the hero to spin
+ * and tilt it with inertia. Touch devices scroll normally; horizontal drags
+ * rotate.
  *
  * Theme classes on <html> retint everything and blend smoothly:
  *   (default)     dark space, additive warm-core / slate-arm galaxy
@@ -37,7 +38,6 @@
 
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var isMobile = window.matchMedia('(max-width: 768px)').matches;
-    var canHover = window.matchMedia('(hover: hover)').matches;
     var DPR = Math.min(window.devicePixelRatio || 1, 2);
     renderer.setPixelRatio(DPR);
     renderer.setClearColor(0x000000, 0);
@@ -57,14 +57,16 @@
     var gPos = new Float32Array(COUNT * 3), gRnd = new Float32Array(COUNT * 3), gScl = new Float32Array(COUNT);
     for (var i = 0; i < COUNT; i++) {
         var i3 = i * 3;
-        var core = i < COUNT * 0.14;
-        var r = core ? Math.pow(Math.random(), 1.6) * 0.8 : Math.random() * RADIUS;
+        var core = i < COUNT * 0.18;
+        var r = core ? Math.pow(Math.random(), 1.5) * 0.9 : Math.random() * RADIUS;
         var branch = ((i % BRANCHES) / BRANCHES) * Math.PI * 2;
         var a = branch + r * SPIN;
         gPos[i3] = Math.cos(a) * r; gPos[i3 + 1] = 0; gPos[i3 + 2] = Math.sin(a) * r;
-        var rs = core ? 0.4 : RANDOM * r + 0.05;
+        var rs = core ? 0.55 : RANDOM * r + 0.05;
+        // vertical spread: a rounded bulge in the core, a thicker disc that thins toward the rim
+        var vy = core ? 0.95 : 0.75 - 0.35 * (r / RADIUS);
         gRnd[i3]     = sgn() * Math.pow(Math.random(), RPOW) * rs;
-        gRnd[i3 + 1] = sgn() * Math.pow(Math.random(), RPOW) * rs * 0.4;
+        gRnd[i3 + 1] = sgn() * Math.pow(Math.random(), RPOW) * rs * vy;
         gRnd[i3 + 2] = sgn() * Math.pow(Math.random(), RPOW) * rs;
         gScl[i] = Math.random() < 0.025 ? 2.2 + Math.random() * 2.2 : 0.45 + Math.random() * 1.1;
     }
@@ -76,44 +78,37 @@
     var gMat = new THREE.ShaderMaterial({
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
         uniforms: {
-            uTime: { value: 0 }, uSize: { value: isMobile ? 23 : 28 }, uPixelRatio: { value: DPR },
+            uTime: { value: 0 }, uSize: { value: isMobile ? 24 : 30 }, uPixelRatio: { value: DPR },
             uOpacity: { value: 1 }, uRadius: { value: RADIUS },
             uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
-            uMouse: { value: new THREE.Vector3(999, 0, 999) }, uMouseStrength: { value: 0 }, uMouseRadius: { value: 1.25 },
             uExplode: { value: 0 }
         },
         vertexShader: [
             'uniform float uTime; uniform float uSize; uniform float uPixelRatio; uniform float uRadius;',
             'uniform vec3 uInside; uniform vec3 uOutside;',
-            'uniform vec3 uMouse; uniform float uMouseStrength; uniform float uMouseRadius; uniform float uExplode;',
+            'uniform float uExplode;',
             'attribute vec3 aRandom; attribute float aScale;',
-            'varying vec3 vColor; varying float vGlow;',
+            'varying vec3 vColor;',
             'void main() {',
             '  vec3 p = position;',
             '  float ang = atan(p.x, p.z); float dist = length(p.xz);',
             '  ang += (1.0 / max(dist, 0.25)) * uTime * 0.09;',   // differential rotation: inner arms turn faster
             '  p.x = cos(ang) * dist; p.z = sin(ang) * dist;',
             '  p += aRandom;',
-            // cursor: particles near the pointer brighten, swell and gather slightly toward it
-            '  vec2 dm = p.xz - uMouse.xz; float md = length(dm);',
-            '  float f = pow(1.0 - smoothstep(0.0, uMouseRadius, md), 2.0) * uMouseStrength;',
-            '  vec2 dir = md > 0.0001 ? dm / md : vec2(1.0, 0.0);',
-            '  p.xz -= dir * f * 0.10; p.y += f * 0.05;',
-            '  vGlow = f;',
             // boring mode: every particle flies outward from the core and fades
             '  float ex = uExplode * uExplode;',
             '  p += normalize(p + vec3(0.001, 0.0, 0.0)) * ex * 18.0 + aRandom * ex * 12.0;',
             '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
             '  gl_Position = projectionMatrix * mv;',
-            '  gl_PointSize = uSize * aScale * uPixelRatio * (1.0 + vGlow * 0.7) * (1.0 / -mv.z);',
+            '  gl_PointSize = uSize * aScale * uPixelRatio * (1.0 / -mv.z);',
             '  vColor = mix(uInside, uOutside, clamp(dist / uRadius, 0.0, 1.0));',
             '}'
         ].join('\n'),
         fragmentShader: [
-            'uniform float uOpacity; uniform float uExplode; varying vec3 vColor; varying float vGlow;',
+            'uniform float uOpacity; uniform float uExplode; varying vec3 vColor;',
             'void main() {', SOFT_DISC,
             '  a = a * a * (3.0 - 2.0 * a); a = pow(a, 1.6);',
-            '  gl_FragColor = vec4(vColor + vec3(0.55) * vGlow, a * uOpacity * (1.0 - uExplode) * (1.0 + vGlow * 0.9));',
+            '  gl_FragColor = vec4(vColor, a * uOpacity * (1.0 - uExplode));',
             '}'
         ].join('\n')
     });
@@ -162,7 +157,7 @@
     scene.add(stars);
 
     /* ── Dust: near-field particles that ride with the camera ────────── */
-    var DC = isMobile ? 320 : 820;
+    var DC = isMobile ? 240 : 560;
     var dPos = new Float32Array(DC * 3), dScl = new Float32Array(DC), dSeed = new Float32Array(DC);
     var TAN_HALF = Math.tan(FOV / 2 * Math.PI / 180);
     for (var k = 0; k < DC; k++) {
@@ -181,28 +176,25 @@
         transparent: true, depthWrite: false, blending: THREE.NormalBlending,
         uniforms: {
             uTime: { value: 0 }, uPixelRatio: { value: DPR }, uOpacity: { value: 0.5 }, uColor: { value: new THREE.Color('#9FB8D6') },
-            uScroll: { value: 0 }, uAspect: { value: 1 }, uTanHalf: { value: TAN_HALF },
-            uMouse: { value: new THREE.Vector2(9, 9) }, uMouseStrength: { value: 0 }, uDrift: { value: reduce ? 0 : 1 }
+            uScroll: { value: 0 }, uAspect: { value: 1 }, uTanHalf: { value: TAN_HALF }, uDrift: { value: reduce ? 0 : 1 }
         },
         vertexShader: [
-            'uniform float uTime; uniform float uPixelRatio; uniform float uScroll; uniform float uAspect; uniform float uTanHalf;',
-            'uniform vec2 uMouse; uniform float uMouseStrength; uniform float uDrift;',
+            'uniform float uTime; uniform float uPixelRatio; uniform float uScroll; uniform float uAspect; uniform float uTanHalf; uniform float uDrift;',
             'attribute float aScale; attribute float aSeed; varying float vA;',
             'void main() {',
             '  vec3 p = position;',
-            '  float H = uTanHalf * -p.z * 1.2; float W = H * uAspect;',
-            '  p.x += sin(uTime * 0.15 + aSeed * 6.283) * 0.35 * uDrift;',
-            '  p.y += cos(uTime * 0.12 + aSeed * 9.0) * 0.3 * uDrift;',
-            '  p.y += uScroll * (2.2 / max(1.0, -p.z * 0.45));',                 // parallax: near dust streams past faster
+            '  float near = 1.0 - clamp((-p.z - 2.5) / 10.0, 0.0, 1.0);',
+            '  float H = uTanHalf * -p.z; float W = H * uAspect;',
+            '  p.x += sin(uTime * 0.15 + aSeed * 6.283) * 0.25 * uDrift;',
+            '  p.y += cos(uTime * 0.12 + aSeed * 9.0) * 0.2 * uDrift;',
+            // parallax: uScroll is viewports scrolled; the page moves 2H per viewport, dust moves 22–60% of that
+            '  p.y += uScroll * 2.0 * H * (0.22 + 0.38 * near);',
+            '  H *= 1.2; W *= 1.2;',
             '  p.x = mod(p.x + W, 2.0 * W) - W; p.y = mod(p.y + H, 2.0 * H) - H;',
-            '  vec2 m = vec2(uMouse.x * W / 1.2, uMouse.y * H / 1.2);',            // cursor projected to this particle depth
-            '  vec2 d = p.xy - m; float md = length(d); float r = 0.26 * -p.z;',
-            '  float f = pow(1.0 - smoothstep(0.0, r, md), 2.0) * uMouseStrength;',
-            '  p.xy -= (md > 0.0001 ? d / md : vec2(1.0, 0.0)) * f * r * 0.3;',
             '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
             '  gl_Position = projectionMatrix * mv;',
-            '  gl_PointSize = aScale * uPixelRatio * (1.0 + f * 0.5) * (19.0 / -mv.z);',
-            '  vA = (0.35 + 0.65 * (1.0 - (-p.z - 2.5) / 10.0)) * (1.0 + f * 0.8);',
+            '  gl_PointSize = aScale * uPixelRatio * (13.0 / -mv.z);',
+            '  vA = 0.35 + 0.65 * near;',
             '}'
         ].join('\n'),
         fragmentShader: [
@@ -264,8 +256,16 @@
 
     /* ── Scroll, pointer, drag ──────────────────────────────────────── */
     var scrollP = 0, dirty = true;
-    var mx = 0, my = 0, smx = 0, smy = 0, mouseIn = false, mouseK = 0;
     var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: 0, ry: 0 };
+    var mx = 0, my = 0, tiltX = 0, tiltY = 0;                   // cursor-driven tilt of the whole galaxy
+    if (!reduce && window.matchMedia('(hover: hover)').matches) {
+        window.addEventListener('mousemove', function (e) {
+            mx = (e.clientX / window.innerWidth - 0.5) * 2;
+            my = (e.clientY / window.innerHeight - 0.5) * 2;
+        }, { passive: true });
+        document.addEventListener('mouseleave', function () { mx = 0; my = 0; });
+        window.addEventListener('blur', function () { mx = 0; my = 0; });
+    }
 
     function readScroll() {
         var p = window.scrollY / (window.innerHeight * 1.4);
@@ -274,16 +274,6 @@
         if (p !== scrollP) { scrollP = p; dirty = true; }
     }
     window.addEventListener('scroll', readScroll, { passive: true });
-
-    if (!reduce && canHover) {
-        window.addEventListener('mousemove', function (e) {
-            mx = (e.clientX / window.innerWidth - 0.5) * 2;
-            my = (e.clientY / window.innerHeight - 0.5) * 2;
-            mouseIn = true;
-        }, { passive: true });
-        document.addEventListener('mouseleave', function () { mouseIn = false; });
-        window.addEventListener('blur', function () { mouseIn = false; });
-    }
 
     var pin = document.querySelector('.hero-pin');
     if (pin && !reduce) {
@@ -307,35 +297,22 @@
         pin.addEventListener('pointercancel', endDrag);
     }
 
-    var ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), inv = new THREE.Matrix4();
-    var rO = new THREE.Vector3(), rD = new THREE.Vector3();
-    function updateGalaxyMouse() {
-        ndc.set(smx, -smy);                                   // smoothed: the wake trails the cursor
-        ray.setFromCamera(ndc, camera);
-        inv.copy(gGroup.matrixWorld).invert();
-        rO.copy(ray.ray.origin).applyMatrix4(inv);
-        rD.copy(ray.ray.direction).transformDirection(inv);
-        var u = gMat.uniforms.uMouse.value;
-        if (Math.abs(rD.y) < 1e-4) { u.set(999, 0, 999); return; }
-        var t = -rO.y / rD.y;
-        if (t < 0) { u.set(999, 0, 999); return; }
-        u.set(rO.x + rD.x * t, 0, rO.z + rD.z * t);
-    }
-
     function place(t) {
         var p = scrollP;
         var pe = p < 1 ? p * p * (3 - 2 * p) : p;
         var zoom = Math.min(pe, 1.6);
         var after = Math.max(0, p - 1.6);                       // how far past the intro we are
-        smx += (mx - smx) * 0.08; smy += (my - smy) * 0.08;
+        var hoverK = drag.on ? 0 : Math.max(0, 1 - after);      // full in the hero, gone once past the intro
+        tiltX += (-my * 0.2 * hoverK - tiltX) * 0.045;          // mouse up = look more from above, never edge-on
+        tiltY += (mx * 0.38 * hoverK - tiltY) * 0.045;
         if (!drag.on) { drag.ry += drag.vy; drag.rx = clamp(drag.rx + drag.vx, -0.75, 0.75); drag.vy *= 0.94; drag.vx *= 0.9; }
 
         // Camera: opens a little further out (cleaner start), pulls back through the hero,
         // then keeps looking lower so the galaxy drifts up and out while the stars and dust remain.
-        camera.position.set(smx * 0.35, 2.4 + zoom * 2.6, 6.6 + zoom * 5.6);
-        camera.lookAt(0, -(zoom + after * 0.9) * 1.15 + smy * 0.12, 0);
-        gGroup.rotation.y = t * 0.018 + zoom * 1.1 + drag.ry;
-        gGroup.rotation.x = drag.rx;
+        camera.position.set(0, 3.5 + zoom * 2.6, 7.6 + zoom * 5.6);
+        camera.lookAt(0, -(zoom + after * 0.9) * 1.15, 0);
+        gGroup.rotation.y = t * 0.018 + zoom * 1.1 + drag.ry + tiltY;
+        gGroup.rotation.x = clamp(drag.rx + tiltX, -0.9, 0.9);
         gGroup.updateMatrixWorld();
 
         var fade = p < 0.85 ? 1 : (p < 2.3 ? Math.max(0.3, 1 - (p - 0.85) * 1.3) : Math.max(0, 0.3 * (1 - (p - 2.3) / 0.7)));
@@ -343,19 +320,13 @@
         gMat.uniforms.uOpacity.value = cur.gOp * fade;
         gMat.uniforms.uExplode.value = explode;
         sMat.uniforms.uOpacity.value = cur.sOp * (1 - explode);
-        dMat.uniforms.uOpacity.value = cur.dOp * (1 - explode);
+        var dustIn = Math.max(0, Math.min(1, (p - 0.75) / 0.6));   // dust only once the galaxy has receded
+        dMat.uniforms.uOpacity.value = cur.dOp * (1 - explode) * dustIn;
 
-        stars.position.y = -window.scrollY * 0.00035;
+        var vps = window.scrollY / window.innerHeight;         // viewports scrolled
+        stars.position.y = -vps * 2.2;
         stars.rotation.y = t * 0.003;
-
-        // Cursor response: full strength in the hero, gentler once reading
-        var wantK = (mouseIn && !drag.on) ? (p < 1.6 ? 1 : 0.6) : 0;
-        mouseK += (wantK - mouseK) * 0.08;
-        gMat.uniforms.uMouseStrength.value = mouseK;
-        dMat.uniforms.uMouseStrength.value = mouseK;
-        dMat.uniforms.uMouse.value.set(smx, -smy);
-        dMat.uniforms.uScroll.value = window.scrollY * 0.004;
-        if (mouseK > 0.01) updateGalaxyMouse();
+        dMat.uniforms.uScroll.value = vps;
 
         gMat.uniforms.uTime.value = t;
         sMat.uniforms.uTime.value = t;
@@ -406,6 +377,6 @@
         window.addEventListener('scroll', function () { if (dirty) renderStatic(); }, { passive: true });
         window.addEventListener('resize', function () { renderStatic(); });
     }
-    window.__space = { rotationY: function () { return gGroup.rotation.y; }, mouseStrength: function () { return mouseK; }, explode: function () { return explode; } };
+    window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; } };
     start();
 })();
