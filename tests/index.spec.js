@@ -138,6 +138,29 @@ test.describe('Index — structure', () => {
     });
 });
 
+test.describe('Index — rhythm', () => {
+    test('timeline draws with scroll, label follows the company, rail tracks the chapter', async ({ page }) => {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.goto(BASE, { waitUntil: 'load' });
+        await page.waitForTimeout(1200);
+        const tlTop = await page.locator('.timeline').evaluate(el => el.getBoundingClientRect().top + scrollY);
+        await page.evaluate(y => window.scrollTo(0, y), tlTop - 300);
+        await page.waitForTimeout(700);
+        const early = await page.locator('.timeline').evaluate(el => parseFloat(el.style.getPropertyValue('--tl')));
+        const tlH = await page.locator('.timeline').evaluate(el => el.getBoundingClientRect().height);
+        await page.evaluate(y => window.scrollTo(0, y), tlTop + tlH * 0.6);
+        await page.waitForTimeout(700);
+        const later = await page.locator('.timeline').evaluate(el => parseFloat(el.style.getPropertyValue('--tl')));
+        expect(later).toBeGreaterThan(early);
+        expect(later).toBeGreaterThan(0.5);
+        await expect(page.locator('#expSub')).toContainText(/Regrello|Metalsa|Salesforce/);
+        await expect(page.locator('#rail a.on')).toHaveAttribute('data-ch', 'experience');
+        await page.locator('#tools').scrollIntoViewIfNeeded();
+        await page.waitForTimeout(700);
+        await expect(page.locator('#rail a.on')).toHaveAttribute('data-ch', 'tools');
+    });
+});
+
 test.describe('Index — reduced motion', () => {
     test.use({ reducedMotion: 'reduce' });
     test('reveals show their final state and the morph is static', async ({ page }) => {

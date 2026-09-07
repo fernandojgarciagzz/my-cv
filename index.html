@@ -458,11 +458,51 @@
         .contact-meta { margin-top: 3.5rem; font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3); }
 
         /* ==========================================================
+           RHYTHM — chapters settle on entry, the timeline draws itself,
+           bullets step in, a rail on the right tracks the chapter
+           ========================================================== */
+        @supports (animation-timeline: view()) {
+            .chapter-body { animation: settle linear both; animation-timeline: view(); animation-range: entry 0px entry 520px; }
+            @keyframes settle { from { transform: translateY(44px); } to { transform: none; } }
+        }
+        html.js .timeline { --tl: 0; }
+        .timeline::before { transform: scaleY(var(--tl, 1)); transform-origin: top; transition: transform 0.2s linear; }
+        .timeline-item.reveal { transform: translate(-14px, 10px); }
+        .timeline-item.reveal.in { transform: none; }
+        .timeline-bullets li { opacity: 0; transform: translateY(8px); transition: opacity 0.5s ease, transform 0.5s ease; }
+        .timeline-item.in .timeline-bullets li { opacity: 1; transform: none; }
+        .timeline-item.in .timeline-bullets li:nth-child(1) { transition-delay: 0.15s; }
+        .timeline-item.in .timeline-bullets li:nth-child(2) { transition-delay: 0.24s; }
+        .timeline-item.in .timeline-bullets li:nth-child(3) { transition-delay: 0.33s; }
+        .timeline-item.in .timeline-bullets li:nth-child(4) { transition-delay: 0.42s; }
+        .timeline-item.in .timeline-bullets li:nth-child(5) { transition-delay: 0.51s; }
+        html:not(.js) .timeline-bullets li { opacity: 1; transform: none; }
+        .chapter-label .sub { text-transform: none; letter-spacing: 0; font-weight: 400; min-height: 1.2em; transition: opacity 0.3s; }
+        .rail {
+            position: fixed; right: 1.4rem; top: 50%; transform: translateY(-50%); z-index: 90;
+            display: flex; flex-direction: column; gap: 0.7rem; padding: 0.4rem 0;
+            opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
+        }
+        .rail.show { opacity: 1; pointer-events: auto; }
+        .rail a { position: relative; display: block; width: 14px; height: 14px; }
+        .rail a::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; border: 1px solid var(--ink-3); transition: background-color 0.25s, border-color 0.25s, transform 0.25s; }
+        .rail a.on::after { background: var(--accent); border-color: var(--accent); transform: scale(1.25); }
+        .rail a span {
+            position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%) translateX(6px);
+            white-space: nowrap; font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase;
+            color: var(--ink-2); opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none;
+        }
+        .rail a:hover span, .rail a:focus-visible span { opacity: 1; transform: translateY(-50%); }
+
+        /* ==========================================================
            BORING MODE — space gone, no motion, black and white
            ========================================================== */
         html.light #space, html.light .space-glow, html.light .space-fallback, html.light .interlude, html.light .hero-hint,
         html.light .photo::before, html.light .chapters::before, html.light .intro::before, html.light .timeline::after { display: none; }
         html.light .hero { height: 100vh; }
+        html.light .rail { display: none; }
+        html.light .timeline { --tl: 1 !important; }
+        html.light .timeline-bullets li, html.light .timeline-item { opacity: 1; transform: none; }
         html.light .hero-first, html.light .hero-last { opacity: 1 !important; }
         html.light .hero-first { transform: translate(0, -50%) !important; }
         html.light .hero-last { transform: translate(0, -50%) !important; }
@@ -486,6 +526,7 @@
            RESPONSIVE
            ========================================================== */
         @media (max-width: 1099px) {
+            .rail { display: none; }
             .chapter-inner { grid-template-columns: minmax(0, var(--measure)); justify-content: center; }
             .chapter-label { grid-column: 1; justify-self: stretch; width: auto; position: sticky; top: var(--nav-h); z-index: 5; flex-direction: row; align-items: baseline; gap: 0.75rem; padding: 0.8rem 0; margin-bottom: 1.75rem; background: rgba(var(--bg-rgb), 0.9); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line-2); }
             .chapter-body { grid-column: 1; }
@@ -537,6 +578,9 @@
             .morph-fallback { opacity: 1 !important; }
             #agentShowcaseCanvas { display: none; }
             .skill-bar-fill { transition: none; }
+            .timeline { --tl: 1 !important; }
+            .timeline-bullets li, .timeline-item { opacity: 1; transform: none; }
+            .rail { display: none; }
         }
     </style>
 </head>
@@ -580,6 +624,18 @@
                 </button>
             </div>
         </div>
+    </nav>
+
+    <nav class="rail" id="rail" aria-label="Chapters">
+        <a href="#about" data-ch="about"><span>about</span></a>
+        <a href="#experience" data-ch="experience"><span>experience</span></a>
+        <a href="#skills" data-ch="skills"><span>skills</span></a>
+        <a href="#tools" data-ch="tools"><span>tools</span></a>
+        <a href="#education" data-ch="education"><span>education</span></a>
+        <a href="#beyond" data-ch="beyond"><span>beyond work</span></a>
+        <a href="#reading" data-ch="reading"><span>reading</span></a>
+        <a href="#dashboards" data-ch="dashboards"><span>dashboards</span></a>
+        <a href="#contact" data-ch="contact"><span>contact</span></a>
     </nav>
 
     <div class="page">
@@ -664,7 +720,7 @@
     <!-- 02 EXPERIENCE -->
     <section class="chapter" id="experience">
         <div class="chapter-inner">
-            <aside class="chapter-label"><span class="num">02</span><span>// experience</span></aside>
+            <aside class="chapter-label"><span class="num">02</span><span>// experience</span><span class="sub" id="expSub" aria-live="polite"></span></aside>
             <div class="chapter-body">
                 <h2 class="h2 reveal">Professional Journey</h2>
                 <p class="section-desc reveal">From engineering internships to building agentic systems at Salesforce.</p>
@@ -975,6 +1031,31 @@
         menu.addEventListener('click', function () { var open = links.classList.toggle('open'); menu.setAttribute('aria-expanded', String(open)); });
         links.addEventListener('click', function (e) { if (e.target.tagName === 'A') { links.classList.remove('open'); menu.setAttribute('aria-expanded', 'false'); } });
 
+        // Rhythm: the timeline draws with scroll, the experience label follows the company, the rail tracks the chapter
+        var tl = d.querySelector('.timeline'), rail = d.getElementById('rail'), expSub = d.getElementById('expSub');
+        if (tl && expSub && 'IntersectionObserver' in window) {
+            var items = tl.querySelectorAll('.timeline-item');
+            var co = new IntersectionObserver(function (es) {
+                es.forEach(function (e) {
+                    if (!e.isIntersecting) return;
+                    var c = e.target.querySelector('.timeline-company');
+                    if (c) expSub.textContent = '· ' + c.textContent.trim();
+                });
+            }, { rootMargin: '-35% 0px -55% 0px' });
+            items.forEach(function (el) { co.observe(el); });
+        }
+        if (rail && 'IntersectionObserver' in window) {
+            var dots = {}; rail.querySelectorAll('a').forEach(function (a) { dots[a.dataset.ch] = a; });
+            var ro = new IntersectionObserver(function (es) {
+                es.forEach(function (e) {
+                    if (!e.isIntersecting) return;
+                    rail.querySelectorAll('a').forEach(function (a) { a.classList.remove('on'); });
+                    if (dots[e.target.id]) dots[e.target.id].classList.add('on');
+                });
+            }, { rootMargin: '-40% 0px -50% 0px' });
+            Object.keys(dots).forEach(function (id) { var el = d.getElementById(id); if (el) ro.observe(el); });
+        }
+
         // Hero progress (--hp) + nav state, one rAF-throttled scroll handler
         var hero = d.querySelector('.hero'), ticking = false;
         function onScroll() {
@@ -988,6 +1069,12 @@
                     hero.style.setProperty('--hp', p.toFixed(3));
                 }
                 if (morphSteps) morphProgress();
+                if (tl && !reduce) {
+                    var tr = tl.getBoundingClientRect();
+                    var tp = Math.max(0, Math.min(1, (window.innerHeight * 0.78 - tr.top) / tr.height));
+                    tl.style.setProperty('--tl', tp.toFixed(3));
+                }
+                if (rail) rail.classList.toggle('show', window.scrollY > window.innerHeight * 1.6);
             });
         }
         window.addEventListener('scroll', onScroll, { passive: true });

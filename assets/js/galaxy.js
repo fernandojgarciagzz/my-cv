@@ -79,7 +79,7 @@
             uTime: { value: 0 }, uSize: { value: isMobile ? 23 : 28 }, uPixelRatio: { value: DPR },
             uOpacity: { value: 1 }, uRadius: { value: RADIUS },
             uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
-            uMouse: { value: new THREE.Vector3(999, 0, 999) }, uMouseStrength: { value: 0 }, uMouseRadius: { value: 0.95 },
+            uMouse: { value: new THREE.Vector3(999, 0, 999) }, uMouseStrength: { value: 0 }, uMouseRadius: { value: 1.25 },
             uExplode: { value: 0 }
         },
         vertexShader: [
@@ -87,33 +87,33 @@
             'uniform vec3 uInside; uniform vec3 uOutside;',
             'uniform vec3 uMouse; uniform float uMouseStrength; uniform float uMouseRadius; uniform float uExplode;',
             'attribute vec3 aRandom; attribute float aScale;',
-            'varying vec3 vColor;',
+            'varying vec3 vColor; varying float vGlow;',
             'void main() {',
             '  vec3 p = position;',
             '  float ang = atan(p.x, p.z); float dist = length(p.xz);',
             '  ang += (1.0 / max(dist, 0.25)) * uTime * 0.09;',   // differential rotation: inner arms turn faster
             '  p.x = cos(ang) * dist; p.z = sin(ang) * dist;',
             '  p += aRandom;',
-            // cursor: particles near the pointer are pushed outward and lifted
+            // cursor: particles near the pointer brighten, swell and gather slightly toward it
             '  vec2 dm = p.xz - uMouse.xz; float md = length(dm);',
             '  float f = pow(1.0 - smoothstep(0.0, uMouseRadius, md), 2.0) * uMouseStrength;',
             '  vec2 dir = md > 0.0001 ? dm / md : vec2(1.0, 0.0);',
-            '  vec2 tang = vec2(-dir.y, dir.x);',
-            '  p.xz += (dir * 0.32 + tang * 0.22) * f; p.y += f * 0.16;',
+            '  p.xz -= dir * f * 0.10; p.y += f * 0.05;',
+            '  vGlow = f;',
             // boring mode: every particle flies outward from the core and fades
             '  float ex = uExplode * uExplode;',
             '  p += normalize(p + vec3(0.001, 0.0, 0.0)) * ex * 18.0 + aRandom * ex * 12.0;',
             '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
             '  gl_Position = projectionMatrix * mv;',
-            '  gl_PointSize = uSize * aScale * uPixelRatio * (1.0 / -mv.z);',
+            '  gl_PointSize = uSize * aScale * uPixelRatio * (1.0 + vGlow * 0.7) * (1.0 / -mv.z);',
             '  vColor = mix(uInside, uOutside, clamp(dist / uRadius, 0.0, 1.0));',
             '}'
         ].join('\n'),
         fragmentShader: [
-            'uniform float uOpacity; uniform float uExplode; varying vec3 vColor;',
+            'uniform float uOpacity; uniform float uExplode; varying vec3 vColor; varying float vGlow;',
             'void main() {', SOFT_DISC,
             '  a = a * a * (3.0 - 2.0 * a); a = pow(a, 1.6);',
-            '  gl_FragColor = vec4(vColor, a * uOpacity * (1.0 - uExplode));',
+            '  gl_FragColor = vec4(vColor + vec3(0.55) * vGlow, a * uOpacity * (1.0 - uExplode) * (1.0 + vGlow * 0.9));',
             '}'
         ].join('\n')
     });
@@ -198,11 +198,11 @@
             '  vec2 m = vec2(uMouse.x * W / 1.2, uMouse.y * H / 1.2);',            // cursor projected to this particle depth
             '  vec2 d = p.xy - m; float md = length(d); float r = 0.26 * -p.z;',
             '  float f = pow(1.0 - smoothstep(0.0, r, md), 2.0) * uMouseStrength;',
-            '  p.xy += (md > 0.0001 ? d / md : vec2(1.0, 0.0)) * f * r * 0.45;',
+            '  p.xy -= (md > 0.0001 ? d / md : vec2(1.0, 0.0)) * f * r * 0.3;',
             '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
             '  gl_Position = projectionMatrix * mv;',
-            '  gl_PointSize = aScale * uPixelRatio * (19.0 / -mv.z);',
-            '  vA = 0.35 + 0.65 * (1.0 - (-p.z - 2.5) / 10.0);',
+            '  gl_PointSize = aScale * uPixelRatio * (1.0 + f * 0.5) * (19.0 / -mv.z);',
+            '  vA = (0.35 + 0.65 * (1.0 - (-p.z - 2.5) / 10.0)) * (1.0 + f * 0.8);',
             '}'
         ].join('\n'),
         fragmentShader: [
@@ -349,7 +349,7 @@
         stars.rotation.y = t * 0.003;
 
         // Cursor response: full strength in the hero, gentler once reading
-        var wantK = (mouseIn && !drag.on) ? (p < 1.6 ? 0.85 : 0.45) : 0;
+        var wantK = (mouseIn && !drag.on) ? (p < 1.6 ? 1 : 0.6) : 0;
         mouseK += (wantK - mouseK) * 0.08;
         gMat.uniforms.uMouseStrength.value = mouseK;
         dMat.uniforms.uMouseStrength.value = mouseK;
