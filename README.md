@@ -10,40 +10,38 @@ Personal portfolio and creative hub for Fernando García — Engineer, Product M
 
 | Page | Description |
 |------|-------------|
-| [`index.html`](index.html) | Main portfolio — hero, about, experience timeline, skills, tools, education, hobbies, and contact |
+| [`index.html`](index.html) | Main portfolio — a claim with three proof numbers, then one chapter per idea: about, experience (Salesforce, Regrello, Metalsa), skills, tools, education, dashboards, beyond work, reading, contact |
 | [`playground.html`](playground.html) | AI Agent Runner — an endless-runner game with keyboard and touch/swipe controls |
 | [`music.html`](music.html) | Roho — a custom music player for original tracks with vinyl aesthetics and MediaSession API |
 | [`dashboards.html`](dashboards.html) | Live data dashboards (e.g., The AI Race — benchmarks, pricing, and capabilities across top AI companies) |
 
 ## Features
 
-- **Dark mode** with localStorage persistence across all pages
-- **Claude Mode** — warm Anthropic-inspired color palette on the main portfolio
-- **3D hero background** via Spline iframe
-- **Interactive perspective grid** — Three.js floor grid with distance falloff, travelling ripple, scroll-direction-aware flow, and cursor-tracking hover glow (raycast onto the grid plane)
-- **Agent showcase morph** — sticky scroll-driven 3D point cloud (~5400 particles) that transitions between four forms: Intelligence (folded brain) → Agents (4 bust silhouettes in a square) → Process (DNA helix) → Orchestration (icosahedron engine + core)
-- **Scroll-driven animations** — reveal on scroll, parallax hero, scroll progress bar, side navigation dots
-- **Vinyl Easter egg** — click the profile photo to flip it into a spinning vinyl record, plays "Hatua Kwa Hatua"
-- **Book Chat agent** — click the Books hobby tag to open a chat-style book recommendation widget
-- **Robot Easter egg** — an animated robot runner in the hero playground button
+- **Dark mode** with localStorage persistence across all pages (key `theme`)
+- **One typographic system** — Space Grotesk for display, Inter for text, a six-step type scale defined as CSS custom properties, one accent color
+- **Chapters** — every section has a sticky label, one headline, one proof point (metric, shipped artifact, or named outcome) and at most one piece of media
+- **Hero orbit** — a 2D-canvas dot field behind the photo (~1.5KB, no WebGL needed) replaces the former Spline iframe
+- **Agent showcase morph** — scroll-driven 3D point cloud (~5400 particles) that transitions between four forms: Intelligence → Agents → Process → Orchestration. Three.js and `showcase.js` load only when the section is near the viewport; a static SVG fallback shows when WebGL or motion is unavailable
+- **Reduced motion** — `prefers-reduced-motion` disables all scroll-driven animation and shows the final state of every reveal
+- **Vinyl Easter egg** — click the profile photo to flip it into a spinning vinyl record, plays "Hatua Kwa Hatua" (audio and the easter-egg script load after first paint)
+- **Reader** — a Kindle-style widget with seven book notes
+- **Robot Easter egg** — an animated robot runner that becomes the hero playground button
 - **Roho music player** — full album experience with play/pause, seek, progress bars, track artwork, drag-to-seek on mobile, and CarPlay/MediaSession metadata
 - **AI Agent Runner game** — endless runner with jump (Space/ArrowUp/swipe up) and crouch (ArrowDown/swipe down), obstacles, score tracking, high score persistence, sound effects, mute toggle
 - **PWA support** — manifest.json, app icons (180/192/512), standalone display mode
-- **Anti-copy protection** — text selection disabled, right-click disabled
 - **Responsive design** — mobile-first layouts across all pages
 
 ## Tech Stack
 
 - Pure HTML, CSS, and vanilla JavaScript — no frameworks, no build step
-- [Three.js r128](https://threejs.org/) (CDN) for the perspective grid background and the agent showcase morph
-- [Spline](https://spline.design/) for 3D hero background
-- [Font Awesome 6.5](https://fontawesome.com/) for icons
-- Google Fonts: Space Grotesk, Inter, JetBrains Mono, Covered By Your Grace
+- [Three.js r128](https://threejs.org/) (CDN, lazy-loaded) for the agent showcase morph
+- Google Fonts: Space Grotesk, Inter (index.html); the other pages keep their own font sets
+- [Font Awesome 6.5](https://fontawesome.com/) for icons on the secondary pages
 - GitHub Pages hosting with custom domain (`CNAME`)
 
 ## Testing
 
-Playwright tests cover the playground game across desktop and mobile viewports:
+Playwright tests cover the main page (structure, lazy loading, reduced motion, blank-viewport checks at three sizes) and the playground game across desktop and mobile viewports:
 
 ```bash
 npx playwright test
@@ -70,11 +68,14 @@ my-cv/
   LICENSE             # All Rights Reserved
   playwright.config.js
   tests/
+    index.spec.js       # Main page: structure, lazy loading, reduced motion, viewports
     playground.spec.js
   assets/
+    img/
+      ai-race.jpg     # Screenshot used as the dashboards chapter media
     js/
-      animations.js   # Interactive perspective grid background
-      showcase.js     # Agent showcase: scroll-driven 4-form point cloud morph
+      extras.js       # Easter eggs (vinyl, robot runner, reader) — loaded after first paint
+      showcase.js     # Agent showcase: scroll-driven 4-form point cloud morph — lazy-loaded
   *.mp3               # Original music tracks (Roho album)
 ```
 

@@ -3,2589 +3,1051 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fernando García | Solutions Portfolio</title>
+    <title>Fernando García | Solutions Product Manager, Salesforce (Agentforce)</title>
+    <meta name="description" content="Fernando García builds Agentforce agents for supply chain, finance, and HR workflows. Mechanical engineer, M.S. Business Intelligence, ex-Metalsa and Regrello.">
     <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Fernando G.">
-    <meta name="theme-color" content="#D97757">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#3B5775">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
     <style>
-        /* ── Anti-copy: disable text selection ── */
-        body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        /* Allow selection inside inputs/textareas if any */
-        input, textarea { -webkit-user-select: text; user-select: text; }
-
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
+        /* ==========================================================
+           TOKENS — the only type sizes, faces, and colors on the page
+           ========================================================== */
         :root {
-            /* Cool concrete + slate palette — muted, premium, less royal-blue */
-            --sf-blue: #3B5775;
-            --sf-blue-dark: #243A52;
-            --sf-blue-light: #5B7895;
-            --sf-cyan: #7EA0BB;
-            --sf-navy: #1A2A3D;
-            --sf-green: #4A6F58;
-            --sf-green-light: #6B8F77;
+            --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+            --font-text: 'Inter', system-ui, -apple-system, sans-serif;
 
-            --bg-primary: #E5E5E7;
-            --bg-secondary: #EFEFF1;
-            --bg-tertiary: #D8D8DB;
-            --border: #CCCDD0;
-            --border-light: #E0E0E3;
-            --text-primary: #2D3748;
-            --text-secondary: #4A5568;
-            --text-tertiary: #5D6779;
-            --text-muted: #8A92A0;
-            --card-bg: #FAFAFB;
-            --nav-bg: rgba(229,229,231,0.85);
-            --node-color: rgba(59, 87, 117, 0.10);
-            --node-line: rgba(59, 87, 117, 0.07);
-            --dot-active: var(--sf-blue);
-            --dot-inactive: #B8BABE;
-            --toggle-bg: #DCDCE0;
-            --toggle-icon: #B8860B;
-            --footer-bg: #1F2731;
-            --footer-text: #8A92A0;
+            /* Type scale: 6 steps. Nothing on the page uses a size outside these. */
+            --t-display: clamp(2.375rem, 1.1rem + 3.6vw, 3.75rem);  /* 38 → 60px */
+            --t-number:  clamp(2rem, 1.35rem + 1.9vw, 2.75rem);      /* 32 → 44px */
+            --t-h2:      clamp(1.625rem, 1.2rem + 1.2vw, 2rem);      /* 26 → 32px */
+            --t-lead:    1.25rem;    /* 20px */
+            --t-body:    1.0625rem;  /* 17px */
+            --t-small:   0.875rem;   /* 14px */
+            --t-micro:   0.75rem;    /* 12px */
 
-            --radius: 12px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-            --shadow-md: 0 4px 20px rgba(59,87,117,0.10);
-            --shadow-lg: 0 12px 40px rgba(59,87,117,0.14);
-            --shadow-card: 0 1px 3px rgba(0,0,0,0.05);
+            --lh-tight: 1.04;
+            --lh-heading: 1.18;
+            --lh-body: 1.65;
+            --lh-small: 1.55;
 
-            --mono: 'JetBrains Mono', monospace;
-            --heading: 'Space Grotesk', sans-serif;
-            --body: 'Inter', sans-serif;
+            --track-display: -0.03em;
+            --track-h2: -0.02em;
+            --track-label: 0.12em;
+
+            /* Layout */
+            --measure: 42rem;            /* 672px reading column, ~Astra's 676 */
+            --wide: 71rem;               /* 1136px wide media, ~Astra's 1143 */
+            --rail: 10.5rem;
+            --gutter: clamp(1.25rem, 4vw, 2.5rem);
+            --nav-h: 64px;
+            --space-chapter: clamp(6rem, 14vh, 10rem);
+            --radius: 4px;
+
+            /* Color — one accent */
+            --accent: #3B5775;
+            --accent-glow: rgba(59, 87, 117, 0.16);
+            --bg: #F3F3F1;
+            --bg-elev: #FFFFFF;
+            --ink: #1B2430;
+            --ink-2: #48525F;
+            --ink-3: #6F7A88;
+            --line: #D8DADF;
+            --line-2: #E7E8EB;
+            --nav-bg: rgba(243, 243, 241, 0.86);
+            --shadow: 0 12px 40px rgba(27, 36, 48, 0.12);
         }
-
         .dark {
-            /* Cement-coordinated dark mode — deep slate concrete with a
-             * lifted accent so the slate blue still reads on dark bg */
-            --sf-blue: #6B8AAD;
-            --sf-blue-dark: #4A6481;
-            --sf-blue-light: #8BA9C8;
-            --sf-cyan: #A4BFD4;
-
-            --bg-primary: #1A1F26;
-            --bg-secondary: #252B33;
-            --bg-tertiary: #2F3741;
-            --border: #3A4250;
-            --border-light: #2A3038;
-            --text-primary: #E2E8F0;
-            --text-secondary: #B0BAC8;
-            --text-tertiary: #8995A5;
-            --text-muted: #6B7585;
-            --card-bg: #252B33;
-            --nav-bg: rgba(26, 31, 38, 0.92);
-            --node-color: rgba(107, 138, 173, 0.14);
-            --node-line: rgba(107, 138, 173, 0.10);
-            --dot-inactive: #4A5260;
-            --toggle-bg: #374050;
-            --toggle-icon: #818CF8;
-            --footer-bg: #141821;
-            --footer-text: #6B7585;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.25);
-            --shadow-md: 0 4px 20px rgba(0,0,0,0.30);
-            --shadow-lg: 0 12px 40px rgba(0,0,0,0.35);
-            --shadow-card: 0 1px 3px rgba(0,0,0,0.35);
+            --accent: #7FA0C4;
+            --accent-glow: rgba(127, 160, 196, 0.18);
+            --bg: #14191F;
+            --bg-elev: #1C232B;
+            --ink: #E7EBF0;
+            --ink-2: #B4BECB;
+            --ink-3: #8794A3;
+            --line: #2E3843;
+            --line-2: #232C35;
+            --nav-bg: rgba(20, 25, 31, 0.86);
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
         }
 
-        html { scroll-behavior: smooth; }
+        /* ==========================================================
+           BASE
+           ========================================================== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: clip; }
         body {
-            font-family: var(--body);
-            color: var(--text-primary);
-            background: var(--bg-primary);
-            line-height: 1.6;
+            font-family: var(--font-text);
+            font-size: var(--t-body);
+            line-height: var(--lh-body);
+            color: var(--ink);
+            background: var(--bg);
             -webkit-font-smoothing: antialiased;
-            transition: background 0.5s ease, color 0.4s ease;
-            overflow-x: hidden;
+            overflow-x: clip;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
-
-        /* --- REVEAL --- */
-        .reveal {
-            opacity: 0;
-            transform: translateY(28px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
+        ::selection { background: var(--accent); color: #FFFFFF; }
+        img { max-width: 100%; display: block; }
+        a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
+        button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+        .skip {
+            position: absolute; left: 1rem; top: -3rem; z-index: 200;
+            background: var(--ink); color: var(--bg); padding: 0.5rem 0.8rem; border-radius: var(--radius);
+            font-size: var(--t-small);
         }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-        .reveal-d1 { transition-delay: 0.1s; }
-        .reveal-d2 { transition-delay: 0.2s; }
-        .reveal-d3 { transition-delay: 0.3s; }
-        .reveal-d4 { transition-delay: 0.4s; }
+        .skip:focus { top: 1rem; }
 
-        /* --- NAV --- */
-        nav {
-            position: fixed; top: 0; width: 100%; z-index: 100;
+        .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.55s ease, transform 0.55s ease; }
+        .reveal.in { opacity: 1; transform: none; }
+        html:not(.js) .reveal { opacity: 1; transform: none; }
+
+        /* ==========================================================
+           NAV
+           ========================================================== */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: var(--nav-h);
             background: var(--nav-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            transition: box-shadow 0.3s, background 0.5s ease;
+            -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s ease, background-color 0.4s ease;
         }
-        nav.scrolled { box-shadow: var(--shadow-sm); }
+        .nav.scrolled { border-bottom-color: var(--line-2); }
         .nav-inner {
-            max-width: 1100px; margin: 0 auto; padding: 0 2rem;
-            height: 60px; display: flex; align-items: center; justify-content: space-between;
+            max-width: var(--wide); margin: 0 auto; height: 100%;
+            padding: 0 var(--gutter);
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem;
         }
         .nav-logo {
-            font-family: var(--heading);
-            font-weight: 700;
-            font-size: 0.95rem;
-            letter-spacing: -0.02em;
-            color: var(--sf-blue);
+            font-family: var(--font-display); font-weight: 600; font-size: var(--t-small);
+            letter-spacing: -0.01em; color: var(--ink); text-decoration: none;
         }
-        .nav-right { display: flex; align-items: center; gap: 2rem; }
-        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-right { display: flex; align-items: center; gap: 1.25rem; }
+        .nav-links { display: flex; gap: 1.4rem; }
         .nav-links a {
-            text-decoration: none;
-            font-family: var(--mono);
-            font-size: 0.68rem;
-            font-weight: 500;
-            color: var(--text-muted);
+            font-size: var(--t-small); font-weight: 500; color: var(--ink-3); text-decoration: none;
             transition: color 0.2s;
-            letter-spacing: 0.03em;
         }
-        .nav-links a:hover { color: var(--sf-blue); }
-        .theme-toggle {
-            width: 34px; height: 34px; border-radius: 8px;
-            border: 1px solid var(--border); background: var(--toggle-bg);
-            color: var(--toggle-icon); cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; transition: all 0.3s ease;
+        .nav-links a:hover { color: var(--ink); }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 999px;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: var(--ink-2); border: 1px solid var(--line);
+            transition: border-color 0.2s, color 0.2s;
         }
-        .theme-toggle:hover { border-color: var(--sf-blue); }
-        .mobile-toggle {
-            display: none; background: none; border: none;
-            font-size: 1.2rem; color: var(--text-secondary); cursor: pointer;
-        }
+        .icon-btn:hover { border-color: var(--ink); color: var(--ink); }
+        .icon-btn svg { width: 16px; height: 16px; }
+        .theme-toggle .moon { display: none; }
+        .dark .theme-toggle .sun { display: none; }
+        .dark .theme-toggle .moon { display: block; }
+        .nav-menu { display: none; }
 
-        /* --- SCROLL PROGRESS --- */
-        .scroll-progress {
-            position: fixed; top: 60px; left: 0; height: 2px;
-            background: linear-gradient(90deg, var(--sf-blue), var(--sf-cyan));
-            z-index: 101; width: 0%;
-        }
-
-        /* --- HERO --- */
+        /* ==========================================================
+           HERO — claim, three proof numbers, one piece of media
+           ========================================================== */
         .hero {
-            position: relative;
-            padding: 10rem 2rem 6rem;
-            background: var(--bg-primary);
             min-height: 100vh;
-            display: flex; align-items: center;
-            transition: background 0.5s ease;
-            z-index: 1;
+            padding: calc(var(--nav-h) + 8vh) var(--gutter) 8vh;
+            display: grid; align-content: center;
         }
         .hero-inner {
-            max-width: 1100px; margin: 0 auto; width: 100%;
-            display: flex; align-items: center; justify-content: space-between; gap: 3rem;
-            position: relative; z-index: 2;
+            max-width: var(--wide); margin: 0 auto; width: 100%;
+            display: grid; grid-template-columns: minmax(0, 1fr) 20rem;
+            gap: 4rem; align-items: center;
         }
-        .hero-left { flex: 1; }
-        .hero-right {
-            display: flex; flex-direction: column; align-items: center; gap: 1rem;
+        .eyebrow {
+            font-size: var(--t-small); font-weight: 500; color: var(--ink-2);
+            margin-bottom: 1.5rem;
         }
-
-        /* ── Claude Mode (warm Anthropic palette) ── */
-        .claude-mode {
-            --sf-blue: #D97757;
-            --sf-blue-dark: #B85C3A;
-            --sf-blue-light: #E8956E;
-            --sf-cyan: #D97757;
-            --sf-navy: #3D2B1F;
-            --sf-green: #B87333;
-            --sf-green-light: #D4956B;
-            --bg-primary: #FAF6F1;
-            --bg-secondary: #F5EDE4;
-            --bg-tertiary: #EDE3D7;
-            --border: #DDD0C0;
-            --border-light: #EDE3D7;
-            --text-primary: #2D1F14;
-            --text-secondary: #5C4033;
-            --text-tertiary: #8B7355;
-            --text-muted: #A69279;
-            --card-bg: #FFFFFF;
-            --nav-bg: rgba(250,246,241,0.92);
-            --node-color: rgba(217,119,87,0.1);
-            --node-line: rgba(217,119,87,0.06);
-            --dot-active: #D97757;
-            --dot-inactive: #D4C4B0;
-            --toggle-bg: #EDE3D7;
-            --footer-bg: #2D1F14;
-            --footer-text: #8B7355;
-            --shadow-sm: 0 1px 3px rgba(45,31,20,0.06);
-            --shadow-md: 0 4px 20px rgba(217,119,87,0.1);
-            --shadow-lg: 0 12px 40px rgba(217,119,87,0.14);
-            --shadow-card: 0 1px 3px rgba(45,31,20,0.05);
+        .eyebrow .dot { color: var(--accent); margin: 0 0.35rem; }
+        .display {
+            font-family: var(--font-display);
+            font-size: var(--t-display); font-weight: 600;
+            line-height: var(--lh-tight); letter-spacing: var(--track-display);
+            max-width: 15ch; text-wrap: balance;
         }
-        .claude-mode.dark {
-            --bg-primary: #1C1210;
-            --bg-secondary: #2D1F14;
-            --bg-tertiary: #3D2B1F;
-            --border: #4A3728;
-            --border-light: #2D1F14;
-            --text-primary: #F5EDE4;
-            --text-secondary: #D4C4B0;
-            --text-tertiary: #A69279;
-            --text-muted: #8B7355;
-            --card-bg: #2D1F14;
-            --nav-bg: rgba(28,18,16,0.94);
-            --node-color: rgba(217,119,87,0.15);
-            --node-line: rgba(217,119,87,0.08);
-            --dot-inactive: #4A3728;
-            --footer-bg: #120C0A;
+        .proof-row {
+            list-style: none;
+            display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem;
+            margin: 2.25rem 0 0; padding-top: 1.5rem;
+            border-top: 1px solid var(--line);
+            max-width: 40rem;
         }
-
-        /* ── Vinyl Easter Egg ── */
-        .profile-photo-wrapper {
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Full vinyl disc (back face of card) */
-        .profile-photo-wrapper::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            z-index: 2;
-            pointer-events: none;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            transform: rotateY(180deg);
-            background:
-                /* outer rim */
-                radial-gradient(circle, transparent 93%, rgba(255,255,255,0.04) 93.5%, rgba(0,0,0,0.3) 96%, #1a1008 97%, transparent 97.5%),
-                /* light reflection arc */
-                conic-gradient(from 200deg at 50% 50%,
-                    transparent 0deg, rgba(255,255,255,0.06) 30deg, rgba(255,255,255,0.09) 50deg,
-                    transparent 80deg, transparent 360deg),
-                /* label area */
-                radial-gradient(circle, #2D1F14 0%, #2D1F14 15.5%, transparent 16%),
-                radial-gradient(circle, rgba(217,119,87,0.3) 16.5%, transparent 17%),
-                /* grooves — alternating warm & cool micro-rings */
-                radial-gradient(circle, transparent 20%, rgba(217,119,87,0.07) 20.2%, transparent 20.8%),
-                radial-gradient(circle, transparent 23%, rgba(255,255,255,0.03) 23.2%, transparent 23.8%),
-                radial-gradient(circle, transparent 26%, rgba(217,119,87,0.06) 26.2%, transparent 26.8%),
-                radial-gradient(circle, transparent 29%, rgba(255,255,255,0.025) 29.2%, transparent 29.8%),
-                radial-gradient(circle, transparent 32%, rgba(217,119,87,0.055) 32.2%, transparent 32.8%),
-                radial-gradient(circle, transparent 35%, rgba(255,255,255,0.03) 35.2%, transparent 35.8%),
-                radial-gradient(circle, transparent 38%, rgba(217,119,87,0.05) 38.2%, transparent 38.8%),
-                radial-gradient(circle, transparent 41%, rgba(255,255,255,0.025) 41.2%, transparent 41.8%),
-                radial-gradient(circle, transparent 44%, rgba(217,119,87,0.05) 44.2%, transparent 44.8%),
-                radial-gradient(circle, transparent 47%, rgba(255,255,255,0.02) 47.2%, transparent 47.8%),
-                radial-gradient(circle, transparent 50%, rgba(217,119,87,0.045) 50.2%, transparent 50.8%),
-                radial-gradient(circle, transparent 53%, rgba(255,255,255,0.025) 53.2%, transparent 53.8%),
-                radial-gradient(circle, transparent 56%, rgba(217,119,87,0.04) 56.2%, transparent 56.8%),
-                radial-gradient(circle, transparent 59%, rgba(255,255,255,0.02) 59.2%, transparent 59.8%),
-                radial-gradient(circle, transparent 62%, rgba(217,119,87,0.04) 62.2%, transparent 62.8%),
-                radial-gradient(circle, transparent 65%, rgba(255,255,255,0.02) 65.2%, transparent 65.8%),
-                radial-gradient(circle, transparent 68%, rgba(217,119,87,0.035) 68.2%, transparent 68.8%),
-                radial-gradient(circle, transparent 71%, rgba(255,255,255,0.02) 71.2%, transparent 71.8%),
-                radial-gradient(circle, transparent 74%, rgba(217,119,87,0.035) 74.2%, transparent 74.8%),
-                radial-gradient(circle, transparent 77%, rgba(255,255,255,0.015) 77.2%, transparent 77.8%),
-                radial-gradient(circle, transparent 80%, rgba(217,119,87,0.03) 80.2%, transparent 80.8%),
-                radial-gradient(circle, transparent 83%, rgba(255,255,255,0.015) 83.2%, transparent 83.8%),
-                radial-gradient(circle, transparent 86%, rgba(217,119,87,0.025) 86.2%, transparent 86.8%),
-                radial-gradient(circle, transparent 89%, rgba(255,255,255,0.01) 89.2%, transparent 89.8%),
-                /* base disc color */
-                conic-gradient(from 0deg, #1a1008, #261a10, #1a1008, #2D1F14, #1a1008, #261a10, #1a1008, #2D1F14);
-        }
-
-        /* Center label (back face of card) */
-        .profile-photo-wrapper::after {
-            content: '';
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%,-50%) rotateY(180deg);
-            width: 22%; height: 22%;
-            border-radius: 50%;
-            z-index: 3;
-            pointer-events: none;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            background:
-                /* spindle hole */
-                radial-gradient(circle, #1a1008 0%, #1a1008 10%, transparent 11%),
-                /* paper texture highlight */
-                radial-gradient(circle at 35% 30%,
-                    rgba(255,255,255,0.18) 0%, transparent 45%),
-                /* label base */
-                radial-gradient(circle,
-                    #F0A882 0%, #D97757 35%, #C4633F 70%, #A8502E 100%);
-            box-shadow:
-                0 0 14px rgba(217,119,87,0.45),
-                inset 0 1px 3px rgba(255,255,255,0.15),
-                inset 0 -1px 2px rgba(0,0,0,0.2);
-        }
-
-        /* Flip to reveal vinyl */
-        .vinyl-active .profile-photo-wrapper {
-            transform: rotateY(180deg);
-            border-color: #D97757 !important;
-            box-shadow: 0 0 30px rgba(217,119,87,0.3), 0 0 80px rgba(217,119,87,0.1) !important;
-        }
-        /* Spin after flip completes */
-        .vinyl-spinning .profile-photo-wrapper {
-            animation: vinylSpin 3.5s linear infinite;
-        }
-        @keyframes vinylSpin {
-            from { transform: rotateY(180deg) rotate(0deg); }
-            to { transform: rotateY(180deg) rotate(360deg); }
-        }
-
-        /* Default: desaturate + cool-shift Spline so it harmonizes with the
-         * concrete + slate palette. Vinyl mode overrides with warm sepia. */
-        .photo-bg-3d iframe {
-            filter: saturate(0.42) hue-rotate(-12deg) brightness(0.88) contrast(1.05);
-            transition: filter 1s ease;
-        }
-        .dark .photo-bg-3d iframe {
-            filter: saturate(0.38) hue-rotate(-15deg) brightness(0.72) contrast(1.05);
-        }
-        .vinyl-active .photo-bg-3d iframe {
-            filter: sepia(0.6) hue-rotate(5deg) saturate(1.5) brightness(0.9);
-            transition: filter 1s ease;
-        }
-
-        /* ── Handwritten annotation ── */
-        .song-annotation {
-            position: absolute;
-            top: 50%;
-            left: calc(50% + 140px);
-            transform: translateY(-50%) translateX(8px);
-            z-index: 10;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.6s ease 0.4s, transform 0.6s ease 0.4s;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 0.3rem;
-        }
-        .vinyl-active .song-annotation {
-            opacity: 1;
-            transform: translateY(-50%) translateX(0);
-        }
-        .song-annotation-arrow {
+        .proof-row .num {
             display: block;
-            width: 80px;
-            height: 44px;
-            flex-shrink: 0;
+            font-family: var(--font-display); font-size: var(--t-number); font-weight: 600;
+            line-height: 1; letter-spacing: var(--track-h2); color: var(--ink);
         }
-        .arrow-vertical { display: none; }
-        .arrow-horizontal { display: block; }
-        .song-annotation-text {
-            font-family: 'Covered By Your Grace', cursive;
-            font-size: 2.6rem;
-            color: #D97757;
-            white-space: nowrap;
-            line-height: 1.25;
-            text-align: left;
+        .proof-row .cap {
+            display: block; margin-top: 0.55rem;
+            font-size: var(--t-small); line-height: var(--lh-small); color: var(--ink-3);
         }
-        /* ── Photo hover hint (desktop) ── */
+        .lead {
+            font-size: var(--t-lead); line-height: 1.5; color: var(--ink-2);
+            max-width: 34rem; margin-top: 2rem;
+        }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; position: relative; z-index: 3; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.8rem 1.3rem; border-radius: 999px;
+            font-size: var(--t-small); font-weight: 500; text-decoration: none;
+            border: 1px solid transparent; line-height: 1;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .btn-primary { background: var(--ink); color: var(--bg); }
+        .btn-primary:hover { background: var(--accent); color: #FFFFFF; }
+        .btn-outline { border-color: var(--line); color: var(--ink); }
+        .btn-outline:hover { border-color: var(--ink); }
+        .ext::after { content: " ↗"; font-size: 0.85em; }
+
+        /* Photo + orbit canvas (Spline replacement) */
+        .photo {
+            position: relative; width: 100%; aspect-ratio: 1;
+            display: grid; place-items: center; justify-self: center;
+        }
+        .photo::before {
+            content: ''; position: absolute; inset: 8%; border-radius: 50%; z-index: 0;
+            background: radial-gradient(circle, var(--accent-glow), transparent 70%);
+        }
+        .photo-orbit {
+            position: absolute; inset: -30%; width: 160%; height: 160%;
+            pointer-events: none; z-index: 1;
+        }
+        .photo-wrap {
+            position: relative; z-index: 2;
+            width: 74%; aspect-ratio: 1; border-radius: 50%;
+            border: 3px solid var(--line); box-shadow: var(--shadow);
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s, box-shadow 0.4s;
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
+        }
+        .photo-wrap:hover { border-color: var(--accent); }
+        .photo-face {
+            position: absolute; inset: 0; border-radius: 50%; overflow: hidden;
+            backface-visibility: hidden; -webkit-backface-visibility: hidden;
+        }
+        .photo-face img {
+            width: 100%; height: 100%; object-fit: cover; object-position: center 25%;
+            transform: scale(1.3); transform-origin: center 25%;
+        }
         .photo-hint {
-            position: absolute;
-            bottom: 8%; right: 8%;
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            background: rgba(217,119,87,0.15);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem;
-            color: #D97757;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-            z-index: 5;
+            position: absolute; bottom: 8%; right: 8%; z-index: 5;
+            width: 28px; height: 28px; border-radius: 50%;
+            display: grid; place-items: center;
+            font-size: var(--t-small); color: var(--accent); background: var(--accent-glow);
+            opacity: 0; pointer-events: none; transition: opacity 0.4s;
         }
-        @keyframes hintPulse {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.15); opacity: 0.5; }
-        }
-        .profile-photo-wrapper:hover .photo-hint {
-            opacity: 1;
-            animation: hintPulse 2s ease-in-out infinite;
-        }
+        .photo-wrap:hover .photo-hint { opacity: 1; }
         .vinyl-active .photo-hint { display: none; }
 
-        /* ── Photo idle nudge (mobile) ── */
+        /* Vinyl easter egg — back face of the photo card */
+        .photo-wrap::before {
+            content: ''; position: absolute; inset: 0; border-radius: 50%; z-index: 2;
+            pointer-events: none; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+            transform: rotateY(180deg);
+            background:
+                radial-gradient(circle, transparent 93%, rgba(255,255,255,0.05) 93.5%, rgba(0,0,0,0.35) 96%, #101418 97%, transparent 97.5%),
+                conic-gradient(from 200deg at 50% 50%, transparent 0deg, rgba(255,255,255,0.07) 30deg, rgba(255,255,255,0.1) 50deg, transparent 80deg, transparent 360deg),
+                radial-gradient(circle, #101418 0%, #101418 15.5%, transparent 16%),
+                radial-gradient(circle, transparent 20%, rgba(255,255,255,0.05) 20.2%, transparent 20.8%),
+                radial-gradient(circle, transparent 25%, rgba(255,255,255,0.035) 25.2%, transparent 25.8%),
+                radial-gradient(circle, transparent 30%, rgba(255,255,255,0.05) 30.2%, transparent 30.8%),
+                radial-gradient(circle, transparent 35%, rgba(255,255,255,0.03) 35.2%, transparent 35.8%),
+                radial-gradient(circle, transparent 40%, rgba(255,255,255,0.045) 40.2%, transparent 40.8%),
+                radial-gradient(circle, transparent 45%, rgba(255,255,255,0.03) 45.2%, transparent 45.8%),
+                radial-gradient(circle, transparent 50%, rgba(255,255,255,0.04) 50.2%, transparent 50.8%),
+                radial-gradient(circle, transparent 55%, rgba(255,255,255,0.025) 55.2%, transparent 55.8%),
+                radial-gradient(circle, transparent 60%, rgba(255,255,255,0.04) 60.2%, transparent 60.8%),
+                radial-gradient(circle, transparent 65%, rgba(255,255,255,0.025) 65.2%, transparent 65.8%),
+                radial-gradient(circle, transparent 70%, rgba(255,255,255,0.035) 70.2%, transparent 70.8%),
+                radial-gradient(circle, transparent 75%, rgba(255,255,255,0.02) 75.2%, transparent 75.8%),
+                radial-gradient(circle, transparent 80%, rgba(255,255,255,0.03) 80.2%, transparent 80.8%),
+                radial-gradient(circle, transparent 85%, rgba(255,255,255,0.02) 85.2%, transparent 85.8%),
+                radial-gradient(circle, transparent 90%, rgba(255,255,255,0.015) 90.2%, transparent 90.8%),
+                conic-gradient(from 0deg, #101418, #1A2026, #101418, #161C22, #101418, #1A2026, #101418, #161C22);
+        }
+        .photo-wrap::after {
+            content: ''; position: absolute; top: 50%; left: 50%; z-index: 3;
+            width: 22%; height: 22%; border-radius: 50%;
+            transform: translate(-50%, -50%) rotateY(180deg);
+            pointer-events: none; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+            background:
+                radial-gradient(circle, #101418 0%, #101418 10%, transparent 11%),
+                radial-gradient(circle at 35% 30%, rgba(255,255,255,0.22) 0%, transparent 45%),
+                radial-gradient(circle, #8FB0D2 0%, #5B7FA6 40%, #3B5775 75%, #2C4359 100%);
+            box-shadow: 0 0 14px rgba(59, 87, 117, 0.5), inset 0 1px 3px rgba(255,255,255,0.15);
+        }
+        .vinyl-active .photo-wrap { transform: rotateY(180deg); border-color: var(--accent); }
+        .vinyl-spinning .photo-wrap { animation: vinylSpin 3.5s linear infinite; }
+        @keyframes vinylSpin {
+            from { transform: rotateY(180deg) rotate(0deg); }
+            to   { transform: rotateY(180deg) rotate(360deg); }
+        }
         @keyframes idleNudge {
             0%, 90%, 100% { transform: rotate(0deg); }
             93% { transform: rotate(2deg); }
             96% { transform: rotate(-2deg); }
         }
-        @media (max-width: 768px) {
-            .profile-photo-wrapper {
-                animation: idleNudge 6s ease-in-out infinite;
-            }
-            .vinyl-active .profile-photo-wrapper {
-                animation: none;
-            }
-        }
 
-        /* ── Album invite ── */
+        .song-note {
+            position: absolute; top: 50%; left: calc(88% + 1rem); z-index: 10;
+            transform: translateY(-50%) translateX(8px);
+            display: flex; align-items: center; gap: 0.4rem;
+            opacity: 0; pointer-events: none; white-space: nowrap;
+            transition: opacity 0.6s ease 0.4s, transform 0.6s ease 0.4s;
+        }
+        .vinyl-active .song-note { opacity: 1; transform: translateY(-50%); }
+        .song-note svg { width: 56px; height: 32px; flex-shrink: 0; color: var(--accent); }
+        .song-note .v { display: none; }
+        .song-title { font-family: var(--font-display); font-size: var(--t-lead); font-weight: 600; color: var(--accent); line-height: 1.2; }
+        .song-by { display: block; font-size: var(--t-small); color: var(--ink-3); }
         .album-invite {
-            position: absolute;
-            top: 50%;
-            left: calc(50% + 140px);
-            transform: translateY(calc(-50% + 9rem)) translateX(8px);
-            z-index: 10;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.6s ease 1.4s, transform 0.6s ease 1.4s;
+            position: absolute; left: calc(88% + 1rem); top: calc(50% + 3.6rem); z-index: 10;
+            opacity: 0; pointer-events: none; transition: opacity 0.6s ease 1.4s;
         }
-        .vinyl-active .album-invite {
-            opacity: 1;
-            transform: translateY(calc(-50% + 9rem)) translateX(0);
-            pointer-events: auto;
-        }
+        .vinyl-active .album-invite { opacity: 1; pointer-events: auto; }
         .album-invite a {
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
-            background: linear-gradient(145deg, #F5E6D8 0%, #EDD8C6 50%, #E8CEBC 100%);
-            padding: 0.75rem 1.3rem 0.65rem;
-            transform: rotate(-2.5deg);
-            clip-path: polygon(2% 0%, 98% 1%, 100% 4%, 99% 96%, 97% 100%, 3% 99%, 0% 97%, 1% 3%);
-            box-shadow: 2px 3px 12px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-        }
-        .dark .album-invite a {
-            background: linear-gradient(145deg, #2D1F14 0%, #3A2618 50%, #2D1F14 100%);
-            box-shadow: 2px 3px 12px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.2);
-        }
-        .album-invite a:hover {
-            transform: rotate(-1deg) translateY(-2px);
-            box-shadow: 3px 5px 18px rgba(217,119,87,0.2), 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .album-invite-title {
-            font-family: 'Covered By Your Grace', cursive;
-            font-size: 1.6rem;
-            color: #D97757;
-            line-height: 1;
-        }
-        .album-invite-sub {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.55rem;
-            letter-spacing: 0.06em;
-            color: #A8502E;
-            opacity: 0.7;
-        }
-        .dark .album-invite-sub { color: #C4A48A; }
-
-        @media (max-width: 768px) {
-            .photo-hint { display: none; }
-            .song-annotation {
-                top: auto;
-                left: 50%;
-                bottom: -5rem;
-                transform: translateX(-50%) translateY(8px);
-                flex-direction: column;
-                align-items: center;
-                gap: 0.2rem;
-            }
-            .vinyl-active .song-annotation {
-                transform: translateX(-50%) translateY(0);
-            }
-            .arrow-horizontal { display: none; }
-            .arrow-vertical { display: block; }
-            .song-annotation-arrow { width: 48px; height: 40px; }
-            .song-annotation-text { font-size: 2.2rem; text-align: center; }
-            .album-invite {
-                position: fixed;
-                top: auto;
-                left: 50%;
-                bottom: 1.5rem;
-                transform: translateX(-50%) translateY(calc(100% + 2rem));
-                z-index: 150;
-            }
-            .vinyl-active .album-invite {
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-
-        /* ── Running robot (canvas overlay → lands as playground button) ── */
-        .playground-btn {
-            display: none;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.7rem 1.5rem;
-            border-radius: 8px;
-            font-family: var(--mono);
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            letter-spacing: 0.02em;
-            background: #D97757;
-            color: #FFFFFF;
-            border: none;
-            box-shadow: 0 2px 8px rgba(217,119,87,0.25);
-            transition: all 0.25s ease;
-            opacity: 0;
-            transform: translateY(8px);
-        }
-        .playground-btn.visible {
-            display: inline-flex;
-            opacity: 1;
-            transform: translateY(0);
-            position: relative;
-            z-index: 10;
-        }
-        .playground-btn:hover {
-            box-shadow: 0 4px 20px rgba(217,119,87,0.35);
-            transform: translateY(-2px);
-        }
-        .playground-btn canvas {
-            display: block;
-            image-rendering: pixelated;
-        }
-
-        /* Robot runner canvas overlay — hidden when idle */
-        #robotRunnerCanvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 200;
-            display: none;
-        }
-        #robotRunnerCanvas.active {
-            display: block;
-        }
-
-        /* Smooth color transitions when toggling Claude mode */
-        body, nav, .hero, .card, section, footer,
-        .hero-name, .hero-tagline, .hero-subtitle, .accent,
-        .btn, .btn-primary, .btn-outline,
-        .nav-logo, .nav-links a, .nav-inner,
-        .section-label, .section-title, .section-desc,
-        .scroll-progress {
-            transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
-        }
-
-        .hero-name {
-            font-family: var(--heading);
-            font-size: clamp(3.5rem, 7.5vw, 6.5rem);
-            font-weight: 700;
-            line-height: 0.95;
-            letter-spacing: -0.04em;
-            color: var(--text-primary);
-            margin-bottom: 0.75rem;
-            transition: color 0.4s ease;
-        }
-        .hero-name .accent { color: var(--sf-blue); }
-        .hero-tagline {
-            font-family: var(--heading);
-            font-size: clamp(1rem, 2vw, 1.3rem);
-            font-weight: 400;
-            color: var(--text-tertiary);
-            margin-bottom: 1.5rem;
-            letter-spacing: -0.01em;
-            transition: color 0.4s ease;
-        }
-        .hero-subtitle {
-            font-size: 0.92rem;
-            line-height: 1.8;
-            color: var(--text-secondary);
-            max-width: 520px;
-            margin-bottom: 2.5rem;
-            transition: color 0.4s ease;
-        }
-        .hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; position: relative; z-index: 10; }
-        .btn {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.7rem 1.5rem; border-radius: 8px;
-            font-family: var(--mono); font-size: 0.75rem; font-weight: 600;
-            text-decoration: none; transition: all 0.25s ease;
-            cursor: pointer; letter-spacing: 0.02em;
-        }
-        .btn-primary {
-            background: var(--sf-blue); color: #FFFFFF; border: none;
-            box-shadow: 0 2px 8px rgba(59,87,117,0.25);
-        }
-        .btn-primary:hover { box-shadow: 0 4px 20px rgba(59,87,117,0.35); transform: translateY(-2px); }
-        .btn-outline {
-            background: transparent; color: var(--sf-blue);
-            border: 1.5px solid var(--border);
-        }
-        .btn-outline:hover { border-color: var(--sf-blue); background: rgba(59,87,117,0.04); }
-
-        /* Profile photo */
-        .profile-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center 25%;
-            transform: scale(1.3);
-            transform-origin: center 25%;
-        }
-        .profile-photo-container {
-            position: relative;
-            width: 550px;
-            height: 550px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: visible;
-            perspective: 1000px;
-        }
-        .photo-bg-3d {
-            position: absolute;
-            top: -45%;
-            left: -39%;
-            width: 200%;
-            height: 200%;
-            z-index: 0;
-        }
-        .photo-bg-3d iframe {
-            display: block;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        .photo-scroll-guard {
-            position: absolute;
-            top: -45%;
-            left: -39%;
-            width: 200%;
-            height: 200%;
-            z-index: 3;
-            background: transparent;
-            pointer-events: auto;
-        }
-        .profile-photo-wrapper {
-            width: 250px;
-            height: 250px;
-            border-radius: 50%;
-            border: 3px solid var(--border);
-            box-shadow: var(--shadow-md);
-            transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            z-index: 5;
-            transform-style: preserve-3d;
-        }
-        .photo-face {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            overflow: hidden;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-        .profile-photo-wrapper:hover { border-color: var(--sf-blue); box-shadow: var(--shadow-lg); }
-
-        /* --- SECTIONS --- */
-        section {
-            padding: 5rem 2rem;
-            position: relative; z-index: 1;
-            transition: background 0.5s ease;
-        }
-        .section-inner { max-width: 1100px; margin: 0 auto; }
-        .section-label {
-            font-family: var(--mono);
-            font-size: 0.65rem; font-weight: 600;
-            letter-spacing: 0.18em; text-transform: uppercase;
-            color: var(--sf-blue); margin-bottom: 0.5rem;
-        }
-        .section-title {
-            font-family: var(--heading);
-            font-size: 1.75rem; font-weight: 700;
-            color: var(--text-primary); margin-bottom: 0.75rem;
-            letter-spacing: -0.03em;
-            transition: color 0.4s ease;
-        }
-        .section-desc {
-            color: var(--text-tertiary);
-            max-width: 500px; font-size: 0.9rem; line-height: 1.7;
-            margin-bottom: 3rem;
-            transition: color 0.4s ease;
-        }
-
-        /* --- STATS --- */
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem;
-        }
-        .stat-card {
-            background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 1.5rem; text-align: center;
-            transition: all 0.3s ease; box-shadow: var(--shadow-card);
-            position: relative; overflow: hidden;
-        }
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-            border-color: rgba(59, 87, 117, 0.25);
-        }
-        .stat-value {
-            font-family: var(--heading);
-            font-size: 2.2rem; font-weight: 700;
-            color: var(--sf-blue); margin-bottom: 0.4rem;
-            letter-spacing: -0.03em;
-        }
-        .stat-label {
-            font-family: var(--mono);
-            font-size: 0.58rem; font-weight: 500;
-            letter-spacing: 0.08em; text-transform: uppercase;
-            color: var(--text-muted);
-        }
-
-        /* --- ABOUT --- */
-        .about-text {
-            font-size: 1rem; line-height: 1.9;
-            color: var(--text-secondary); max-width: 700px;
-            margin-bottom: 1.25rem;
-            transition: color 0.4s ease;
-        }
-        .about-personal {
-            font-size: 0.85rem; line-height: 1.7;
-            color: var(--text-muted); max-width: 700px;
-            font-style: italic;
-            transition: color 0.4s ease;
-        }
-
-        /* --- TIMELINE (WORKFLOW STYLE) --- */
-        .timeline { position: relative; padding-left: 2.5rem; }
-        .timeline::before {
-            content: ''; position: absolute;
-            left: 7px; top: 0; bottom: 0; width: 2px;
-            background: var(--border);
-            transition: background 0.4s ease;
-        }
-
-        /* Flowing dots */
-        .timeline::after {
-            content: ''; position: absolute;
-            left: 5px; width: 6px; height: 6px;
-            border-radius: 50%; background: var(--sf-blue);
-            animation: flowDown 4s ease-in-out infinite;
-            opacity: 0.6;
-        }
-        @keyframes flowDown {
-            0% { top: 0; opacity: 0; }
-            10% { opacity: 0.7; }
-            90% { opacity: 0.7; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        .timeline-item { position: relative; padding-bottom: 3rem; }
-        .timeline-item:last-child { padding-bottom: 0; }
-
-        /* Workflow status dot */
-        .timeline-dot {
-            position: absolute; left: -2rem; top: 4px;
-            width: 16px; height: 16px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .timeline-dot.active {
-            background: rgba(59, 87, 117, 0.15);
-            border: 2px solid var(--sf-blue);
-        }
-        .timeline-dot.active::after {
-            content: ''; width: 6px; height: 6px;
-            border-radius: 50%; background: var(--sf-blue);
-            animation: pulse 2s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.4); }
-        }
-        .timeline-dot.completed {
-            background: var(--sf-green); border: none;
-        }
-        .timeline-dot.completed::after {
-            content: '✓'; color: #FFFFFF;
-            font-size: 0.55rem; font-weight: 700;
-        }
-
-        .timeline-header {
-            display: flex; align-items: baseline; gap: 0.75rem;
-            flex-wrap: wrap; margin-bottom: 0.2rem;
-        }
-        .timeline-company {
-            font-family: var(--heading);
-            font-size: 1.1rem; font-weight: 700;
-            color: var(--text-primary);
-            transition: color 0.4s ease;
-        }
-        .timeline-badge {
-            font-family: var(--mono);
-            font-size: 0.55rem; font-weight: 600;
-            letter-spacing: 0.06em; text-transform: uppercase;
-            padding: 0.15rem 0.5rem; border-radius: 4px;
-            background: rgba(59, 87, 117, 0.08); color: var(--sf-blue);
-        }
-        .workflow-status {
-            font-family: var(--mono); font-size: 0.55rem;
-            font-weight: 600; letter-spacing: 0.05em;
-            text-transform: uppercase; margin-left: auto;
-        }
-        .workflow-status.running { color: var(--sf-blue); }
-        .workflow-status.done { color: var(--sf-green); }
-        .timeline-role {
-            font-family: var(--mono); font-size: 0.75rem;
-            font-weight: 500; color: var(--text-muted); margin-bottom: 0.75rem;
-        }
-        .timeline-bullets { list-style: none; padding: 0; }
-        .timeline-bullets li {
-            position: relative; padding-left: 1.2rem; margin-bottom: 0.45rem;
-            font-size: 0.85rem; color: var(--text-secondary); line-height: 1.65;
-            transition: color 0.4s ease;
-        }
-        .timeline-bullets li::before {
-            content: ''; position: absolute; left: 0; top: 0.55em;
-            width: 5px; height: 5px; border-radius: 50%; background: var(--border);
-        }
-        .timeline-bullets li strong { color: var(--text-primary); font-weight: 600; }
-
-        /* --- AGENT NODE CARDS --- */
-        .agent-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem;
-            position: relative;
-        }
-        .agent-card {
-            background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 1.75rem;
-            transition: all 0.3s ease; box-shadow: var(--shadow-card);
-            position: relative; overflow: hidden;
-        }
-        .agent-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-            border-color: rgba(59, 87, 117, 0.25);
-        }
-        .agent-card::before {
-            content: '';
-            position: absolute; top: 50%; left: -12px;
-            width: 8px; height: 8px; border-radius: 50%;
-            border: 2px solid var(--sf-blue);
-            background: var(--bg-primary);
-            transition: background 0.4s ease;
-        }
-        .agent-card::after {
-            content: '';
-            position: absolute; top: 50%; right: -12px;
-            width: 8px; height: 8px; border-radius: 50%;
-            border: 2px solid var(--border);
-            background: var(--bg-primary);
-            transition: background 0.4s, border-color 0.4s;
-        }
-        .spotlight {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none; opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 0;
-        }
-        .magnetic:hover .spotlight { opacity: 1; }
-        .agent-card-inner, .edu-card-inner { position: relative; z-index: 1; }
-        .agent-icon {
-            width: 36px; height: 36px; border-radius: 8px;
-            background: rgba(59, 87, 117, 0.08);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--sf-blue); font-size: 0.85rem; margin-bottom: 1rem;
-        }
-        .agent-card h3 {
-            font-family: var(--heading);
-            font-size: 0.9rem; font-weight: 600;
-            color: var(--text-primary); margin-bottom: 0.4rem;
-            transition: color 0.4s ease;
-        }
-        .agent-card p {
-            font-size: 0.8rem; color: var(--text-tertiary);
-            line-height: 1.6;
-            transition: color 0.4s ease;
-        }
-        .agent-type {
-            font-family: var(--mono); font-size: 0.55rem;
-            color: var(--sf-blue); letter-spacing: 0.06em;
-            text-transform: uppercase; margin-bottom: 0.75rem;
-        }
-        .learning-card { border-left: 3px solid var(--sf-blue); margin-top: 1.25rem; }
-
-        /* --- SKILLS --- */
-        .skills-list { max-width: 580px; }
-        .skill-row {
-            display: flex; align-items: center; gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        .skill-name {
-            font-family: var(--mono); font-size: 0.72rem; font-weight: 500;
-            color: var(--text-secondary); min-width: 200px;
-            transition: color 0.4s ease;
-        }
-        .skill-bar-bg {
-            flex: 1; height: 5px; background: var(--border);
-            border-radius: 3px; overflow: hidden;
-            transition: background 0.4s ease;
-        }
-        .skill-bar-fill {
-            height: 100%; border-radius: 3px;
-            background: linear-gradient(90deg, var(--sf-blue), var(--sf-blue-light));
-            width: 0%;
-            transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        .skill-pct {
-            font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
-            color: var(--text-muted); min-width: 34px; text-align: right;
-        }
-
-        /* --- SKILLS: LEARNING TAGS --- */
-        .skills-learning { margin-top: 2.5rem; }
-        .skills-learning-label {
-            font-family: var(--mono);
-            font-size: 0.6rem; font-weight: 600;
-            letter-spacing: 0.1em; text-transform: uppercase;
-            color: var(--text-muted); margin-bottom: 1rem;
-            transition: color 0.4s ease;
-        }
-        .skills-learning-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-        .learning-tag {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: 8px;
-            font-family: var(--mono); font-size: 0.72rem; font-weight: 500;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-        }
-        .learning-tag:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
-        .learning-dot {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: var(--sf-blue);
-            animation: pulse 2s ease-in-out infinite;
-            flex-shrink: 0;
-        }
-        .learning-tag-status {
-            font-size: 0.55rem; font-weight: 600;
-            letter-spacing: 0.05em; text-transform: uppercase;
-            color: var(--sf-blue);
-        }
-
-        /* --- EDUCATION --- */
-        .edu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
-        .edu-card {
-            background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 1.75rem;
-            transition: all 0.3s ease; box-shadow: var(--shadow-card);
-            position: relative; overflow: hidden;
-        }
-        .edu-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-            border-color: rgba(59, 87, 117, 0.25);
-        }
-        .edu-card h3 {
-            font-family: var(--heading);
-            font-size: 0.95rem; font-weight: 600;
-            color: var(--text-primary); margin-bottom: 0.3rem;
-        }
-        .edu-school { font-size: 0.82rem; color: var(--sf-blue); font-weight: 500; margin-bottom: 0.3rem; }
-        .edu-year {
-            font-family: var(--mono); font-size: 0.68rem;
-            color: var(--text-muted); margin-bottom: 0.65rem;
-        }
-        .edu-detail {
-            font-size: 0.78rem; color: var(--text-tertiary);
-            line-height: 1.6; list-style: none; padding: 0;
-        }
-        .edu-detail li { margin-bottom: 0.2rem; }
-
-        /* --- HOBBIES --- */
-        .hobbies-featured {
-            display: grid; grid-template-columns: 1fr;
-            gap: 0.9rem;
-        }
-        .hobby-card {
-            display: flex; align-items: center; gap: 1rem;
-            padding: 1rem 1.2rem;
-            background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: 12px; text-decoration: none; color: inherit;
-            transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-            cursor: pointer;
-        }
-        .hobby-card:hover {
-            border-color: var(--sf-blue);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 87, 117, 0.08);
-        }
-        .hobby-card-icon {
-            width: 38px; height: 38px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 10px;
-            background: linear-gradient(135deg, var(--sf-blue), var(--sf-blue-dark));
-            color: #FFF; font-size: 1rem;
-        }
-        .hobby-card-text { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; }
-        .hobby-card-title {
-            font-family: var(--font-display); font-weight: 600;
-            font-size: 0.95rem; color: var(--text-primary);
-        }
-        .hobby-card-sub {
-            font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.04em;
-            color: var(--text-muted); text-transform: uppercase;
-        }
-        .hobby-card-arrow {
-            color: var(--text-muted); font-size: 0.85rem; flex-shrink: 0;
-            transition: transform 0.25s ease, color 0.25s ease;
-        }
-        .hobby-card:hover .hobby-card-arrow { color: var(--sf-blue); transform: translateX(3px); }
-
-        .hobbies-grid { display: flex; flex-wrap: wrap; gap: 0.55rem; }
-        .hobby-tag {
-            display: inline-flex; align-items: center; gap: 0.45rem;
-            padding: 0.4rem 0.85rem;
-            background: transparent; border: 1px solid var(--border);
-            border-radius: 100px;
-            font-size: 0.72rem; color: var(--text-muted); font-weight: 500;
-            letter-spacing: 0.02em;
-            transition: border-color 0.25s ease, color 0.25s ease;
-            cursor: default;
-        }
-        .hobby-tag i { font-size: 0.72rem; opacity: 0.85; }
-        .hobby-tag:hover { border-color: var(--sf-blue); color: var(--sf-blue); }
-
-        /* --- DASHBOARDS --- */
-        .dashboard-list {
-            display: grid; grid-template-columns: 1fr; gap: 1rem;
-        }
-        .dashboard-card {
-            display: flex; align-items: center; gap: 1.5rem;
-            text-decoration: none; color: inherit;
-            background: var(--card-bg); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 1.75rem;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-            box-shadow: var(--shadow-card);
-        }
-        .dashboard-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--sf-blue);
-        }
-        .dashboard-card-content { flex: 1; min-width: 0; }
-        .dashboard-card h3 {
-            font-family: var(--heading);
-            font-size: 1.1rem; font-weight: 600;
-            color: var(--text-primary); margin-bottom: 0.4rem;
-        }
-        .dashboard-card p {
-            font-size: 0.85rem; color: var(--text-tertiary);
-            line-height: 1.6; max-width: 580px;
-        }
-        .dashboard-tags {
-            display: flex; flex-wrap: wrap; gap: 0.4rem;
-            margin-top: 0.85rem;
-        }
-        .dashboard-tag {
-            font-family: var(--mono); font-size: 0.6rem; font-weight: 500;
-            padding: 0.18rem 0.55rem; border-radius: 50px;
-            background: rgba(59, 87, 117, 0.08); color: var(--sf-blue);
-            letter-spacing: 0.04em;
-        }
-        .dark .dashboard-tag { background: rgba(107, 138, 173, 0.14); }
-        .dashboard-status {
             display: inline-flex; align-items: center; gap: 0.4rem;
-            font-family: var(--mono); font-size: 0.62rem;
-            color: #2E844A; margin-top: 0.7rem;
-            text-transform: uppercase; letter-spacing: 0.08em;
-        }
-        .dark .dashboard-status { color: #45C65A; }
-        .dashboard-status-dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: #2E844A;
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
-        .dark .dashboard-status-dot { background: #45C65A; }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        .dashboard-card-arrow {
-            font-size: 0.95rem; color: var(--text-muted);
-            transition: transform 0.25s ease, color 0.25s ease;
-            flex-shrink: 0;
-        }
-        .dashboard-card:hover .dashboard-card-arrow {
-            transform: translate(3px, -3px);
-            color: var(--sf-blue);
+            padding: 0.5rem 0.9rem; border-radius: 999px;
+            border: 1px solid var(--accent); background: var(--bg-elev);
+            color: var(--accent); font-size: var(--t-small); font-weight: 500; text-decoration: none;
+            white-space: nowrap;
         }
 
-        /* --- KINDLE READER --- */
-        .kindle-frame {
-            margin: 2.5rem auto 0;
-            max-width: 940px;
-            background: linear-gradient(160deg, #3F4D5E, #2A3340);
-            border-radius: 26px;
-            padding: 18px 18px 38px;
-            box-shadow:
-                0 28px 64px rgba(28, 38, 52, 0.22),
-                0 8px 18px rgba(28, 38, 52, 0.10),
-                inset 0 1px 0 rgba(255, 255, 255, 0.10),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.20);
-            position: relative;
+        .playground-btn { display: none; }
+        .playground-btn.visible { display: inline-flex; }
+        .playground-btn canvas { display: block; image-rendering: pixelated; }
+        #robotRunnerCanvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 200; display: none;
         }
-        .kindle-frame::after {
-            content: '';
-            position: absolute;
-            bottom: 14px; left: 50%;
-            width: 56px; height: 6px; border-radius: 4px;
-            background: rgba(255, 255, 255, 0.16);
-            transform: translateX(-50%);
+        #robotRunnerCanvas.active { display: block; }
+
+        /* ==========================================================
+           CHAPTERS — sticky label · one headline · one proof · ≤1 media
+           ========================================================== */
+        .chapter {
+            padding: var(--space-chapter) var(--gutter);
+            scroll-margin-top: var(--nav-h);
         }
-        .kindle-screen {
-            background: #F1EAD9;
-            border-radius: 8px;
+        .chapter + .chapter { border-top: 1px solid var(--line-2); }
+        .chapter-inner {
             display: grid;
-            grid-template-columns: 320px 1fr;
-            min-height: 480px;
-            overflow: hidden;
-            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+            grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure)) minmax(0, 1fr);
+            column-gap: 2.5rem;
         }
-        .dark .kindle-screen { background: #1C232C; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04); }
+        .chapter-label {
+            grid-column: 1; justify-self: end; width: var(--rail);
+            position: sticky; top: calc(var(--nav-h) + 1.5rem); align-self: start;
+            display: flex; flex-direction: column; gap: 0.3rem;
+            font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label);
+            text-transform: uppercase; color: var(--ink-3); line-height: 1.5;
+        }
+        .chapter-label .num { color: var(--accent); font-family: var(--font-display); font-weight: 600; }
+        .chapter-label .sub { text-transform: none; letter-spacing: 0; font-weight: 400; }
+        .chapter-body { grid-column: 2; min-width: 0; }
 
-        .kindle-toc {
-            border-right: 1px solid rgba(28, 38, 52, 0.10);
-            padding: 1.4rem 0.7rem 1.4rem 1.3rem;
-            display: flex; flex-direction: column; min-width: 0;
+        .kicker { font-size: var(--t-small); font-weight: 500; color: var(--ink-2); margin-bottom: 0.9rem; }
+        .h2 {
+            font-family: var(--font-display); font-size: var(--t-h2); font-weight: 600;
+            line-height: var(--lh-heading); letter-spacing: var(--track-h2);
+            margin-bottom: 1.25rem; text-wrap: balance;
         }
-        .dark .kindle-toc { border-right-color: rgba(255, 255, 255, 0.06); }
+        .chapter-body > p { margin-bottom: 1.1rem; }
+        .chapter-body > p:last-of-type { margin-bottom: 0; }
 
-        .kindle-toc-header {
-            font-family: var(--mono);
-            font-size: 0.6rem; letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: rgba(28, 38, 52, 0.55);
-            display: flex; align-items: center; gap: 0.55rem;
-            margin-bottom: 1rem;
-            padding: 0 0.55rem;
+        .proof {
+            margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
+            display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: 1rem;
         }
-        .dark .kindle-toc-header { color: rgba(232, 228, 220, 0.45); }
-        .kindle-toc-header-rule {
-            flex: 1; height: 1px; background: currentColor; opacity: 0.3;
+        .proof-tag {
+            font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label);
+            text-transform: uppercase; color: var(--accent); padding-top: 0.35rem;
+        }
+        .proof-list { list-style: none; display: grid; gap: 1rem; }
+        .proof-list li { line-height: var(--lh-body); }
+        .proof-num {
+            display: block; font-family: var(--font-display); font-size: var(--t-h2); font-weight: 600;
+            letter-spacing: var(--track-h2); line-height: 1.1; margin-bottom: 0.2rem;
+        }
+        .proof-name { font-weight: 500; }
+        .path { list-style: none; display: grid; gap: 0.6rem; }
+        .path li { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: 1rem; font-size: var(--t-small); line-height: var(--lh-small); }
+        .path .when { color: var(--ink-3); }
+        .path .now .when { color: var(--accent); font-weight: 500; }
+
+        .media { margin-top: 2.5rem; }
+        .media-frame { border: 1px solid var(--line); background: var(--bg-elev); border-radius: var(--radius); overflow: hidden; }
+        .media img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+        .media figcaption { font-size: var(--t-small); line-height: var(--lh-small); color: var(--ink-3); margin-top: 0.9rem; max-width: 40rem; }
+        .media-wide {
+            width: min(var(--wide), calc(100vw - 2 * var(--gutter)));
+            margin-left: calc(50% - min(var(--wide), calc(100vw - 2 * var(--gutter))) / 2);
         }
 
-        .kindle-toc-list {
-            list-style: none; padding: 0; margin: 0;
-            display: flex; flex-direction: column; gap: 1px;
-            overflow-y: auto;
+        /* Rows: skills, tools, education, record */
+        .rows { list-style: none; border-top: 1px solid var(--line); margin-top: 0.5rem; }
+        .rows li {
+            display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.5rem;
+            padding: 1.1rem 0; border-bottom: 1px solid var(--line);
         }
-        .kindle-toc-item {
-            display: flex; gap: 0.7rem; align-items: flex-start;
-            padding: 0.7rem 0.6rem;
-            border-radius: 4px;
-            cursor: pointer;
-            color: #1C2632;
-            transition: background 0.18s ease;
-            border: none; background: transparent; text-align: left; width: 100%;
-            font-family: inherit;
+        .rows h3 { font-family: var(--font-display); font-size: var(--t-lead); font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; }
+        .rows .desc { font-size: var(--t-small); line-height: var(--lh-small); color: var(--ink-2); margin-top: 0.25rem; }
+        .rows .ev { font-size: var(--t-small); line-height: var(--lh-small); color: var(--ink); }
+        .rows .ev strong { font-family: var(--font-display); font-weight: 600; }
+        .rows .ev .from { color: var(--ink-3); }
+        .record li { grid-template-columns: 9rem minmax(0, 1fr) 9rem; padding: 0.75rem 0; font-size: var(--t-small); line-height: var(--lh-small); }
+        .record .co { font-weight: 500; }
+        .record .when { color: var(--ink-3); text-align: right; }
+        .record-title { font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3); margin-top: 3rem; }
+
+        /* Morph — the one piece of media for the Salesforce chapter */
+        .morph { position: relative; height: 200vh; }
+        .morph-pin {
+            position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h));
+            display: grid; place-items: center; overflow: hidden;
+            border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2);
         }
+        #agentShowcaseCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.8s ease; }
+        .morph.is-live #agentShowcaseCanvas { opacity: 1; }
+        .morph-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: var(--accent); transition: opacity 0.8s ease; }
+        .morph.is-live .morph-fallback { opacity: 0; }
+        .morph-svg { width: min(56vh, 78vw); height: auto; }
+        .morph-steps {
+            position: absolute; left: 0; right: 0; bottom: 1.5rem; z-index: 2;
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem 1.75rem;
+            font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3);
+        }
+        .morph-steps span { transition: color 0.3s; }
+        .morph-steps span.on { color: var(--accent); }
+        .morph.no-webgl, .morph.reduced { height: auto; }
+        .morph.no-webgl .morph-pin, .morph.reduced .morph-pin { position: static; height: 60vh; }
+        .morph.no-webgl #agentShowcaseCanvas, .morph.reduced #agentShowcaseCanvas { display: none; }
+
+        /* Kindle reader — the one piece of media for the reading chapter */
+        .kindle-frame {
+            background: linear-gradient(160deg, #3F4D5E, #2A3340);
+            border-radius: 22px; padding: 16px 16px 34px; position: relative;
+            box-shadow: 0 28px 64px rgba(28, 38, 52, 0.22), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .kindle-frame::after { content: ''; position: absolute; bottom: 12px; left: 50%; width: 52px; height: 6px; border-radius: 4px; background: rgba(255,255,255,0.16); transform: translateX(-50%); }
+        .kindle-screen { background: #F1EAD9; border-radius: 6px; display: grid; grid-template-columns: 15rem 1fr; min-height: 440px; overflow: hidden; }
+        .dark .kindle-screen { background: #1C232C; }
+        .kindle-toc { border-right: 1px solid rgba(28,38,52,0.1); padding: 1.2rem 0.6rem 1.2rem 1rem; display: flex; flex-direction: column; min-width: 0; }
+        .dark .kindle-toc { border-right-color: rgba(255,255,255,0.06); }
+        .kindle-toc-header { font-size: var(--t-micro); letter-spacing: var(--track-label); text-transform: uppercase; color: rgba(28,38,52,0.55); display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.9rem; padding: 0 0.5rem; }
+        .dark .kindle-toc-header { color: rgba(232,228,220,0.45); }
+        .kindle-toc-header-rule { flex: 1; height: 1px; background: currentColor; opacity: 0.3; }
+        .kindle-toc-list { list-style: none; display: flex; flex-direction: column; gap: 1px; overflow-y: auto; }
+        .kindle-toc-item { display: flex; gap: 0.7rem; align-items: flex-start; padding: 0.65rem 0.55rem; border-radius: 4px; color: #1C2632; text-align: left; width: 100%; transition: background 0.18s; }
         .dark .kindle-toc-item { color: #E8E4DC; }
-        .kindle-toc-item:hover { background: rgba(28, 38, 52, 0.05); }
-        .dark .kindle-toc-item:hover { background: rgba(255, 255, 255, 0.04); }
-        .kindle-toc-item.active { background: rgba(59, 87, 117, 0.10); }
-        .dark .kindle-toc-item.active { background: rgba(107, 138, 173, 0.18); }
-        .kindle-toc-item:focus-visible {
-            outline: 2px solid var(--sf-blue); outline-offset: -2px;
-        }
-        .kindle-toc-num {
-            font-family: var(--mono); font-size: 0.62rem;
-            color: var(--sf-blue);
-            letter-spacing: 0.06em;
-            padding-top: 3px; flex-shrink: 0;
-        }
-        .kindle-toc-title {
-            font-family: var(--heading);
-            font-size: 0.88rem; font-weight: 500;
-            line-height: 1.4; letter-spacing: -0.01em;
-        }
-
-        .kindle-reader-pane {
-            padding: 2.4rem 2.6rem 2rem;
-            display: flex; flex-direction: column;
-            color: #1C2632; min-width: 0;
-        }
+        .kindle-toc-item:hover { background: rgba(28,38,52,0.05); }
+        .dark .kindle-toc-item:hover { background: rgba(255,255,255,0.04); }
+        .kindle-toc-item.active { background: rgba(59,87,117,0.1); }
+        .dark .kindle-toc-item.active { background: rgba(127,160,196,0.18); }
+        .kindle-toc-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+        .kindle-toc-num { font-size: var(--t-micro); color: var(--accent); letter-spacing: 0.06em; padding-top: 3px; flex-shrink: 0; }
+        .kindle-toc-title { font-family: var(--font-display); font-size: var(--t-small); font-weight: 500; line-height: 1.4; }
+        .kindle-reader-pane { padding: 2.2rem 2.4rem 1.8rem; display: flex; flex-direction: column; color: #1C2632; min-width: 0; }
         .dark .kindle-reader-pane { color: #E8E4DC; }
-        .kindle-reader-meta {
-            font-family: var(--mono);
-            font-size: 0.6rem; letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: rgba(28, 38, 52, 0.5);
-            margin-bottom: 1.1rem;
-        }
-        .dark .kindle-reader-meta { color: rgba(232, 228, 220, 0.4); }
-        .kindle-reader-title {
-            font-family: var(--heading);
-            font-size: 1.55rem; font-weight: 600;
-            letter-spacing: -0.02em;
-            line-height: 1.2;
-            margin-bottom: 0.45rem;
-            color: inherit;
-        }
-        .kindle-reader-author {
-            font-family: var(--mono);
-            font-size: 0.68rem; letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: var(--sf-blue);
-            margin-bottom: 1.6rem;
-        }
-        .kindle-reader-rule {
-            border: none; border-top: 1px solid rgba(28, 38, 52, 0.12);
-            margin: 0 0 1.5rem;
-        }
-        .dark .kindle-reader-rule { border-top-color: rgba(255, 255, 255, 0.10); }
-        .kindle-reader-note {
-            font-family: var(--heading);
-            font-size: 1rem; line-height: 1.75;
-            font-style: italic;
-            color: #2A3340;
-            max-width: 540px;
-        }
+        .kindle-reader-meta { font-size: var(--t-micro); letter-spacing: var(--track-label); text-transform: uppercase; color: rgba(28,38,52,0.5); margin-bottom: 1rem; }
+        .dark .kindle-reader-meta { color: rgba(232,228,220,0.4); }
+        .kindle-reader-title { font-family: var(--font-display); font-size: var(--t-h2); font-weight: 600; letter-spacing: var(--track-h2); line-height: 1.2; margin-bottom: 0.4rem; }
+        .kindle-reader-author { font-size: var(--t-micro); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.4rem; }
+        .kindle-reader-rule { border: none; border-top: 1px solid rgba(28,38,52,0.12); margin: 0 0 1.4rem; }
+        .dark .kindle-reader-rule { border-top-color: rgba(255,255,255,0.1); }
+        .kindle-reader-note { font-size: var(--t-body); line-height: var(--lh-body); color: #2A3340; max-width: 34rem; }
         .dark .kindle-reader-note { color: #D2CDC3; }
-        .kindle-reader-note::before {
-            content: '\201C'; color: var(--sf-blue);
-            font-size: 1.5em; line-height: 0;
-            vertical-align: -0.15em; margin-right: 2px;
-        }
-        .kindle-reader-note::after {
-            content: '\201D'; color: var(--sf-blue);
-            font-size: 1.5em; line-height: 0;
-            vertical-align: -0.4em; margin-left: 2px;
-        }
-        .kindle-page-indicator {
-            margin-top: auto;
-            padding-top: 2rem;
-            font-family: var(--mono);
-            font-size: 0.58rem; letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: rgba(28, 38, 52, 0.4);
-            display: flex; justify-content: space-between; gap: 1rem;
-        }
-        .dark .kindle-page-indicator { color: rgba(232, 228, 220, 0.3); }
+        .kindle-page-indicator { margin-top: auto; padding-top: 2rem; font-size: var(--t-micro); letter-spacing: var(--track-label); text-transform: uppercase; color: rgba(28,38,52,0.4); display: flex; justify-content: space-between; gap: 1rem; }
+        .dark .kindle-page-indicator { color: rgba(232,228,220,0.3); }
 
-        @media (max-width: 720px) {
-            .kindle-frame { padding: 12px 12px 28px; border-radius: 18px; }
-            .kindle-frame::after { width: 44px; height: 5px; bottom: 10px; }
-            .kindle-screen {
-                grid-template-columns: 1fr;
-                min-height: auto;
+        /* ==========================================================
+           CONTACT
+           ========================================================== */
+        .contact { padding: var(--space-chapter) var(--gutter); border-top: 1px solid var(--line); scroll-margin-top: var(--nav-h); }
+        .contact-inner { max-width: var(--measure); margin: 0 auto; }
+        .contact-links { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+        .contact-meta { margin-top: 3.5rem; font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3); }
+
+        /* ==========================================================
+           RESPONSIVE
+           ========================================================== */
+        @media (max-width: 1099px) {
+            .chapter-inner { grid-template-columns: minmax(0, var(--measure)); justify-content: center; }
+            .chapter-label {
+                grid-column: 1; justify-self: stretch; width: auto;
+                position: sticky; top: var(--nav-h); z-index: 5;
+                flex-direction: row; align-items: baseline; gap: 0.75rem;
+                padding: 0.8rem 0; margin-bottom: 1.75rem;
+                background: var(--bg); border-bottom: 1px solid var(--line-2);
             }
-            .kindle-toc {
-                border-right: none;
-                border-bottom: 1px solid rgba(28, 38, 52, 0.10);
-                padding: 1rem 0.6rem 0.9rem 0.9rem;
-                max-height: 260px;
-            }
-            .dark .kindle-toc { border-bottom-color: rgba(255, 255, 255, 0.06); }
-            .kindle-reader-pane { padding: 1.6rem 1.4rem 1.4rem; }
-            .kindle-reader-title { font-size: 1.25rem; }
-            .kindle-reader-note { font-size: 0.92rem; }
+            .chapter-label .sub::before { content: '· '; }
+            .chapter-body { grid-column: 1; }
         }
-
-        /* --- FOOTER --- */
-        footer {
-            background: var(--footer-bg); color: #FFFFFF;
-            padding: 4rem 2rem; text-align: center;
-            transition: background 0.5s ease; position: relative; z-index: 1;
-        }
-        .footer-inner { max-width: 1100px; margin: 0 auto; }
-        footer h2 {
-            font-family: var(--heading);
-            font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
-        }
-        .footer-sub {
-            color: var(--footer-text); font-size: 0.85rem;
-            margin-bottom: 2rem;
-            transition: color 0.4s ease;
-        }
-        .social-links {
-            display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 2.5rem;
-        }
-        .social-links a {
-            width: 40px; height: 40px; border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--footer-text); text-decoration: none;
-            transition: all 0.25s ease; font-size: 0.9rem;
-        }
-        .social-links a:hover { color: #FFFFFF; border-color: var(--sf-blue); background: var(--sf-blue); }
-        .footer-meta {
-            font-family: var(--mono); font-size: 0.6rem;
-            letter-spacing: 0.1em; text-transform: uppercase;
-            color: rgba(255,255,255,0.18);
-        }
-
-        /* --- RESPONSIVE --- */
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .nav-links { display: none; }
-            .mobile-toggle { display: block; }
+            .nav-menu { display: inline-flex; }
             .nav-links.open {
-                display: flex; flex-direction: column;
-                position: absolute; top: 60px; left: 0; width: 100%;
-                background: var(--nav-bg); backdrop-filter: blur(16px);
-                padding: 1.5rem 2rem;
-                border-bottom: 1px solid var(--border); gap: 1rem;
+                display: flex; flex-direction: column; gap: 1rem;
+                position: absolute; top: var(--nav-h); left: 0; right: 0;
+                padding: 1.25rem var(--gutter) 1.5rem;
+                background: var(--nav-bg); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+                border-bottom: 1px solid var(--line);
             }
-            .hero { padding: 8rem 1.5rem 14rem; min-height: auto; position: relative; overflow: hidden; }
-            .hero-inner { flex-direction: column; text-align: center; position: relative; z-index: 3; }
-            .hero-left { position: relative; z-index: 5; }
-            .hero-subtitle { max-width: 100%; }
-            .hero-actions { justify-content: center; }
-            
-            .hero-name { font-size: clamp(2.8rem, 12vw, 4rem); }
-            .profile-photo-container { width: 280px; height: 280px; overflow: visible; perspective: 800px; }
-            .profile-photo-wrapper { width: 200px; height: 200px; position: relative; z-index: 5; transform-style: preserve-3d; }
-            .photo-bg-3d {
-                position: absolute;
-                top: -42%; left: -32%;
-                width: 200%; height: 200%;
-                z-index: 0; opacity: 0.5;
-                pointer-events: none;
-                transition: opacity 0.8s ease;
+            .hero { padding-top: calc(var(--nav-h) + 4vh); }
+            .hero-inner { grid-template-columns: 1fr; gap: 3rem; }
+            .photo { width: min(15rem, 60vw); margin: 0 auto; }
+            .photo-wrap { animation: idleNudge 6s ease-in-out infinite; }
+            .vinyl-active .photo-wrap { animation: none; }
+            .photo-hint { display: none; }
+            .song-note {
+                top: auto; left: 50%; bottom: -4.5rem;
+                transform: translateX(-50%) translateY(8px);
+                flex-direction: column; text-align: center;
             }
-            .photo-scroll-guard { display: none; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .agent-grid { grid-template-columns: 1fr; }
-            .agent-card::before, .agent-card::after { display: none; }
-            .edu-grid { grid-template-columns: 1fr; }
-            .skill-name { min-width: 0; width: 45%; flex-shrink: 0; font-size: 0.65rem; }
-            .skill-row { gap: 0.5rem; }
+            .vinyl-active .song-note { transform: translateX(-50%); }
+            .song-note .h { display: none; }
+            .song-note .v { display: block; width: 32px; height: 28px; }
+            .album-invite { position: fixed; left: 50%; top: auto; bottom: 1.25rem; transform: translateX(-50%); z-index: 150; }
+            .record li { grid-template-columns: minmax(0, 1fr); gap: 0.15rem; }
+            .record .when { text-align: left; }
+        }
+        @media (max-width: 640px) {
+            .proof-row { grid-template-columns: 1fr; gap: 1rem; }
+            .proof-row li { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); align-items: baseline; gap: 1rem; }
+            .proof-row .cap { margin-top: 0; }
+            .proof { grid-template-columns: 1fr; gap: 0.5rem; }
+            .rows li { grid-template-columns: 1fr; gap: 0.5rem; }
+            .path li { grid-template-columns: 1fr; gap: 0.1rem; }
+            .kindle-frame { padding: 10px 10px 26px; border-radius: 16px; }
+            .kindle-screen { grid-template-columns: 1fr; min-height: auto; }
+            .kindle-toc { border-right: none; border-bottom: 1px solid rgba(28,38,52,0.1); max-height: 240px; }
+            .kindle-reader-pane { padding: 1.5rem 1.25rem 1.25rem; }
         }
 
+        /* ==========================================================
+           REDUCED MOTION — no scroll-driven animation, final states only
+           ========================================================== */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+            .reveal { opacity: 1; transform: none; }
+            .morph { height: auto; }
+            .morph-pin { position: static; height: 60vh; }
+            .morph-fallback { opacity: 1 !important; }
+            #agentShowcaseCanvas { display: none; }
+        }
     </style>
 </head>
 <body>
+    <script>(function(){document.documentElement.classList.add('js');try{if(localStorage.getItem('theme')==='dark')document.body.classList.add('dark');}catch(e){}})();</script>
+    <a class="skip" href="#about">Skip to content</a>
 
-    <!-- Scroll progress -->
-    <div class="scroll-progress" id="scrollProgress"></div>
-
-    <!-- Nav -->
-    <nav id="navbar">
+    <nav class="nav" id="navbar" aria-label="Primary">
         <div class="nav-inner">
-            <span class="nav-logo">fernandogarciag</span>
-            <button class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Toggle menu">
-                <i class="fas fa-bars"></i>
-            </button>
+            <a class="nav-logo" href="#top">fernandogarciag</a>
             <div class="nav-right">
-                <div class="nav-links">
+                <div class="nav-links" id="navLinks">
                     <a href="#about">about</a>
                     <a href="#experience">experience</a>
-                    <a href="#agents">skills</a>
-                    <a href="#skills">tools</a>
+                    <a href="#skills">skills</a>
+                    <a href="#tools">tools</a>
                     <a href="#education">education</a>
                     <a href="#dashboards">dashboards</a>
                     <a href="#contact">contact</a>
                 </div>
-                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
-                    <i class="fas fa-sun"></i>
+                <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
+                    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                </button>
+                <button class="icon-btn nav-menu" id="navMenu" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
                 </button>
             </div>
         </div>
     </nav>
 
-    <!-- HERO -->
-    <header class="hero" id="hero">
-        <div class="hero-inner" id="heroContent">
-            <div class="hero-left">
-                <h1 class="hero-name">
-                    FERNANDO<br><span class="accent">GARCÍA</span>
-                </h1>
-                <p class="hero-tagline">Architecting the Future of Agentic Processes</p>
-                <p class="hero-subtitle">
-                    Engineer and Product Manager with a Master's in Business Intelligence — translating high-stakes industrial workflows into agentic AI products that drive operational performance.
-                </p>
+    <!-- HERO: claim → three proof numbers → one line → two actions. One media (photo). -->
+    <header class="hero" id="top">
+        <div class="hero-inner">
+            <div class="hero-copy">
+                <p class="eyebrow">Solutions Product Manager, Salesforce (Agentforce)<span class="dot">·</span>May 2026–present</p>
+                <h1 class="display">I build AI agents for the workflows I used to run.</h1>
+                <ol class="proof-row" aria-label="Three proof points">
+                    <li><span class="num">20%</span><span class="cap">working capital cut on the Toyota chassis program at Metalsa</span></li>
+                    <li><span class="num">99%+</span><span class="cap">accuracy on AI-generated task outputs across Regrello blueprints</span></li>
+                    <li><span class="num">2nd</span><span class="cap">place, CLAUT automotive-cluster innovation contest</span></li>
+                </ol>
+                <p class="lead">Mechanical engineer turned product manager. Three years planning automotive supply chains, building agentic workflows since 2024, now shipping Agentforce solutions across supply chain, finance, and HR.</p>
                 <div class="hero-actions">
-                    <a href="#experience" class="btn btn-primary">
-                        <i class="fas fa-play" style="font-size: 0.6rem;"></i> View My Impact
-                    </a>
-                    <a href="https://www.linkedin.com/in/fernandogarciagzz/" target="_blank" class="btn btn-outline">
-                        <i class="fab fa-linkedin"></i> LinkedIn
-                    </a>
-                    <a href="playground.html" class="playground-btn" id="playgroundBtn">
-                        <canvas id="playgroundBtnRobot" width="20" height="28"></canvas>
+                    <a href="mailto:fernando.jgarciagzz@gmail.com" class="btn btn-primary">Email me</a>
+                    <a href="https://www.linkedin.com/in/fernandogarciagzz/" target="_blank" rel="noopener" class="btn btn-outline ext">LinkedIn</a>
+                    <a href="playground.html" class="btn btn-primary playground-btn" id="playgroundBtn">
+                        <canvas id="playgroundBtnRobot" width="20" height="28" aria-hidden="true"></canvas>
                         Playground
                     </a>
                 </div>
             </div>
-            <div class="hero-right">
-                <div class="profile-photo-container" id="photoContainer">
-                    <div class="photo-bg-3d">
-                        <iframe id="splineFrame" src="https://my.spline.design/pandemoniumchaosartwork-KjSeQ5Fwh0tOJv1twUQFefWC/?v=3" frameborder="0" loading="lazy" title="3D Background"></iframe>
-                    </div>
-                    <div class="photo-scroll-guard" id="scrollGuard"></div>
-                    <div class="profile-photo-wrapper" id="vinylTrigger">
-                        <div class="photo-face">
-                            <img src="photo.png" alt="Fernando García" class="profile-photo">
-                        </div>
-                        <span class="photo-hint">♫</span>
-                    </div>
-                    <div class="album-invite" id="albumInvite">
-                        <a href="music.html" onclick="event.stopPropagation()">
-                            <span class="album-invite-title">✦ Roho</span>
-                            <span class="album-invite-sub">enter the album</span>
-                        </a>
-                    </div>
-                    <div class="song-annotation" id="songAnnotation">
-                        <svg class="song-annotation-arrow arrow-horizontal" viewBox="0 0 80 44" fill="none">
-                            <path d="M76 22 C60 20, 34 24, 14 22" stroke="#D97757" stroke-width="2" stroke-linecap="round" fill="none" stroke-dasharray="4 4"/>
-                            <path d="M20 15 L8 22 L20 29" stroke="#D97757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                        </svg>
-                        <svg class="song-annotation-arrow arrow-vertical" viewBox="0 0 36 30" fill="none">
-                            <path d="M18 2 C18 8, 17 16, 18 24" stroke="#D97757" stroke-width="1.8" stroke-linecap="round" fill="none" stroke-dasharray="3 3"/>
-                            <path d="M13 19 L18 26 L23 19" stroke="#D97757" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                        </svg>
-                        <span class="song-annotation-text">
-                            Hatua Kwa Hatua<br>
-                            <span style="font-size:0.85em;opacity:0.7;">by Fernando García</span>
-                        </span>
-                    </div>
+            <div class="photo" id="photoContainer">
+                <canvas class="photo-orbit" id="heroOrbit" aria-hidden="true"></canvas>
+                <div class="photo-wrap" id="vinylTrigger" role="button" tabindex="0" aria-label="Fernando García. Click to flip.">
+                    <div class="photo-face"><img src="photo.png" alt="Fernando García" width="512" height="512" fetchpriority="high"></div>
+                    <span class="photo-hint" aria-hidden="true">♫</span>
+                </div>
+                <div class="song-note" id="songAnnotation" aria-hidden="true">
+                    <svg class="h" viewBox="0 0 80 44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M76 22 C60 20, 34 24, 14 22" stroke-dasharray="4 4"/><path d="M20 15 L8 22 L20 29"/></svg>
+                    <svg class="v" viewBox="0 0 36 30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2 C18 8, 17 16, 18 24" stroke-dasharray="3 3"/><path d="M13 19 L18 26 L23 19"/></svg>
+                    <span><span class="song-title">Hatua Kwa Hatua</span><span class="song-by">by Fernando García</span></span>
+                </div>
+                <div class="album-invite" id="albumInvite">
+                    <a href="music.html" onclick="event.stopPropagation()">✦ Roho <span aria-hidden="true">—</span> enter the album</a>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Agent showcase: sticky scroll-driven 3D morph -->
-    <section class="agent-showcase" id="agentShowcase">
-        <div class="agent-showcase-pin">
-            <canvas id="agentShowcaseCanvas"></canvas>
-        </div>
-    </section>
-
-    <!-- Connector -->
-
-    <!-- Stats -->
-    <section class="bg-primary" style="padding: 2rem 2rem 3.5rem;">
-        <div class="section-inner">
-            <div class="stats-grid">
-                <div class="stat-card magnetic reveal">
-                    <div class="stat-value" data-count="1.5" data-suffix="+" data-decimal="true">0+</div>
-                    <div class="stat-label">Years Agentic Orchestration</div>
-                </div>
-                <div class="stat-card magnetic reveal reveal-d1">
-                    <div class="stat-value" data-static="true">M.S.</div>
-                    <div class="stat-label">Business Intelligence</div>
-                </div>
-                <div class="stat-card magnetic reveal reveal-d2">
-                    <div class="stat-value" data-count="20" data-suffix="%">0%</div>
-                    <div class="stat-label">Working Capital Reduction Across Supply Chain</div>
-                </div>
-                <div class="stat-card magnetic reveal reveal-d3">
-                    <div class="stat-value" data-static="true">2nd</div>
-                    <div class="stat-label">CLAUT Innovation Award</div>
+    <!-- 01 ABOUT -->
+    <section class="chapter" id="about">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">01</span><span>About</span></aside>
+            <div class="chapter-body">
+                <h2 class="h2 reveal">I ran the workflows before I automated them.</h2>
+                <p class="reveal">I'm a mechanical engineer with a master's in business intelligence. For three years I planned production and demand for Toyota and Stellantis programs at Metalsa, where every dependency mattered and things broke if you missed a detail. That process logic is what I bring to AI.</p>
+                <p class="reveal">At Regrello, and then at Salesforce after the acquisition, I've spent the time since 2024 turning supply chain, finance, and HR workflows into agentic solutions: designing them, testing them against real operating scenarios, and now owning them as a product manager on Agentforce.</p>
+                <div class="proof reveal">
+                    <span class="proof-tag">Path</span>
+                    <ol class="path">
+                        <li><span class="when">2021–2024</span><span>Metalsa · production planning for Toyota and Stellantis programs</span></li>
+                        <li><span class="when">2023–2024</span><span>M.S. Business Intelligence · University of Barcelona &amp; OBS</span></li>
+                        <li><span class="when">2024–2025</span><span>Regrello · industry analyst · acquired by Salesforce</span></li>
+                        <li><span class="when">2025–2026</span><span>Salesforce · quality engineer, Agentforce</span></li>
+                        <li class="now"><span class="when">2026–now</span><span>Salesforce · solutions product manager, Agentforce</span></li>
+                    </ol>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Connector -->
-
-    <!-- About -->
-    <section id="about" class="bg-primary">
-        <div class="section-inner">
-            <p class="section-label reveal">// about</p>
-            <h2 class="section-title reveal">The "Why" Behind the Solutions</h2>
-            <p class="about-text reveal">
-                I am a Data-Driven Engineer with a Master's in Business Intelligence, driven by a passion for uncovering the "why" behind complex bottlenecks to build truly scalable solutions. Currently a Solutions Product Manager at Salesforce, I specialize in the Agentforce platform, where I architect sophisticated agentic workflows that enable manufacturing teams to automate high-stakes processes and work significantly smarter.
-            </p>
-            <p class="about-text reveal">
-                I am a creator at heart, someone whose systems thinking was shaped by Supply Chain, where every dependency matters and things break if you miss the details. That process logic turns out to work anywhere. I now expand the same rigor to Finance, HR, and Industrial Operations, turning messy, fragmented workflows into clean, AI-driven solutions. The goal has never been to just fix what's broken. It's to build what comes next.
-            </p>
-            <p class="about-personal reveal">
-                Outside of architecting data strategies and process automation, I stay sharp through continuous learning, reading, and maintaining a disciplined lifestyle centered on fitness and mindfulness.
-            </p>
-        </div>
-    </section>
-
-    <!-- Connector -->
-
-    <!-- Experience -->
-    <section id="experience" class="bg-primary">
-        <div class="section-inner">
-            <p class="section-label reveal">// experience</p>
-            <h2 class="section-title reveal">Professional Journey</h2>
-            <p class="section-desc reveal">From engineering internships to building agentic systems at Salesforce.</p>
-
-            <div class="timeline">
-                <div class="timeline-item reveal">
-                    <div class="timeline-dot active"></div>
-                    <div class="timeline-header">
-                        <span class="timeline-company">Salesforce</span>
-                        <span class="timeline-badge">Current</span>
-                        <span class="workflow-status running">● Running</span>
-                    </div>
-                    <p class="timeline-role">Solutions Product Manager · May 2026 – Present · Remote — Mexico</p>
-                    <ul class="timeline-bullets">
-                        <li><strong>Multi-Vertical Solutioning:</strong> Architect and deploy Agentforce solutions across supply chain, finance, and HR verticals, owning end-to-end solution design from business requirements through production implementation.</li>
-                        <li><strong>AI Product Strategy:</strong> Bridge product management and technical solutioning by defining how Salesforce agents interact with external enterprise platforms like Tableau, Slack, and SAP to deliver integrated, intelligent workflows.</li>
-                        <li><strong>Product Roadmap Influence:</strong> Partner with product, engineering, and AI teams to shape the Agentforce feature roadmap, translating enterprise client feedback and real-world workflow gaps into prioritized product improvements.</li>
-                        <li><strong>Business Impact Translation:</strong> Operate at the intersection of AI, platform integration, and multi-vertical product strategy, translating complex agent architectures into clear, measurable business outcomes for enterprise stakeholders.</li>
+    <!-- 02 EXPERIENCE · Salesforce -->
+    <section class="chapter" id="experience">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">02</span><span>Experience</span><span class="sub">Salesforce</span></aside>
+            <div class="chapter-body">
+                <p class="kicker reveal">Solutions Product Manager, Agentforce · May 2026–present. Quality Engineer · Nov 2025–Apr 2026.</p>
+                <h2 class="h2 reveal">Agents that audit their own answers, running every day.</h2>
+                <p class="reveal">As a product manager I own Agentforce solution design across supply chain, finance, and HR, from business requirements through production, and I define how agents work with Tableau, Slack, and SAP. Client feedback and workflow gaps go back into the roadmap as prioritized improvements.</p>
+                <p class="reveal">Before that, as a quality engineer, I built the harness first: test scenarios that mirror real industrial workflows, so the platform is measured against the messy cases, not the demo.</p>
+                <div class="proof reveal">
+                    <span class="proof-tag">Shipped</span>
+                    <ul class="proof-list">
+                        <li><span class="proof-name">AgentSuite.</span> A master agentic blueprint that orchestrates child workflows to run real use-case scenarios daily, with a self-evaluation layer where agents audit their own responses.</li>
+                        <li><span class="proof-name">Slack service agent.</span> Answers internal and external product questions from the full documentation, taking manual support cases off the queue.</li>
                     </ul>
                 </div>
-
-                <div class="timeline-item reveal">
-                    <div class="timeline-dot completed"></div>
-                    <div class="timeline-header">
-                        <span class="timeline-company">Salesforce</span>
-                        <span class="timeline-badge">Transitioned</span>
-                        <span class="workflow-status done">✓ Completed</span>
-                    </div>
-                    <p class="timeline-role">Quality Engineer · Nov 2025 – Apr 2026</p>
-                    <ul class="timeline-bullets">
-                        <li><strong>Agentic Orchestration:</strong> Engineered "AgentSuite," a master fully agentic blueprint that orchestrates complex child workflows to execute real-world use case scenarios daily. I developed an automated self-evaluation layer where agents audit their own responses, ensuring high-fidelity outputs across the entire agent suite.</li>
-                        <li><strong>Customer Success AI:</strong> Developed and deployed a Slack-based Service Agent that leverages full product documentation to provide real-time support. This agent acts as an intelligent filter for internal and external queries, resolving doubts instantly and significantly reducing the volume of manual Customer Support cases.</li>
-                        <li><strong>Cross-Functional Feedback:</strong> Collaborates directly with Product and Engineering teams to refine agent capabilities, identifying logic gaps in new releases and translating them into improved system architecture.</li>
-                        <li><strong>Strategic Testing:</strong> Leverages deep supply chain expertise to design "out-of-the-box" test scenarios that mirror complex industrial workflows, increasing platform robustness and resilience.</li>
-                    </ul>
-                </div>
-
-                <div class="timeline-item reveal">
-                    <div class="timeline-dot completed"></div>
-                    <div class="timeline-header">
-                        <span class="timeline-company">Regrello</span>
-                        <span class="timeline-badge">Acquired by Salesforce</span>
-                        <span class="workflow-status done">✓ Completed</span>
-                    </div>
-                    <p class="timeline-role">Industry Analyst · Oct 2024 – Oct 2025</p>
-                    <ul class="timeline-bullets">
-                        <li><strong>Operational Automation:</strong> "Lemurized" (automated) high-complexity supply chain and finance blueprints to run on a daily cadence. This system measures platform output consistency over time, providing a continuous pulse on the reliability of agentic interactions in industrial environments.</li>
-                        <li><strong>Intelligent Solution Design:</strong> Architected "Golden Blueprints" featuring advanced task logic, field mappings, and conditional branching for global supply chain and finance workflows.</li>
-                        <li><strong>AI & Prompt Refinement:</strong> Engineered and refined high-precision prompts to improve AI-generated task responses, ensuring 99%+ accuracy and consistency across diverse agent outputs.</li>
-                        <li><strong>Strategic Quality Assurance:</strong> Led "Golden Test" simulations and rigorous QA cycles to identify edge-case logic gaps and workflow inconsistencies prior to production deployment.</li>
-                        <li><strong>BI Architecture & Reporting:</strong> Transformed raw platform data into actionable intelligence by designing operational dashboards and KPI reports in Google Looker Studio, enabling data-driven decision-making for stakeholders.</li>
-                    </ul>
-                </div>
-
-                <div class="timeline-item reveal">
-                    <div class="timeline-dot completed"></div>
-                    <div class="timeline-header">
-                        <span class="timeline-company">Metalsa</span>
-                        <span class="timeline-badge">Toyota Program</span>
-                        <span class="workflow-status done">✓ Completed</span>
-                    </div>
-                    <p class="timeline-role">Production Planning Specialist · 2022 – Oct 2024</p>
-                    <ul class="timeline-bullets">
-                        <li><strong>Operational Impact:</strong> Led the finished product planning for Toyota chassis, managing the Master Production Schedule (MPS) and sales forecasting within the QAD ERP system to ensure 100% assembly fulfillment.</li>
-                        <li><strong>Financial Optimization:</strong> Partnered with the Supply Chain Director to optimize demand planning and inventory projections, successfully reducing working capital by over 20% through rigorous historical forecast analysis.</li>
-                        <li><strong>Strategic Business Intelligence:</strong> Architected and deployed the entire suite of Power BI S&OP Dashboards for the Toyota and Stellantis business units. These tools became the primary source of truth for Plant Managers and Directors to track production and global inventory levels.</li>
-                        <li><strong>Award-Winning Innovation:</strong> Awarded 2nd Place in the Automotive Cluster (CLAUT) Innovation Contest for excellence in supply chain improvement and process optimization.</li>
-                        <li><strong>Demand Analysis:</strong> Conducted deep-dive analysis of customer demand variations to engineer inventory buffers that protected capital flow while maintaining lean manufacturing standards.</li>
-                    </ul>
-                </div>
-
-                <div class="timeline-item reveal">
-                    <div class="timeline-dot completed"></div>
-                    <div class="timeline-header">
-                        <span class="timeline-company">Metalsa</span>
-                        <span class="workflow-status done">✓ Completed</span>
-                    </div>
-                    <p class="timeline-role">Logistics & Demand Planning Specialist · 2021 – 2022</p>
-                    <ul class="timeline-bullets">
-                        <li><strong>Supplier Intervention:</strong> Traveled to supplier facilities across the US and Mexico to identify production bottlenecks. I worked on-site with suppliers to resolve delays and ensure critical components reached the production lines on time.</li>
-                        <li><strong>Component Planning:</strong> Managed the planning and inventory for all necessary components. I analyzed customer demand to ensure we had the right materials to meet finished-product goals.</li>
-                        <li><strong>Logistics Coordination:</strong> Acted as the daily point of contact for external logistics teams. I tracked all incoming deliveries and made strategic decisions on when to expedite materials to prevent line stoppages.</li>
-                        <li><strong>Supply Chain Resilience:</strong> Managed the end-to-end logistics for both local and imported components, maintaining a steady flow of materials for high-volume automotive production.</li>
-                        <li><strong>Process Improvement:</strong> Led the management and rotation of plastic pallets and returnable packaging, optimizing the physical flow of materials between suppliers and the plant.</li>
-                    </ul>
-                </div>
-
-                <div class="timeline-item reveal">
-                    <div class="timeline-dot completed"></div>
-                    <div class="timeline-header">
-                        <span class="timeline-company">Metalsa</span>
-                        <span class="timeline-badge">Stellantis Project</span>
-                        <span class="workflow-status done">✓ Completed</span>
-                    </div>
-                    <p class="timeline-role">Production Control Intern · 2021</p>
-                    <ul class="timeline-bullets">
-                        <li><strong>Demand Analysis:</strong> Supported MPS planning and demand analysis for major automotive production projects.</li>
-                    </ul>
-                </div>
-
-                <div class="timeline-item reveal">
-                    <div class="timeline-dot completed"></div>
-                    <div class="timeline-header">
-                        <span class="timeline-company">John Deere</span>
-                        <span class="workflow-status done">✓ Completed</span>
-                    </div>
-                    <p class="timeline-role">Design Engineering Intern · 2020</p>
-                    <ul class="timeline-bullets">
-                        <li><strong>Engineering Simulation:</strong> Performed Finite Element Analysis (FEA) and topological optimization for industrial designs.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Connector -->
-
-    <!-- Core Competencies (Agent Nodes) -->
-    <section id="agents" class="bg-primary">
-        <div class="section-inner">
-            <p class="section-label reveal">// skills</p>
-            <h2 class="section-title reveal">Core Skills</h2>
-            <p class="section-desc reveal">The capabilities I bring to every solution I build.</p>
-
-            <div class="agent-grid">
-                <div class="agent-card magnetic reveal">
-                    <div class="agent-card-inner">
-                        <div class="agent-type">agent::product</div>
-                        <div class="agent-icon"><i class="fas fa-robot"></i></div>
-                        <h3>Product & Solutions</h3>
-                        <p>Agentic Orchestration, No-Code Workflow Design, Quality Assurance</p>
-                    </div>
-                </div>
-                <div class="agent-card magnetic reveal reveal-d1">
-                    <div class="agent-card-inner">
-                        <div class="agent-type">agent::automation</div>
-                        <div class="agent-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
-                        <h3>AI & Automation</h3>
-                        <p>Generative AI (GPT/Gemini), Agentic Testing & Automation, Prompt Engineering</p>
-                    </div>
-                </div>
-                <div class="agent-card magnetic reveal reveal-d2">
-                    <div class="agent-card-inner">
-                        <div class="agent-type">agent::analytics</div>
-                        <div class="agent-icon"><i class="fas fa-chart-line"></i></div>
-                        <h3>Business Intelligence</h3>
-                        <p>Power BI (Advanced), Tableau, Looker Studio, QAD ERP, Data Modeling</p>
-                    </div>
-                </div>
-                <div class="agent-card magnetic reveal reveal-d3">
-                    <div class="agent-card-inner">
-                        <div class="agent-type">agent::domain</div>
-                        <div class="agent-icon"><i class="fas fa-industry"></i></div>
-                        <h3>Domain Expertise</h3>
-                        <p>Demand Planning, Production Control, Logistics, S&OP Strategy, Automotive Supply Chain</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="agent-card learning-card magnetic reveal" style="margin-top: 1.25rem;">
-                <div class="agent-card-inner">
-                    <div class="agent-type">agent::learning // in training</div>
-                    <div class="agent-icon"><i class="fas fa-code"></i></div>
-                    <h3>Technical Development</h3>
-                    <p>Software Development with Claude Code to deepen understanding of SaaS and bug fixing. Actively learning Python and SQL for advanced data analysis and AI/software logic comprehension.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Connector -->
-
-    <!-- Skills -->
-    <section id="skills" class="bg-primary">
-        <div class="section-inner">
-            <p class="section-label reveal">// tools</p>
-            <h2 class="section-title reveal">Tools & Proficiency</h2>
-            <p class="section-desc reveal">A transparent view of where I stand today.</p>
-
-            <div class="skills-list" id="skillsList">
-                <div class="skill-row reveal">
-                    <span class="skill-name">Agentforce for Supply Chain</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="100"></div></div>
-                    <span class="skill-pct">100%</span>
-                </div>
-                <div class="skill-row reveal">
-                    <span class="skill-name">Generative AI (Claude / GPT / Gemini)</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95"></div></div>
-                    <span class="skill-pct">95%</span>
-                </div>
-                <div class="skill-row reveal">
-                    <span class="skill-name">Excel</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95"></div></div>
-                    <span class="skill-pct">95%</span>
-                </div>
-                <div class="skill-row reveal">
-                    <span class="skill-name">Power BI</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="90"></div></div>
-                    <span class="skill-pct">90%</span>
-                </div>
-                <div class="skill-row reveal">
-                    <span class="skill-name">Tableau</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="80"></div></div>
-                    <span class="skill-pct">80%</span>
-                </div>
-                <div class="skill-row reveal">
-                    <span class="skill-name">Google Looker Studio</span>
-                    <div class="skill-bar-bg"><div class="skill-bar-fill" data-width="75"></div></div>
-                    <span class="skill-pct">75%</span>
-                </div>
-            </div>
-
-            <div class="skills-learning reveal">
-                <p class="skills-learning-label">// currently_exploring</p>
-                <div class="skills-learning-grid">
-                    <span class="learning-tag"><span class="learning-dot"></span> Cursor AI <span class="learning-tag-status">In Progress</span></span>
-                    <span class="learning-tag"><span class="learning-dot"></span> Claude Code <span class="learning-tag-status">In Progress</span></span>
-                    <span class="learning-tag"><span class="learning-dot"></span> Python <span class="learning-tag-status">In Progress</span></span>
-                    <span class="learning-tag"><span class="learning-dot"></span> SQL <span class="learning-tag-status">In Progress</span></span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Connector -->
-
-    <!-- Education -->
-    <section id="education" class="bg-primary">
-        <div class="section-inner">
-            <p class="section-label reveal">// education</p>
-            <h2 class="section-title reveal">Academic Background</h2>
-            <div class="edu-grid" style="margin-top: 2rem;">
-                <div class="edu-card magnetic reveal">
-                    <div class="edu-card-inner">
-                        <h3>Master's in Business Intelligence</h3>
-                        <p class="edu-school">University of Barcelona & OBS Business School</p>
-                        <p class="edu-year">2023 – 2024</p>
-                    </div>
-                </div>
-                <div class="edu-card magnetic reveal reveal-d1">
-                    <div class="edu-card-inner">
-                        <h3>B.S. in Mechanical Engineering with Management</h3>
-                        <p class="edu-school">Universidad de Monterrey (UDEM)</p>
-                        <p class="edu-year">2017 – 2021</p>
-                        <ul class="edu-detail">
-                            <li>&#8226; Academic Excellence Scholarship</li>
-                            <li>&#8226; Certificates in Leadership, Spirituality & Social Justice</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Connector -->
-
-    <!-- Hobbies -->
-    <section class="bg-primary">
-        <div class="section-inner">
-            <p class="section-label reveal">// beyond_work</p>
-            <h2 class="section-title reveal">Hobbies & Interests</h2>
-            <div class="hobbies-featured reveal" style="margin-top: 2rem;">
-                <a class="hobby-card" href="music.html">
-                    <span class="hobby-card-icon"><i class="fas fa-music"></i></span>
-                    <span class="hobby-card-text">
-                        <span class="hobby-card-title">Music</span>
-                        <span class="hobby-card-sub">Listen to Roho</span>
-                    </span>
-                    <i class="fas fa-arrow-right hobby-card-arrow"></i>
-                </a>
-            </div>
-            <div class="hobbies-grid reveal" style="margin-top: 1rem;">
-                <span class="hobby-tag"><i class="fas fa-futbol"></i> Soccer</span>
-                <span class="hobby-tag"><i class="fas fa-plane"></i> Travel</span>
-                <span class="hobby-tag"><i class="fas fa-person-running"></i> Running</span>
-                <span class="hobby-tag"><i class="fas fa-dumbbell"></i> Hyrox / Gym</span>
-                <span class="hobby-tag"><i class="fas fa-utensils"></i> Cooking</span>
-                <span class="hobby-tag"><i class="fas fa-table-tennis-paddle-ball"></i> Padel</span>
-                <span class="hobby-tag"><i class="fas fa-mountain"></i> Outdoors</span>
-                <span class="hobby-tag"><i class="fas fa-microchip"></i> AI</span>
-                <span class="hobby-tag"><i class="fas fa-spa"></i> Mindfulness</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- Connector -->
-
-    <!-- Books -->
-    <section class="bg-primary">
-        <div class="section-inner">
-            <p class="section-label reveal">// reading_list</p>
-            <h2 class="section-title reveal">Books I Recommend</h2>
-            <p class="section-desc reveal">Seven books that shaped how I think about mind, work, and growth. Tap a title to read why.</p>
-            <div class="kindle-frame reveal">
-                <div class="kindle-screen">
-                    <div class="kindle-toc">
-                        <div class="kindle-toc-header">
-                            <i class="fas fa-book"></i>
-                            <span>Library</span>
-                            <span class="kindle-toc-header-rule"></span>
-                            <span id="kindleCount">07</span>
-                        </div>
-                        <ul class="kindle-toc-list" id="kindleTocList" role="listbox" aria-label="Book list"></ul>
-                    </div>
-                    <div class="kindle-reader-pane" id="kindleReaderPane" aria-live="polite"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Connector -->
-
-    <!-- Dashboards -->
-    <section id="dashboards" class="bg-primary">
-        <div class="section-inner">
-            <p class="section-label reveal">// live_data</p>
-            <h2 class="section-title reveal">Dashboards</h2>
-            <p class="section-desc reveal">Live data projects I've built.</p>
-            <div class="dashboard-list reveal" style="margin-top: 2rem;">
-                <a href="https://ai-race-dashboard.onrender.com" target="_blank" rel="noopener" class="dashboard-card">
-                    <div class="dashboard-card-content">
-                        <h3>The AI Race</h3>
-                        <p>A live tracker of benchmarks, pricing, open-source downloads, and capabilities across the top AI companies.</p>
-                        <div class="dashboard-tags">
-                            <span class="dashboard-tag">Python</span>
-                            <span class="dashboard-tag">Dash</span>
-                            <span class="dashboard-tag">Plotly</span>
-                            <span class="dashboard-tag">Live Data</span>
-                        </div>
-                        <div class="dashboard-status">
-                            <span class="dashboard-status-dot"></span>
-                            live
+                <figure class="media media-wide">
+                    <div class="morph" id="agentShowcase">
+                        <div class="morph-pin">
+                            <div class="morph-fallback" aria-hidden="true"><svg class="morph-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true"><circle cx="120.0" cy="199.2" r="2.15" opacity="0.74"/><circle cx="108.7" cy="192.7" r="2.21" opacity="0.77"/><circle cx="121.9" cy="209.0" r="2.00" opacity="0.67"/><circle cx="136.1" cy="185.1" r="2.27" opacity="0.80"/><circle cx="90.1" cy="198.4" r="2.10" opacity="0.72"/><circle cx="148.6" cy="204.4" r="2.00" opacity="0.68"/><circle cx="110.4" cy="174.2" r="2.36" opacity="0.84"/><circle cx="101.6" cy="211.8" r="1.88" opacity="0.62"/><circle cx="159.9" cy="183.8" r="2.21" opacity="0.77"/><circle cx="78.5" cy="181.5" r="2.22" opacity="0.77"/><circle cx="140.0" cy="213.0" r="1.82" opacity="0.59"/><circle cx="134.8" cy="163.4" r="2.40" opacity="0.86"/><circle cx="75.6" cy="201.9" r="1.92" opacity="0.64"/><circle cx="172.1" cy="193.2" r="2.01" opacity="0.68"/><circle cx="88.3" cy="161.7" r="2.37" opacity="0.84"/><circle cx="112.7" cy="215.7" r="1.70" opacity="0.54"/><circle cx="164.8" cy="163.8" r="2.32" opacity="0.82"/><circle cx="59.9" cy="181.9" r="2.08" opacity="0.71"/><circle cx="163.7" cy="205.9" r="1.77" opacity="0.57"/><circle cx="117.1" cy="147.2" r="2.47" opacity="0.89"/><circle cx="78.6" cy="207.4" r="1.72" opacity="0.55"/><circle cx="185.4" cy="174.8" r="2.10" opacity="0.72"/><circle cx="64.8" cy="157.8" r="2.29" opacity="0.80"/><circle cx="135.1" cy="213.9" r="1.59" opacity="0.49"/><circle cx="154.7" cy="143.9" r="2.42" opacity="0.87"/><circle cx="52.4" cy="187.5" r="1.88" opacity="0.62"/><circle cx="185.5" cy="191.3" r="1.81" opacity="0.59"/><circle cx="91.7" cy="137.3" r="2.45" opacity="0.88"/><circle cx="94.8" cy="210.9" r="1.54" opacity="0.47"/><circle cx="186.7" cy="153.0" r="2.23" opacity="0.78"/><circle cx="46.1" cy="160.5" r="2.12" opacity="0.73"/><circle cx="161.9" cy="205.5" r="1.56" opacity="0.48"/><circle cx="133.3" cy="127.4" r="2.49" opacity="0.90"/><circle cx="57.3" cy="194.6" r="1.65" opacity="0.52"/><circle cx="199.9" cy="170.9" r="1.93" opacity="0.64"/><circle cx="65.0" cy="134.2" r="2.36" opacity="0.84"/><circle cx="120.4" cy="209.9" r="1.42" opacity="0.41"/><circle cx="175.6" cy="131.3" r="2.36" opacity="0.84"/><circle cx="36.9" cy="167.8" r="1.90" opacity="0.63"/><circle cx="187.1" cy="190.3" r="1.61" opacity="0.50"/><circle cx="104.8" cy="116.4" r="2.49" opacity="0.90"/><circle cx="74.3" cy="200.1" r="1.45" opacity="0.43"/><circle cx="203.4" cy="147.5" r="2.08" opacity="0.71"/><circle cx="42.5" cy="137.4" r="2.18" opacity="0.76"/><circle cx="150.5" cy="202.6" r="1.37" opacity="0.39"/><circle cx="153.3" cy="112.7" r="2.45" opacity="0.88"/><circle cx="39.6" cy="176.8" r="1.65" opacity="0.52"/><circle cx="205.6" cy="169.5" r="1.73" opacity="0.55"/><circle cx="74.4" cy="112.0" r="2.41" opacity="0.86"/><circle cx="100.9" cy="201.4" r="1.30" opacity="0.36"/><circle cx="194.4" cy="123.7" r="2.23" opacity="0.78"/><circle cx="28.9" cy="145.3" r="1.95" opacity="0.65"/><circle cx="179.8" cy="188.6" r="1.41" opacity="0.41"/><circle cx="123.4" cy="99.3" r="2.48" opacity="0.89"/><circle cx="54.5" cy="184.6" r="1.42" opacity="0.42"/><circle cx="213.6" cy="145.1" r="1.89" opacity="0.63"/><circle cx="47.4" cy="114.2" r="2.25" opacity="0.79"/><circle cx="133.1" cy="196.5" r="1.23" opacity="0.33"/><circle cx="173.9" cy="102.5" r="2.36" opacity="0.84"/><circle cx="27.1" cy="155.5" r="1.70" opacity="0.54"/><circle cx="203.3" cy="168.5" r="1.52" opacity="0.46"/><circle cx="90.4" cy="92.5" r="2.43" opacity="0.87"/><circle cx="80.0" cy="188.6" r="1.24" opacity="0.33"/><circle cx="209.0" cy="119.7" r="2.06" opacity="0.70"/><circle cx="28.6" cy="121.7" r="2.02" opacity="0.69"/><circle cx="165.7" cy="184.9" r="1.24" opacity="0.33"/><circle cx="144.4" cy="86.1" r="2.42" opacity="0.87"/><circle cx="38.0" cy="165.3" r="1.44" opacity="0.42"/><circle cx="216.7" cy="144.2" r="1.68" opacity="0.53"/><circle cx="59.4" cy="92.6" r="2.29" opacity="0.81"/><circle cx="112.3" cy="186.8" r="1.13" opacity="0.28"/><circle cx="192.1" cy="96.1" r="2.22" opacity="0.77"/><circle cx="21.1" cy="132.2" r="1.76" opacity="0.57"/><circle cx="193.7" cy="166.7" r="1.32" opacity="0.37"/><circle cx="110.4" cy="76.3" r="2.41" opacity="0.86"/><circle cx="60.3" cy="172.0" r="1.23" opacity="0.33"/><circle cx="217.8" cy="118.1" r="1.87" opacity="0.61"/><circle cx="35.4" cy="98.5" r="2.09" opacity="0.71"/><circle cx="146.8" cy="178.1" r="1.10" opacity="0.27"/><circle cx="165.1" cy="76.9" r="2.32" opacity="0.82"/><circle cx="26.5" cy="143.3" r="1.49" opacity="0.45"/><circle cx="212.7" cy="143.5" r="1.47" opacity="0.44"/><circle cx="76.8" cy="73.5" r="2.31" opacity="0.81"/><circle cx="91.0" cy="173.3" r="1.08" opacity="0.26"/><circle cx="206.0" cy="92.8" r="2.04" opacity="0.69"/><circle cx="22.1" cy="108.4" r="1.83" opacity="0.60"/><circle cx="178.3" cy="162.6" r="1.16" opacity="0.30"/><circle cx="131.9" cy="63.9" r="2.34" opacity="0.83"/><circle cx="44.2" cy="152.0" r="1.25" opacity="0.34"/><circle cx="219.8" cy="117.5" r="1.66" opacity="0.52"/><circle cx="48.6" cy="77.1" r="2.13" opacity="0.73"/><circle cx="125.6" cy="167.9" r="1.01" opacity="0.23"/><circle cx="183.1" cy="71.2" r="2.17" opacity="0.75"/><circle cx="21.5" cy="119.7" r="1.56" opacity="0.48"/><circle cx="202.1" cy="141.4" r="1.28" opacity="0.35"/><circle cx="97.3" cy="57.8" r="2.28" opacity="0.80"/><circle cx="71.6" cy="156.1" r="1.07" opacity="0.26"/><circle cx="213.9" cy="91.5" r="1.84" opacity="0.60"/><circle cx="30.0" cy="85.4" r="1.90" opacity="0.63"/><circle cx="158.9" cy="155.5" r="1.02" opacity="0.24"/><circle cx="152.4" cy="55.2" r="2.23" opacity="0.78"/><circle cx="33.6" cy="129.7" r="1.30" opacity="0.36"/><circle cx="214.8" cy="116.6" r="1.45" opacity="0.43"/><circle cx="66.4" cy="58.4" r="2.14" opacity="0.74"/><circle cx="104.5" cy="153.8" r="0.96" opacity="0.21"/><circle cx="196.1" cy="68.2" r="1.99" opacity="0.67"/><circle cx="23.5" cy="96.0" r="1.63" opacity="0.51"/><circle cx="186.1" cy="136.9" r="1.12" opacity="0.28"/><circle cx="118.6" cy="45.9" r="2.21" opacity="0.77"/><circle cx="56.4" cy="135.8" r="1.10" opacity="0.27"/><circle cx="214.8" cy="90.8" r="1.63" opacity="0.51"/><circle cx="43.8" cy="64.4" r="1.93" opacity="0.64"/><circle cx="137.8" cy="144.5" r="0.94" opacity="0.20"/><circle cx="169.4" cy="49.8" r="2.08" opacity="0.71"/><circle cx="29.9" cy="106.2" r="1.37" opacity="0.39"/><circle cx="203.4" cy="114.0" r="1.26" opacity="0.34"/><circle cx="86.9" cy="43.5" r="2.10" opacity="0.72"/><circle cx="86.0" cy="136.1" r="0.96" opacity="0.21"/><circle cx="202.6" cy="66.8" r="1.79" opacity="0.58"/><circle cx="32.5" cy="73.5" r="1.69" opacity="0.53"/><circle cx="166.6" cy="128.9" r="1.00" opacity="0.22"/><circle cx="138.1" cy="37.9" r="2.09" opacity="0.71"/><circle cx="47.5" cy="113.4" r="1.15" opacity="0.29"/><circle cx="208.4" cy="89.4" r="1.43" opacity="0.42"/><circle cx="62.0" cy="46.8" r="1.93" opacity="0.64"/><circle cx="117.7" cy="129.6" r="0.90" opacity="0.18"/><circle cx="180.5" cy="47.1" r="1.89" opacity="0.63"/><circle cx="33.7" cy="83.0" r="1.44" opacity="0.42"/><circle cx="186.6" cy="108.5" r="1.11" opacity="0.28"/><circle cx="107.4" cy="32.7" r="2.02" opacity="0.68"/><circle cx="72.9" cy="115.2" r="1.00" opacity="0.22"/><circle cx="201.2" cy="65.8" r="1.58" opacity="0.49"/><circle cx="47.6" cy="53.7" r="1.71" opacity="0.54"/><circle cx="146.0" cy="116.6" r="0.93" opacity="0.19"/><circle cx="152.9" cy="33.4" r="1.92" opacity="0.64"/><circle cx="46.5" cy="90.0" r="1.22" opacity="0.32"/><circle cx="195.0" cy="85.7" r="1.25" opacity="0.34"/><circle cx="82.5" cy="33.5" r="1.87" opacity="0.62"/><circle cx="101.4" cy="110.6" r="0.92" opacity="0.19"/><circle cx="183.7" cy="46.0" r="1.69" opacity="0.53"/><circle cx="45.5" cy="61.6" r="1.48" opacity="0.44"/><circle cx="166.4" cy="98.5" r="1.01" opacity="0.23"/><circle cx="125.0" cy="26.5" r="1.88" opacity="0.62"/><circle cx="67.8" cy="92.1" r="1.06" opacity="0.25"/><circle cx="191.0" cy="63.5" r="1.39" opacity="0.40"/><circle cx="67.6" cy="38.3" r="1.68" opacity="0.53"/><circle cx="127.3" cy="99.3" r="0.92" opacity="0.19"/><circle cx="159.9" cy="32.0" r="1.72" opacity="0.55"/><circle cx="55.3" cy="67.4" r="1.28" opacity="0.35"/><circle cx="175.2" cy="77.7" r="1.13" opacity="0.28"/><circle cx="102.4" cy="25.7" r="1.75" opacity="0.56"/><circle cx="92.6" cy="87.6" r="0.98" opacity="0.22"/><circle cx="176.1" cy="44.9" r="1.48" opacity="0.44"/><circle cx="65.5" cy="44.2" r="1.47" opacity="0.44"/><circle cx="145.1" cy="82.5" r="0.99" opacity="0.22"/><circle cx="135.5" cy="25.2" r="1.67" opacity="0.53"/><circle cx="74.4" cy="67.9" r="1.14" opacity="0.29"/><circle cx="170.4" cy="57.5" r="1.25" opacity="0.34"/><circle cx="90.8" cy="29.5" r="1.57" opacity="0.48"/><circle cx="114.8" cy="75.6" r="0.99" opacity="0.22"/><circle cx="153.8" cy="33.2" r="1.49" opacity="0.45"/><circle cx="77.5" cy="47.8" r="1.30" opacity="0.36"/><circle cx="148.8" cy="62.3" r="1.10" opacity="0.27"/><circle cx="117.6" cy="26.4" r="1.52" opacity="0.46"/><circle cx="98.8" cy="59.8" r="1.10" opacity="0.27"/><circle cx="150.0" cy="42.0" r="1.30" opacity="0.36"/><circle cx="98.0" cy="35.6" r="1.36" opacity="0.39"/><circle cx="125.2" cy="54.0" r="1.12" opacity="0.28"/><circle cx="127.4" cy="34.4" r="1.34" opacity="0.38"/><circle cx="120.0" cy="40.8" r="1.25" opacity="0.34"/></svg></div>
+                            <canvas id="agentShowcaseCanvas" aria-hidden="true"></canvas>
+                            <div class="morph-steps" aria-hidden="true"><span class="on">Intelligence</span><span>Agents</span><span>Process</span><span>Orchestration</span></div>
                         </div>
                     </div>
-                    <i class="fas fa-arrow-up-right-from-square dashboard-card-arrow"></i>
-                </a>
+                    <figcaption>Intelligence → Agents → Process → Orchestration: the four things an Agentforce solution has to get right, in the order I design them. Scroll-driven point cloud, loaded only when this section is near; static when WebGL or motion is off.</figcaption>
+                </figure>
             </div>
         </div>
     </section>
 
-    <!-- Connector -->
-
-    <!-- Footer -->
-    <footer id="contact">
-        <div class="footer-inner">
-            <h2 class="reveal">Let's Build the Future Together</h2>
-            <p class="footer-sub reveal">Currently bridging the gap between quality engineering and strategic product solutions.</p>
-            <div class="social-links reveal">
-                <a href="mailto:fernando.jgarciagzz@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-                <a href="https://www.linkedin.com/in/fernandogarciagzz/" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
-                <a href="https://www.salesforce.com/trailblazer/f0geoy9fs18wzcvj6f" target="_blank" aria-label="Trailhead"><i class="fas fa-cloud"></i></a>
+    <!-- 03 EXPERIENCE · Regrello -->
+    <section class="chapter" id="regrello">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">03</span><span>Experience</span><span class="sub">Regrello</span></aside>
+            <div class="chapter-body">
+                <p class="kicker reveal">Industry Analyst · Oct 2024–Oct 2025 · Regrello, acquired by Salesforce</p>
+                <h2 class="h2 reveal">99%+ accuracy on AI task outputs, checked on a daily cadence.</h2>
+                <p class="reveal">I automated high-complexity supply chain and finance blueprints to run every day, so platform output consistency was measured continuously instead of at release time. I wrote and refined the prompts behind those tasks, led the Golden Test QA cycles before production, and built the Looker Studio dashboards stakeholders used to read the results.</p>
+                <div class="proof reveal">
+                    <span class="proof-tag">Proof</span>
+                    <ul class="proof-list">
+                        <li><span class="proof-num">99%+</span>accuracy and consistency on AI-generated task responses across diverse agent outputs, after prompt refinement.</li>
+                        <li><span class="proof-name">Golden Blueprints.</span> Reference workflows with advanced task logic, field mappings, and conditional branching for global supply chain and finance processes.</li>
+                    </ul>
+                </div>
             </div>
-            <p class="footer-meta reveal">Based in Monterrey, Mexico · Working Remotely for Salesforce</p>
+        </div>
+    </section>
+
+    <!-- 04 EXPERIENCE · Metalsa -->
+    <section class="chapter" id="metalsa">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">04</span><span>Experience</span><span class="sub">Metalsa</span></aside>
+            <div class="chapter-body">
+                <p class="kicker reveal">Production Planning Specialist, Toyota program · 2022–Oct 2024. Logistics &amp; Demand Planning Specialist · 2021–2022.</p>
+                <h2 class="h2 reveal">20% less working capital on the Toyota chassis program.</h2>
+                <p class="reveal">I owned the master production schedule and sales forecast for Toyota chassis in QAD ERP, and partnered with the supply chain director on demand planning and inventory projections. Before that I planned components and logistics, and worked on site with suppliers across the US and Mexico when lines were at risk.</p>
+                <div class="proof reveal">
+                    <span class="proof-tag">Proof</span>
+                    <ul class="proof-list">
+                        <li><span class="proof-num">20%</span>reduction in working capital through historical forecast analysis and inventory projection, with 100% assembly fulfillment maintained.</li>
+                        <li><span class="proof-name">Power BI S&amp;OP suite.</span> The dashboard set for the Toyota and Stellantis units that became the plant's source of truth for production and global inventory.</li>
+                        <li><span class="proof-name">2nd place, CLAUT innovation contest.</span> Automotive cluster award for supply chain improvement and process optimization.</li>
+                    </ul>
+                </div>
+                <p class="record-title reveal">Full record</p>
+                <ol class="rows record reveal">
+                    <li><span class="co">Salesforce</span><span>Solutions Product Manager, Agentforce</span><span class="when">May 2026–present</span></li>
+                    <li><span class="co">Salesforce</span><span>Quality Engineer, Agentforce</span><span class="when">Nov 2025–Apr 2026</span></li>
+                    <li><span class="co">Regrello</span><span>Industry Analyst · acquired by Salesforce</span><span class="when">Oct 2024–Oct 2025</span></li>
+                    <li><span class="co">Metalsa</span><span>Production Planning Specialist, Toyota program</span><span class="when">2022–Oct 2024</span></li>
+                    <li><span class="co">Metalsa</span><span>Logistics &amp; Demand Planning Specialist</span><span class="when">2021–2022</span></li>
+                    <li><span class="co">Metalsa</span><span>Production Control Intern, Stellantis project</span><span class="when">2021</span></li>
+                    <li><span class="co">John Deere</span><span>Design Engineering Intern · FEA and topology optimization</span><span class="when">2020</span></li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <!-- 05 SKILLS -->
+    <section class="chapter" id="skills">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">05</span><span>Skills</span></aside>
+            <div class="chapter-body">
+                <h2 class="h2 reveal">Four things I bring to a solution, each with a receipt.</h2>
+                <ul class="rows reveal">
+                    <li>
+                        <div><h3>Product &amp; solutions</h3><p class="desc">Agentic orchestration, no-code workflow design, quality assurance</p></div>
+                        <p class="ev"><strong>AgentSuite</strong> and <strong>Golden Blueprints</strong> <span class="from">· Salesforce, Regrello</span></p>
+                    </li>
+                    <li>
+                        <div><h3>AI &amp; automation</h3><p class="desc">Generative AI (Claude, GPT, Gemini), agentic testing, prompt engineering</p></div>
+                        <p class="ev"><strong>99%+</strong> output accuracy after prompt refinement <span class="from">· Regrello</span></p>
+                    </li>
+                    <li>
+                        <div><h3>Business intelligence</h3><p class="desc">Power BI, Tableau, Looker Studio, QAD ERP, data modeling</p></div>
+                        <p class="ev"><strong>Power BI S&amp;OP suite</strong>, Looker Studio reporting, <a href="#dashboards">The AI Race</a> <span class="from">· Metalsa, Regrello, personal</span></p>
+                    </li>
+                    <li>
+                        <div><h3>Domain</h3><p class="desc">Demand planning, production control, logistics, S&amp;OP, automotive supply chain</p></div>
+                        <p class="ev"><strong>20%</strong> working capital cut, <strong>100%</strong> assembly fulfillment <span class="from">· Metalsa, Toyota program</span></p>
+                    </li>
+                </ul>
+                <p class="reveal" style="margin-top: 1.5rem;">In training: software development with Claude Code, and Python and SQL for analysis.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 06 TOOLS -->
+    <section class="chapter" id="tools">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">06</span><span>Tools</span></aside>
+            <div class="chapter-body">
+                <h2 class="h2 reveal">The tools I work in, and what I'm learning next.</h2>
+                <ul class="rows reveal">
+                    <li>
+                        <div><h3>Daily</h3></div>
+                        <p class="ev">Agentforce (supply chain), Claude / GPT / Gemini, Excel, Power BI, Tableau, Looker Studio, QAD ERP, Slack</p>
+                    </li>
+                    <li>
+                        <div><h3>Learning</h3></div>
+                        <p class="ev">Claude Code, Cursor, Python, SQL</p>
+                    </li>
+                </ul>
+                <div class="proof reveal">
+                    <span class="proof-tag">Proof</span>
+                    <ul class="proof-list">
+                        <li><span class="proof-num">33</span>Trailhead badges and 10,025 points on my public <a href="https://www.salesforce.com/trailblazer/f0geoy9fs18wzcvj6f" target="_blank" rel="noopener" class="ext">Trailblazer profile</a>.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 07 EDUCATION -->
+    <section class="chapter" id="education">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">07</span><span>Education</span></aside>
+            <div class="chapter-body">
+                <h2 class="h2 reveal">Engineering first, then business intelligence.</h2>
+                <ul class="rows reveal">
+                    <li>
+                        <div><h3>M.S. Business Intelligence</h3><p class="desc">University of Barcelona &amp; OBS Business School</p></div>
+                        <p class="ev">2023–2024</p>
+                    </li>
+                    <li>
+                        <div><h3>B.S. Mechanical Engineering with Management</h3><p class="desc">Universidad de Monterrey (UDEM)</p></div>
+                        <p class="ev">2017–2021 <span class="from">· Academic Excellence Scholarship · certificates in leadership, spirituality &amp; social justice</span></p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 08 DASHBOARDS -->
+    <section class="chapter" id="dashboards">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">08</span><span>Dashboards</span></aside>
+            <div class="chapter-body">
+                <h2 class="h2 reveal">The AI Race: a live tracker of who is ahead in AI.</h2>
+                <p class="reveal">A public dashboard I built in Python with Dash and Plotly. It tracks benchmarks, context windows, pricing, scaling, chips and compute, and coding ability across the top AI labs, and it updates from live data.</p>
+                <div class="proof reveal">
+                    <span class="proof-tag">Shipped</span>
+                    <ul class="proof-list">
+                        <li><a href="https://ai-race-dashboard.onrender.com" target="_blank" rel="noopener" class="ext">ai-race-dashboard.onrender.com</a> · live · Python, Dash, Plotly</li>
+                    </ul>
+                </div>
+                <figure class="media reveal">
+                    <a class="media-frame" href="https://ai-race-dashboard.onrender.com" target="_blank" rel="noopener" style="display:block">
+                        <img src="assets/img/ai-race.jpg" alt="The AI Race dashboard landing view" width="1600" height="900" loading="lazy" decoding="async">
+                    </a>
+                    <figcaption>Landing view of The AI Race. Screenshot; the live version updates from source data.</figcaption>
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- 09 BEYOND WORK -->
+    <section class="chapter" id="beyond">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">09</span><span>Beyond work</span></aside>
+            <div class="chapter-body">
+                <h2 class="h2 reveal">I also make music.</h2>
+                <p class="reveal">Roho is an album of original tracks I wrote and produced. It has its own player on this site, and one of its songs is hiding behind the photo at the top of this page.</p>
+                <p class="reveal">Off screen: soccer, running, Hyrox, padel, cooking, travel, the outdoors, and a daily mindfulness practice.</p>
+                <div class="proof reveal">
+                    <span class="proof-tag">Shipped</span>
+                    <ul class="proof-list">
+                        <li><a href="music.html">Roho, the album</a> · original tracks with a custom player</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 10 READING -->
+    <section class="chapter" id="reading">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">10</span><span>Reading</span></aside>
+            <div class="chapter-body">
+                <h2 class="h2 reveal">Seven books that shaped how I think.</h2>
+                <p class="reveal">Tap a title to read why.</p>
+                <figure class="media reveal">
+                    <div class="kindle-frame">
+                        <div class="kindle-screen">
+                            <div class="kindle-toc">
+                                <div class="kindle-toc-header"><span>Library</span><span class="kindle-toc-header-rule"></span><span id="kindleCount">07</span></div>
+                                <ul class="kindle-toc-list" id="kindleTocList" role="listbox" aria-label="Book list">
+                                    <li><button class="kindle-toc-item active" type="button" data-i="0" role="option" aria-selected="true"><span class="kindle-toc-num">01</span><span class="kindle-toc-title">The Power of Your Subconscious Mind</span></button></li>
+                                    <li><button class="kindle-toc-item" type="button" data-i="1" role="option"><span class="kindle-toc-num">02</span><span class="kindle-toc-title">The Power of Now</span></button></li>
+                                    <li><button class="kindle-toc-item" type="button" data-i="2" role="option"><span class="kindle-toc-num">03</span><span class="kindle-toc-title">A New Earth</span></button></li>
+                                    <li><button class="kindle-toc-item" type="button" data-i="3" role="option"><span class="kindle-toc-num">04</span><span class="kindle-toc-title">Secrets of the Millionaire Mind</span></button></li>
+                                    <li><button class="kindle-toc-item" type="button" data-i="4" role="option"><span class="kindle-toc-num">05</span><span class="kindle-toc-title">Think and Grow Rich</span></button></li>
+                                    <li><button class="kindle-toc-item" type="button" data-i="5" role="option"><span class="kindle-toc-num">06</span><span class="kindle-toc-title">The Almanack of Naval Ravikant</span></button></li>
+                                    <li><button class="kindle-toc-item" type="button" data-i="6" role="option"><span class="kindle-toc-num">07</span><span class="kindle-toc-title">Manifest</span></button></li>
+                                </ul>
+                            </div>
+                            <div class="kindle-reader-pane" id="kindleReaderPane" aria-live="polite">
+                                <div class="kindle-reader-meta">Book 01 of 07</div>
+                                <h3 class="kindle-reader-title">The Power of Your Subconscious Mind</h3>
+                                <div class="kindle-reader-author">by Joseph Murphy</div>
+                                <hr class="kindle-reader-rule">
+                                <p class="kindle-reader-note">My entry point into this whole genre — the book that opened the door to everything else on this list. Older and more spiritual than I expected, but the core idea stuck: your subconscious takes whatever you repeatedly think as instruction. The chapters on autosuggestion before sleep changed how I end my days.</p>
+                                <div class="kindle-page-indicator"><span>fernando's library</span><span>01 / 07</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT -->
+    <footer class="contact" id="contact">
+        <div class="contact-inner">
+            <h2 class="h2 reveal">Hiring for Agentforce, supply chain workflows, or an early product role? Let's talk.</h2>
+            <p class="reveal">Fastest is email. LinkedIn works too.</p>
+            <div class="contact-links reveal">
+                <a href="mailto:fernando.jgarciagzz@gmail.com" class="btn btn-primary">fernando.jgarciagzz@gmail.com</a>
+                <a href="https://www.linkedin.com/in/fernandogarciagzz/" target="_blank" rel="noopener" class="btn btn-outline ext">LinkedIn</a>
+                <a href="https://www.salesforce.com/trailblazer/f0geoy9fs18wzcvj6f" target="_blank" rel="noopener" class="btn btn-outline ext">Trailhead</a>
+            </div>
+            <p class="contact-meta reveal">Based in Monterrey, Mexico · Working remotely for Salesforce</p>
         </div>
     </footer>
 
-    <script>
-    (function() {
-
-        // --- DARK MODE ---
-        const toggle = document.getElementById('themeToggle');
-        const icon = toggle.querySelector('i');
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark');
-            icon.className = 'fas fa-moon';
-        }
-        toggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark');
-            const dark = document.body.classList.contains('dark');
-            icon.className = dark ? 'fas fa-moon' : 'fas fa-sun';
-            localStorage.setItem('theme', dark ? 'dark' : 'light');
-        });
-
-        // --- SCROLL: NAV + PROGRESS ---
-        const navbar = document.getElementById('navbar');
-        const progress = document.getElementById('scrollProgress');
-        window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 10);
-            const h = document.documentElement.scrollHeight - window.innerHeight;
-            progress.style.width = h > 0 ? (window.scrollY / h * 100) + '%' : '0%';
-        });
-
-        // --- PARALLAX HERO ---
-        const heroContent = document.getElementById('heroContent');
-        window.addEventListener('scroll', () => {
-            const y = window.scrollY;
-            if (y < window.innerHeight) {
-                heroContent.style.transform = 'translateY(' + (y * 0.3) + 'px)';
-                heroContent.style.opacity = 1 - (y / (window.innerHeight * 0.75));
-            }
-        });
-
-        // --- REVEAL ON SCROLL ---
-        const reveals = document.querySelectorAll('.reveal');
-        const revealObs = new IntersectionObserver((entries) => {
-            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-        }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
-        reveals.forEach(el => revealObs.observe(el));
-
-        // --- COUNTER ANIMATION ---
-        const stats = document.querySelectorAll('.stat-value[data-count]');
-        const counterObs = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting || entry.target.dataset.counted) return;
-                const el = entry.target;
-                el.dataset.counted = 'true';
-                if (el.dataset.static === 'true') return;
-                const target = parseFloat(el.dataset.count);
-                const suffix = el.dataset.suffix || '';
-                const dec = el.dataset.decimal === 'true';
-                const dur = 1400, start = performance.now();
-                function tick(now) {
-                    const p = Math.min((now - start) / dur, 1);
-                    const ease = 1 - Math.pow(1 - p, 3);
-                    el.textContent = (dec ? (target * ease).toFixed(1) : Math.round(target * ease)) + suffix;
-                    if (p < 1) requestAnimationFrame(tick);
-                }
-                requestAnimationFrame(tick);
-            });
-        }, { threshold: 0.5 });
-        stats.forEach(el => counterObs.observe(el));
-
-        // --- SKILL BARS ---
-        const bars = document.querySelectorAll('.skill-bar-fill');
-        const barObs = new IntersectionObserver((entries) => {
-            entries.forEach(e => { if (e.isIntersecting) e.target.style.width = e.target.dataset.width + '%'; });
-        }, { threshold: 0.25 });
-        bars.forEach(b => barObs.observe(b));
-
-        // --- SPOTLIGHT CARDS ---
-        document.querySelectorAll('.magnetic').forEach(card => {
-            const spot = document.createElement('div');
-            spot.className = 'spotlight';
-            card.appendChild(spot);
-
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const isDark = document.body.classList.contains('dark');
-                const alpha = isDark ? 0.12 : 0.08;
-                spot.style.background = 'radial-gradient(circle 180px at ' + x + 'px ' + y + 'px, rgba(59,87,117,' + alpha + '), transparent)';
-            });
-        });
-
-    })();
-    </script>
-
-    <!-- Hidden Audio -->
-    <audio id="easterEggAudio" preload="auto">
+    <!-- Easter-egg audio: nothing downloads until the photo is flipped -->
+    <audio id="easterEggAudio" preload="none">
         <source src="Hatua Kwa Hatua (Remastered).mp3" type="audio/mpeg">
     </audio>
+    <canvas id="robotRunnerCanvas" aria-hidden="true"></canvas>
 
+    <!-- Hero orbit: 2D canvas, no WebGL, ~1.5KB. Static frame under reduced motion. -->
     <script>
-    (function() {
-        // --- SPLINE: scroll guard with hover pass-through ---
-        const scrollGuard = document.getElementById('scrollGuard');
-        if (scrollGuard) {
-            let hoverTimer;
+    (function () {
+        var c = document.getElementById('heroOrbit');
+        if (!c || !c.getContext) return;
+        var ctx = c.getContext('2d');
+        if (!ctx) return;
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var RINGS = [[56, 0.30, 0.00010], [88, 0.37, -0.00007], [120, 0.44, 0.00004]]; // [count, radius fraction, angular speed]
+        var W, H, dpr, col = [59, 87, 117], running = false, visible = true, inView = true, raf = null;
 
-            scrollGuard.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                window.scrollBy({ top: e.deltaY, behavior: 'instant' });
-            }, { passive: false });
-
-            scrollGuard.addEventListener('mousemove', () => {
-                scrollGuard.style.pointerEvents = 'none';
-                clearTimeout(hoverTimer);
-                hoverTimer = setTimeout(() => {
-                    scrollGuard.style.pointerEvents = 'auto';
-                }, 60);
-            });
-
-            window.addEventListener('wheel', () => {
-                clearTimeout(hoverTimer);
-                scrollGuard.style.pointerEvents = 'auto';
-            }, { capture: true, passive: true });
+        function hexToRgb(hex) {
+            var h = hex.replace('#', '').trim();
+            if (h.length === 3) h = h.split('').map(function (x) { return x + x; }).join('');
+            var n = parseInt(h, 16);
+            return isNaN(n) ? [59, 87, 117] : [(n >> 16) & 255, (n >> 8) & 255, n & 255];
         }
-
-        // --- AURORA GLOW ---
-        const aCanvas = document.getElementById('auroraCanvas');
-        if (aCanvas) {
-            const aCtx = aCanvas.getContext('2d');
-            const photoBox = document.getElementById('photoContainer');
-            let aW, aH;
-            let intensity = 0;
-            let targetIntensity = 0;
-            let mouseX = 0.5, mouseY = 0.5;
-            let smoothX = 0.5, smoothY = 0.5;
-
-            function aResize() {
-                const rect = photoBox.getBoundingClientRect();
-                aW = aCanvas.width = rect.width * 2;
-                aH = aCanvas.height = rect.height * 2;
-            }
-            aResize();
-            window.addEventListener('resize', aResize);
-
-            photoBox.addEventListener('mousemove', (e) => {
-                const rect = photoBox.getBoundingClientRect();
-                mouseX = (e.clientX - rect.left) / rect.width;
-                mouseY = (e.clientY - rect.top) / rect.height;
-                targetIntensity = 1;
-            });
-            photoBox.addEventListener('mouseleave', () => { targetIntensity = 0; });
-            photoBox.style.pointerEvents = 'auto';
-
-            let time = 0;
-            function drawAurora() {
-                aCtx.clearRect(0, 0, aW, aH);
-                time += 0.008;
-
-                intensity += (targetIntensity - intensity) * 0.04;
-                smoothX += (mouseX - smoothX) * 0.06;
-                smoothY += (mouseY - smoothY) * 0.06;
-
-                const isDark = document.body.classList.contains('dark');
-                const cx = aW / 2;
-                const cy = aH / 2;
-
-                // Three aurora blobs that drift and fade
-                const blobs = [
-                    {
-                        x: cx + Math.sin(time * 0.7) * 80 + (smoothX - 0.5) * 150 * intensity,
-                        y: cy + Math.cos(time * 0.5) * 60 + (smoothY - 0.5) * 100 * intensity,
-                        rx: aW * 0.35 + Math.sin(time * 0.4) * 40,
-                        ry: aH * 0.25 + Math.cos(time * 0.6) * 30,
-                        r: 1, g: 118, b: 211,
-                        baseAlpha: isDark ? 0.15 : 0.18,
-                        hoverAlpha: isDark ? 0.35 : 0.4
-                    },
-                    {
-                        x: cx + Math.cos(time * 0.5) * 90 + (smoothX - 0.5) * 130 * intensity,
-                        y: cy + Math.sin(time * 0.8) * 70 + (smoothY - 0.5) * 80 * intensity,
-                        rx: aW * 0.3 + Math.cos(time * 0.3) * 35,
-                        ry: aH * 0.22 + Math.sin(time * 0.5) * 25,
-                        r: 0, g: 161, b: 224,
-                        baseAlpha: isDark ? 0.12 : 0.14,
-                        hoverAlpha: isDark ? 0.3 : 0.35
-                    },
-                    {
-                        x: cx + Math.sin(time * 0.9) * 70 + (smoothX - 0.5) * 110 * intensity,
-                        y: cy + Math.cos(time * 0.3) * 80 + (smoothY - 0.5) * 120 * intensity,
-                        rx: aW * 0.28 + Math.sin(time * 0.6) * 30,
-                        ry: aH * 0.2 + Math.cos(time * 0.4) * 20,
-                        r: 26, g: 214, b: 255,
-                        baseAlpha: isDark ? 0.1 : 0.12,
-                        hoverAlpha: isDark ? 0.25 : 0.3
-                    }
-                ];
-
-                blobs.forEach(b => {
-                    const alpha = b.baseAlpha + (b.hoverAlpha - b.baseAlpha) * intensity;
-                    const grad = aCtx.createRadialGradient(b.x, b.y, 0, b.x, b.y, Math.max(b.rx, b.ry));
-                    grad.addColorStop(0, 'rgba(' + b.r + ',' + b.g + ',' + b.b + ',' + alpha + ')');
-                    grad.addColorStop(0.4, 'rgba(' + b.r + ',' + b.g + ',' + b.b + ',' + (alpha * 0.6) + ')');
-                    grad.addColorStop(1, 'rgba(' + b.r + ',' + b.g + ',' + b.b + ', 0)');
-
-                    aCtx.save();
-                    aCtx.translate(b.x, b.y);
-                    aCtx.scale(1, b.ry / b.rx);
-                    aCtx.translate(-b.x, -b.y);
-                    aCtx.beginPath();
-                    aCtx.arc(b.x, b.y, b.rx, 0, Math.PI * 2);
-                    aCtx.fillStyle = grad;
-                    aCtx.fill();
-                    aCtx.restore();
-                });
-
-                requestAnimationFrame(drawAurora);
-            }
-            drawAurora();
+        function readColor() {
+            col = hexToRgb(getComputedStyle(document.body).getPropertyValue('--accent') || '#3B5775');
         }
-    })();
-    </script>
-
-    <!-- Kindle Reader -->
-    <script>
-    (function() {
-        var books = [
-            { title: 'The Power of Your Subconscious Mind', author: 'Joseph Murphy', note: 'My entry point into this whole genre \u2014 the book that opened the door to everything else on this list. Older and more spiritual than I expected, but the core idea stuck: your subconscious takes whatever you repeatedly think as instruction. The chapters on autosuggestion before sleep changed how I end my days.' },
-            { title: 'The Power of Now', author: 'Eckhart Tolle', note: 'My personal favorite. The book that taught me to notice the difference between me and my thoughts \u2014 and that the present moment is all we ever actually have. Tolle\u2019s idea of the \u201Cpain-body\u201D alone is worth the read; it gave me language for patterns I\u2019d been running on autopilot for years.' },
-            { title: 'A New Earth', author: 'Eckhart Tolle', note: 'Picks up where The Power of Now leaves off, but zoomed out: how ego shows up in relationships, complaining, and the things we identify with. Less practical than the first, more honest about how collective the problem is.' },
-            { title: 'Secrets of the Millionaire Mind', author: 'T. Harv Eker', note: 'Eker\u2019s idea that you inherit a \u201Cmoney blueprint\u201D from childhood reframed the whole topic for me \u2014 wealth is a thinking habit before it\u2019s a number. The 17 contrasts between rich-mindset and poor-mindset thinking are uncomfortably specific; I caught myself in several.' },
-            { title: 'Think and Grow Rich', author: 'Napoleon Hill', note: 'Another favorite of mine. Don\u2019t let the title fool you \u2014 it\u2019s about abundance, not just money. Hill\u2019s central idea is that how we think is how we create: thoughts, faith, and a definite purpose are the raw materials, and wealth is only one of the forms they take. He spent 20 years interviewing the wealthiest industrialists of his time and distilled it into 13 principles, repetitive on purpose because he wanted them drilled in. The chapter on definite purpose is the one I keep coming back to.' },
-            { title: 'The Almanack of Naval Ravikant', author: 'Eric Jorgenson', note: 'Naval\u2019s clearest thinking, organized into two halves: how to get rich (own equity, build specific knowledge, use leverage that doesn\u2019t require permission) and how to be happy (desire is a contract you make to be unhappy until you get what you want). Reads like a friend\u2019s notebook \u2014 dense, re-readable, every page quotable.' },
-            { title: 'Manifest', author: 'Roxie Nafousi', note: 'Nafousi\u2019s 7-step framework is what makes the spiritual ideas in the other books actually executable \u2014 be clear, remove fear, align your actions, trust the timing. The chapter on turning envy into inspiration was the one I underlined the most: every time you feel jealous, that\u2019s data about what you actually want.' }
-        ];
-
-        var tocList = document.getElementById('kindleTocList');
-        var pane = document.getElementById('kindleReaderPane');
-        var countEl = document.getElementById('kindleCount');
-        if (!tocList || !pane) return;
-
-        var current = 0;
-        function pad(n) { return n < 10 ? '0' + n : '' + n; }
-        function esc(s) {
-            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        function resize() {
+            var r = c.getBoundingClientRect();
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            W = c.width = Math.max(1, Math.round(r.width * dpr));
+            H = c.height = Math.max(1, Math.round(r.height * dpr));
         }
-
-        function renderToc() {
-            tocList.innerHTML = books.map(function(b, i) {
-                return '<li><button class="kindle-toc-item' + (i === current ? ' active' : '') +
-                    '" type="button" data-i="' + i + '" role="option"' +
-                    (i === current ? ' aria-selected="true"' : '') + '>' +
-                    '<span class="kindle-toc-num">' + pad(i + 1) + '</span>' +
-                    '<span class="kindle-toc-title">' + esc(b.title) + '</span>' +
-                    '</button></li>';
-            }).join('');
-        }
-
-        function renderPane() {
-            var b = books[current];
-            pane.innerHTML =
-                '<div class="kindle-reader-meta">Book ' + pad(current + 1) + ' of ' + pad(books.length) + '</div>' +
-                '<h3 class="kindle-reader-title">' + esc(b.title) + '</h3>' +
-                '<div class="kindle-reader-author">by ' + esc(b.author) + '</div>' +
-                '<hr class="kindle-reader-rule"/>' +
-                '<p class="kindle-reader-note">' + esc(b.note) + '</p>' +
-                '<div class="kindle-page-indicator">' +
-                '<span>fernando&rsquo;s library</span>' +
-                '<span>' + pad(current + 1) + ' / ' + pad(books.length) + '</span>' +
-                '</div>';
-        }
-
-        function select(i) {
-            if (i < 0 || i >= books.length || i === current) return;
-            current = i;
-            renderToc();
-            renderPane();
-        }
-
-        tocList.addEventListener('click', function(e) {
-            var btn = e.target.closest('.kindle-toc-item');
-            if (!btn) return;
-            select(parseInt(btn.dataset.i, 10));
-        });
-
-        tocList.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowDown') { e.preventDefault(); select(Math.min(current + 1, books.length - 1)); focusActive(); }
-            else if (e.key === 'ArrowUp') { e.preventDefault(); select(Math.max(current - 1, 0)); focusActive(); }
-        });
-
-        function focusActive() {
-            var el = tocList.querySelector('.kindle-toc-item.active');
-            if (el) el.focus();
-        }
-
-        if (countEl) countEl.textContent = pad(books.length);
-        renderToc();
-        renderPane();
-    })();
-    </script>
-
-    <!-- Vinyl Easter Egg Script -->
-    <script>
-    (function() {
-        const audio = document.getElementById('easterEggAudio');
-        const container = document.getElementById('photoContainer');
-        const trigger = document.getElementById('vinylTrigger');
-        const FADE = 600;
-        const VOL = 0.6;
-        let playing = false;
-
-        audio.volume = VOL;
-
-        function fadeIn() {
-            audio.volume = 0;
-            audio.play().then(() => {
-                let s = 0; const n = 30;
-                const iv = setInterval(() => {
-                    s++;
-                    audio.volume = Math.min(VOL, (s / n) * VOL);
-                    if (s >= n) clearInterval(iv);
-                }, FADE / n);
-            }).catch(() => {});
-        }
-
-        function fadeOut(cb) {
-            const v0 = audio.volume;
-            if (v0 === 0) { audio.pause(); if (cb) cb(); return; }
-            let s = 0; const n = 20;
-            const iv = setInterval(() => {
-                s++;
-                audio.volume = Math.max(0, v0 * (1 - s / n));
-                if (s >= n) {
-                    clearInterval(iv);
-                    audio.pause();
-                    audio.volume = VOL;
-                    if (cb) cb();
+        function draw(t) {
+            ctx.clearRect(0, 0, W, H);
+            var cx = W / 2, cy = H / 2, base = Math.min(W, H);
+            ctx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
+            for (var k = 0; k < RINGS.length; k++) {
+                var n = RINGS[k][0], r = RINGS[k][1] * base, a0 = t * RINGS[k][2];
+                for (var i = 0; i < n; i++) {
+                    var a = a0 + (i / n) * Math.PI * 2;
+                    var wob = Math.sin(t * 0.0006 + i * 1.7 + k) * 0.01 * base;
+                    var x = cx + Math.cos(a) * (r + wob);
+                    var y = cy + Math.sin(a) * (r + wob) * 0.97;
+                    ctx.globalAlpha = 0.14 + 0.34 * (0.5 + 0.5 * Math.sin(t * 0.0009 + i * 0.37 + k * 2));
+                    ctx.beginPath();
+                    ctx.arc(x, y, (k === 1 ? 1.5 : 1.05) * dpr, 0, Math.PI * 2);
+                    ctx.fill();
                 }
-            }, FADE / n);
+            }
+            ctx.globalAlpha = 1;
         }
-
-        let spinTimer = null;
-
-        function activate() {
-            playing = true;
-            container.classList.add('vinyl-active');
-            document.body.classList.add('claude-mode');
-            spinTimer = setTimeout(() => {
-                if (playing) {
-                    container.classList.add('vinyl-spinning');
-                    fadeIn();
-                }
-            }, 800);
+        function loop(t) {
+            raf = null;
+            if (!running || !visible || !inView) return;
+            draw(t);
+            raf = requestAnimationFrame(loop);
         }
+        function start() { if (reduce) { draw(0); return; } running = true; if (!raf) raf = requestAnimationFrame(loop); }
 
-        function deactivate() {
-            playing = false;
-            clearTimeout(spinTimer);
-            container.classList.remove('vinyl-spinning');
-            fadeOut(() => {
-                audio.currentTime = 0;
-                container.classList.remove('vinyl-active');
-                document.body.classList.remove('claude-mode');
-            });
+        readColor(); resize(); draw(0);
+        window.addEventListener('resize', function () { resize(); if (reduce) draw(0); }, { passive: true });
+        document.addEventListener('visibilitychange', function () { visible = !document.hidden; start(); });
+        new MutationObserver(function () { readColor(); if (reduce) draw(0); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver(function (es) { inView = es[0].isIntersecting; start(); }).observe(c);
         }
-
-        trigger.addEventListener('click', e => {
-            e.stopPropagation();
-            playing ? deactivate() : activate();
-        });
-
-        audio.addEventListener('ended', () => {
-            clearTimeout(spinTimer);
-            container.classList.remove('vinyl-spinning');
-            container.classList.remove('vinyl-active');
-            document.body.classList.remove('claude-mode');
-            playing = false;
-        });
-
+        start();
     })();
     </script>
 
-    <!-- Anti-copy protection -->
+    <!-- Page behaviour: theme, nav, reveals, lazy morph, lazy easter eggs. -->
     <script>
-    (function(){
-        // Disable right-click context menu
-        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    (function () {
+        var d = document, b = d.body;
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        // Block keyboard shortcuts: Ctrl+U (view source), Ctrl+S (save), Ctrl+Shift+I (dev tools), F12
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F12') { e.preventDefault(); return; }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'u') { e.preventDefault(); return; }
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); return; }
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) { e.preventDefault(); return; }
+        // Theme — same localStorage key as the other pages
+        var tg = d.getElementById('themeToggle');
+        function setTheme(dark) {
+            b.classList.toggle('dark', dark);
+            tg.setAttribute('aria-pressed', String(dark));
+            try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+        }
+        tg.setAttribute('aria-pressed', String(b.classList.contains('dark')));
+        tg.addEventListener('click', function () { setTheme(!b.classList.contains('dark')); });
+
+        // Nav
+        var nav = d.getElementById('navbar'), menu = d.getElementById('navMenu'), links = d.getElementById('navLinks');
+        menu.addEventListener('click', function () {
+            var open = links.classList.toggle('open');
+            menu.setAttribute('aria-expanded', String(open));
         });
-
-        // Disable drag on images
-        document.querySelectorAll('img').forEach(function(img) {
-            img.setAttribute('draggable', 'false');
-            img.addEventListener('dragstart', function(e) { e.preventDefault(); });
+        links.addEventListener('click', function (e) {
+            if (e.target.tagName === 'A') { links.classList.remove('open'); menu.setAttribute('aria-expanded', 'false'); }
         });
+        function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 8); }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
 
-        // Detect if page is loaded inside an iframe (anti-framing)
-        if (window.top !== window.self) {
-            window.top.location = window.self.location;
+        // Reveals — final state immediately under reduced motion or without IO
+        var rv = d.querySelectorAll('.reveal');
+        if (reduce || !('IntersectionObserver' in window)) {
+            for (var i = 0; i < rv.length; i++) rv[i].classList.add('in');
+        } else {
+            var io = new IntersectionObserver(function (es) {
+                es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+            }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+            for (var j = 0; j < rv.length; j++) io.observe(rv[j]);
         }
 
-        // Console warning
-        console.log('%c⚠ This site is protected. Unauthorized copying or reproduction is prohibited.', 'color: #D97757; font-size: 16px; font-weight: bold;');
-        console.log('%c© Fernando García González — fernandogarciag.com', 'color: #3B5775; font-size: 12px;');
-    })();
-    </script>
-
-    <!-- Robot runner animation overlay -->
-    <canvas id="robotRunnerCanvas"></canvas>
-
-    <script>
-    (function() {
-        /* ── Sprites ── */
-        const SPR_STAND = [
-            [0,0,0,0,1,1,0,0,0,0],
-            [0,0,0,1,1,1,1,0,0,0],
-            [0,0,1,1,1,1,1,1,0,0],
-            [0,0,1,0,1,1,0,1,0,0],
-            [0,0,1,1,1,1,1,1,0,0],
-            [0,0,0,1,1,1,1,0,0,0],
-            [0,1,1,1,1,1,1,1,1,0],
-            [0,1,1,1,1,1,1,1,1,0],
-            [0,0,1,1,1,1,1,1,0,0],
-            [0,0,1,1,1,1,1,1,0,0],
-            [0,0,0,1,1,1,1,0,0,0],
-            [0,0,0,1,0,0,1,0,0,0],
-            [0,0,1,1,0,0,1,1,0,0],
-            [0,0,1,1,0,0,1,1,0,0],
-        ];
-        const SPR_RUN = [
-            [0,0,0,0,1,1,0,0,0,0],
-            [0,0,0,1,1,1,1,0,0,0],
-            [0,0,1,1,1,1,1,1,0,0],
-            [0,0,1,0,1,1,0,1,0,0],
-            [0,0,1,1,1,1,1,1,0,0],
-            [0,0,0,1,1,1,1,0,0,0],
-            [0,1,1,1,1,1,1,1,1,0],
-            [0,1,1,1,1,1,1,1,1,0],
-            [0,0,1,1,1,1,1,1,0,0],
-            [0,0,1,1,1,1,1,1,0,0],
-            [0,0,0,1,1,1,1,0,0,0],
-            [0,0,1,1,0,0,0,1,0,0],
-            [0,1,1,0,0,0,0,1,1,0],
-            [0,1,0,0,0,0,0,0,1,0],
-        ];
-
-        const PX = 3;
-        const COLOR = '#D97757';
-
-        function drawSprite(ctx, spr, x, y, px, color) {
-            ctx.fillStyle = color;
-            for (let r = 0; r < spr.length; r++)
-                for (let c = 0; c < spr[r].length; c++)
-                    if (spr[r][c] === 1)
-                        ctx.fillRect(x + c * px, y + r * px, px, px);
-        }
-
-        /* ── Draw button robot icon ── */
-        const btnCanvas = document.getElementById('playgroundBtnRobot');
-        if (btnCanvas) {
-            const bCtx = btnCanvas.getContext('2d');
-            const bPx = 2;
-            btnCanvas.width = SPR_STAND[0].length * bPx;
-            btnCanvas.height = SPR_STAND.length * bPx;
-            drawSprite(bCtx, SPR_STAND, 0, 0, bPx, '#FFFFFF');
-        }
-
-        /* ── Runner overlay ── */
-        const overlay = document.getElementById('robotRunnerCanvas');
-        const octx = overlay.getContext('2d');
-        const btn = document.getElementById('playgroundBtn');
-        const container = document.getElementById('photoContainer');
-
-        // State machine: 'idle' | 'waiting' | 'running-forward' | 'arrived' | 'running-backward'
-        let robotState = 'idle';
-        let animFrame = 0;
-        let rafId = null;
-        let delayTimer = null;
-        let robotX, robotY, targetX, targetY, startX, startY;
-
-        // Persistent trail particles
-        let trail = [];
-
-        const DURATION = 120; // ~2 seconds at 60fps — smooth, not rushed
-
-        function resizeOverlay() {
-            overlay.width = window.innerWidth * devicePixelRatio;
-            overlay.height = window.innerHeight * devicePixelRatio;
-            octx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-        }
-        resizeOverlay();
-        window.addEventListener('resize', resizeOverlay);
-
-        function getVinylCenter() {
-            const wrapper = document.getElementById('vinylTrigger');
-            const rect = wrapper.getBoundingClientRect();
-            return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-        }
-
-        function getButtonTarget() {
-            // Temporarily make button visible off-screen to measure
-            const wasVisible = btn.classList.contains('visible');
-            if (!wasVisible) {
-                btn.style.display = 'inline-flex';
-                btn.style.opacity = '0';
-                btn.style.pointerEvents = 'none';
-                void btn.offsetHeight;
+        // Morph — load Three.js + showcase.js only when the section is near; static fallback otherwise
+        var morph = d.getElementById('agentShowcase');
+        if (morph) {
+            var steps = morph.querySelectorAll('.morph-steps span');
+            function progress() {
+                var r = morph.getBoundingClientRect();
+                var total = r.height - window.innerHeight;
+                var p = total > 0 ? Math.max(0, Math.min(1, -r.top / total)) : 0;
+                var idx = Math.min(steps.length - 1, Math.round(p * (steps.length - 1)));
+                for (var k = 0; k < steps.length; k++) steps[k].classList.toggle('on', k === idx);
             }
-            const rect = btn.getBoundingClientRect();
-            const pos = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-            if (!wasVisible) {
-                btn.style.display = '';
-                btn.style.opacity = '';
-                btn.style.pointerEvents = '';
-            }
-            return pos;
-        }
-
-        function cancelAnimation() {
-            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-            if (delayTimer) { clearTimeout(delayTimer); delayTimer = null; }
-            octx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-            overlay.classList.remove('active');
-            trail = [];
-        }
-
-        function animateRobot() {
-            if (robotState !== 'running-forward') return;
-            animFrame++;
-
-            octx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-            const progress = Math.min(1, animFrame / DURATION);
-            // Smooth ease-in-out
-            const eased = progress < 0.5
-                ? 4 * progress * progress * progress
-                : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
-            robotX = startX + (targetX - startX) * eased;
-            robotY = startY + (targetY - startY) * eased;
-
-            // Running bounce — smooth sine wave
-            const bounce = Math.abs(Math.sin(animFrame * 0.18)) * 10 * (1 - progress * 0.5);
-            const spr = (Math.floor(animFrame / 7) % 2 === 0) ? SPR_STAND : SPR_RUN;
-            const sprW = spr[0].length * PX;
-            const sprH = spr.length * PX;
-
-            // Add trail particles
-            if (animFrame % 4 === 0 && progress < 0.9) {
-                trail.push({
-                    x: robotX - sprW / 2 + Math.random() * sprW,
-                    y: robotY + Math.random() * 4,
-                    life: 30,
-                    size: 2 + Math.random() * 2,
-                });
-            }
-
-            // Draw & update trail
-            for (let i = trail.length - 1; i >= 0; i--) {
-                const p = trail[i];
-                p.life--;
-                if (p.life <= 0) { trail.splice(i, 1); continue; }
-                octx.globalAlpha = p.life / 30 * 0.4;
-                octx.fillStyle = COLOR;
-                octx.fillRect(p.x, p.y, p.size, p.size);
-            }
-            octx.globalAlpha = 1;
-
-            // Draw robot
-            drawSprite(octx, spr, robotX - sprW / 2, robotY - sprH - bounce, PX, COLOR);
-
-            if (progress >= 1) {
-                // Animation complete — hide overlay so nothing blocks clicks
-                octx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                overlay.classList.remove('active');
-                trail = [];
-                robotState = 'arrived';
-                btn.classList.add('visible');
-                rafId = null;
-                return;
-            }
-
-            rafId = requestAnimationFrame(animateRobot);
-        }
-
-        function runForward() {
-            cancelAnimation();
-            overlay.classList.add('active');
-            resizeOverlay();
-            const from = getVinylCenter();
-            const to = getButtonTarget();
-
-            startX = from.x;
-            startY = from.y;
-            targetX = to.x;
-            targetY = to.y;
-            animFrame = 0;
-            robotState = 'running-forward';
-            rafId = requestAnimationFrame(animateRobot);
-        }
-
-        /* ── Shatter effect — button breaks apart ── */
-        let shatterParticles = [];
-        let shatterRafId = null;
-
-        function shatterButton() {
-            cancelAnimation();
-            const rect = btn.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
-
-            // Generate shatter particles from button area
-            shatterParticles = [];
-            for (let i = 0; i < 24; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 2 + Math.random() * 5;
-                shatterParticles.push({
-                    x: cx + (Math.random() - 0.5) * rect.width,
-                    y: cy + (Math.random() - 0.5) * rect.height,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed - 2,
-                    life: 40 + Math.random() * 20,
-                    maxLife: 60,
-                    size: 3 + Math.random() * 5,
-                    rotation: Math.random() * Math.PI,
-                    rotSpeed: (Math.random() - 0.5) * 0.3,
-                });
-            }
-
-            btn.classList.remove('visible');
-            overlay.classList.add('active');
-            resizeOverlay();
-            robotState = 'shattering';
-            animateShatter();
-        }
-
-        function animateShatter() {
-            if (robotState !== 'shattering') return;
-            octx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-            let alive = false;
-            for (let i = shatterParticles.length - 1; i >= 0; i--) {
-                const p = shatterParticles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.15; // gravity
-                p.vx *= 0.98; // friction
-                p.rotation += p.rotSpeed;
-                p.life--;
-
-                if (p.life <= 0) { shatterParticles.splice(i, 1); continue; }
-                alive = true;
-
-                octx.save();
-                octx.globalAlpha = p.life / p.maxLife;
-                octx.translate(p.x, p.y);
-                octx.rotate(p.rotation);
-                octx.fillStyle = COLOR;
-                octx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-                octx.restore();
-            }
-
-            if (!alive) {
-                octx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                overlay.classList.remove('active');
-                shatterParticles = [];
-                robotState = 'idle';
-                shatterRafId = null;
-                return;
-            }
-
-            shatterRafId = requestAnimationFrame(animateShatter);
-        }
-
-        /* ── Hook into vinyl activation ── */
-        let prevActive = false;
-        const observer = new MutationObserver(() => {
-            const isActive = container.classList.contains('vinyl-active');
-            if (isActive === prevActive) return;
-            prevActive = isActive;
-
-            if (isActive) {
-                cancelAnimation();
-                if (shatterRafId) { cancelAnimationFrame(shatterRafId); shatterRafId = null; }
-                robotState = 'waiting';
-                delayTimer = setTimeout(() => {
-                    delayTimer = null;
-                    if (container.classList.contains('vinyl-active')) {
-                        runForward();
-                    } else {
-                        robotState = 'idle';
-                    }
-                }, 1400);
+            var hasGL = (function () {
+                try { var t = d.createElement('canvas'); return !!(t.getContext('webgl') || t.getContext('experimental-webgl')); } catch (e) { return false; }
+            })();
+            if (reduce) {
+                morph.classList.add('reduced');
+            } else if (!hasGL) {
+                morph.classList.add('no-webgl');
             } else {
-                if (robotState === 'waiting') {
-                    cancelAnimation();
-                    robotState = 'idle';
-                } else if (robotState === 'arrived' || robotState === 'running-forward') {
-                    shatterButton();
+                window.addEventListener('scroll', progress, { passive: true });
+                progress();
+                var loaded = false;
+                function loadMorph() {
+                    if (loaded) return; loaded = true;
+                    var s = d.createElement('script'); s.src = 'assets/js/showcase.js'; s.defer = true; d.body.appendChild(s);
                 }
+                if ('IntersectionObserver' in window) {
+                    var mo = new IntersectionObserver(function (es) {
+                        if (es.some(function (e) { return e.isIntersecting; })) { loadMorph(); mo.disconnect(); }
+                    }, { rootMargin: '600px 0px' });
+                    mo.observe(morph);
+                } else { loadMorph(); }
             }
+        }
+
+        // Easter eggs (vinyl, robot runner, reader) — after load on idle, or on first photo click
+        var extrasP = null;
+        function extras() {
+            if (extrasP) return extrasP;
+            extrasP = new Promise(function (res, rej) {
+                var s = d.createElement('script'); s.src = 'assets/js/extras.js'; s.onload = res; s.onerror = rej; d.body.appendChild(s);
+            });
+            return extrasP;
+        }
+        var photo = d.getElementById('vinylTrigger');
+        if (photo) {
+            var first = function (e) {
+                if (window.__extrasReady) return;
+                photo.removeEventListener('click', first);
+                extras().then(function () { photo.click(); }).catch(function () {});
+            };
+            photo.addEventListener('click', first);
+            photo.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); photo.click(); } });
+        }
+        window.addEventListener('load', function () {
+            var idle = window.requestIdleCallback || function (f) { setTimeout(f, 1200); };
+            idle(function () { extras().catch(function () {}); }, { timeout: 3000 });
         });
-        observer.observe(container, { attributes: true, attributeFilter: ['class'] });
     })();
     </script>
-
-    <!-- Three.js node graph background -->
-    <script src="assets/js/animations.js"></script>
-
-    <!-- Agent showcase morph -->
-    <script src="assets/js/showcase.js"></script>
-
 </body>
 </html>
