@@ -10,17 +10,18 @@ Personal portfolio and creative hub for Fernando García — Engineer, Product M
 
 | Page | Description |
 |------|-------------|
-| [`index.html`](index.html) | Main portfolio — a claim with three proof numbers, then one chapter per idea: about, experience (Salesforce, Regrello, Metalsa), skills, tools, education, dashboards, beyond work, reading, contact |
+| [`index.html`](index.html) | Main portfolio — galaxy hero, tagline with three proof numbers, agent morph, then one chapter per section: about, experience, skills, tools, education, hobbies, books, dashboards, contact |
 | [`playground.html`](playground.html) | AI Agent Runner — an endless-runner game with keyboard and touch/swipe controls |
 | [`music.html`](music.html) | Roho — a custom music player for original tracks with vinyl aesthetics and MediaSession API |
 | [`dashboards.html`](dashboards.html) | Live data dashboards (e.g., The AI Race — benchmarks, pricing, and capabilities across top AI companies) |
 
 ## Features
 
-- **Dark mode** with localStorage persistence across all pages (key `theme`)
-- **One typographic system** — Space Grotesk for display, Inter for text, a six-step type scale defined as CSS custom properties, one accent color
-- **Chapters** — every section has a sticky label, one headline, one proof point (metric, shipped artifact, or named outcome) and at most one piece of media
-- **Hero orbit** — a 2D-canvas dot field behind the photo (~1.5KB, no WebGL needed) replaces the former Spline iframe
+- **Space layer** — a Three.js spiral galaxy (60k particles, 22k on mobile) and a twinkling star field on a fixed canvas behind the whole page. Scroll drives the camera: the galaxy is the hero, then pulls back and settles behind the chapters. Static SVG stars when WebGL is unavailable
+- **Dark-first** with light mode, persisted across all pages (localStorage key `theme`)
+- **Claude Mode** — flipping the record switches the page and the galaxy to a warm amber palette
+- **One typographic system** — Space Grotesk for display, Inter for text, a six-step type scale defined as CSS custom properties, one accent color per theme
+- **Chapters** — every section has a sticky label and one headline; the original copy, timeline, skill bars, and cards live inside them
 - **Agent showcase morph** — scroll-driven 3D point cloud (~5400 particles) that transitions between four forms: Intelligence → Agents → Process → Orchestration. Three.js and `showcase.js` load only when the section is near the viewport; a static SVG fallback shows when WebGL or motion is unavailable
 - **Reduced motion** — `prefers-reduced-motion` disables all scroll-driven animation and shows the final state of every reveal
 - **Vinyl Easter egg** — click the profile photo to flip it into a spinning vinyl record, plays "Hatua Kwa Hatua" (audio and the easter-egg script load after first paint)
@@ -34,7 +35,7 @@ Personal portfolio and creative hub for Fernando García — Engineer, Product M
 ## Tech Stack
 
 - Pure HTML, CSS, and vanilla JavaScript — no frameworks, no build step
-- [Three.js r128](https://threejs.org/) (CDN, lazy-loaded) for the agent showcase morph
+- [Three.js r128](https://threejs.org/) (CDN) for the galaxy space layer and the lazy-loaded agent showcase morph
 - Google Fonts: Space Grotesk, Inter (index.html); the other pages keep their own font sets
 - [Font Awesome 6.5](https://fontawesome.com/) for icons on the secondary pages
 - GitHub Pages hosting with custom domain (`CNAME`)
@@ -71,10 +72,9 @@ my-cv/
     index.spec.js       # Main page: structure, lazy loading, reduced motion, viewports
     playground.spec.js
   assets/
-    img/
-      ai-race.jpg     # Screenshot used as the dashboards chapter media
     js/
-      extras.js       # Easter eggs (vinyl, robot runner, reader) — loaded after first paint
+      galaxy.js       # Space layer: spiral galaxy + star field, scroll-driven camera, theme-aware
+      extras.js       # Easter eggs (vinyl + Claude Mode, robot runner, reader) — loaded after first paint
       showcase.js     # Agent showcase: scroll-driven 4-form point cloud morph — lazy-loaded
   *.mp3               # Original music tracks (Roho album)
 ```

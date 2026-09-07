@@ -28,13 +28,20 @@ const visibleContent = () => {
 };
 
 test.describe('Index — structure', () => {
-    test('hero leads with a claim and three proof numbers', async ({ page }) => {
+    test('hero has the name, the galaxy canvas, then the tagline and three proof numbers', async ({ page }) => {
         await page.goto(BASE);
-        await expect(page.locator('h1')).toContainText('I build AI agents');
-        await expect(page.locator('.hero .proof-row li')).toHaveCount(3);
-        await expect(page.locator('.hero .eyebrow')).toContainText('Solutions Product Manager');
-        await expect(page.locator('.hero a[href^="mailto:"]')).toBeVisible();
-        await expect(page.locator('.hero a[href*="linkedin.com"]')).toBeVisible();
+        await expect(page.locator('h1')).toHaveAttribute('aria-label', 'Fernando García');
+        await expect(page.locator('#space')).toHaveCount(1);
+        await expect(page.locator('.intro .display')).toContainText('Architecting the Future of Agentic Processes');
+        await expect(page.locator('.intro .proof-row li')).toHaveCount(3);
+        await expect(page.locator('.intro .eyebrow')).toContainText('Solutions Product Manager');
+        await page.locator('.intro').scrollIntoViewIfNeeded();
+        await expect(page.locator('.intro a[href="#experience"]')).toBeVisible();
+        await expect(page.locator('.intro a[href*="linkedin.com"]')).toBeVisible();
+        // The space layer rendered (WebGL) or fell back to the static stars — never nothing.
+        await page.waitForTimeout(2500);
+        const state = await page.evaluate(() => document.documentElement.className);
+        expect(/space-live|no-webgl/.test(state)).toBe(true);
     });
 
     test('nav keeps the same anchors and each target exists', async ({ page }) => {
@@ -78,7 +85,7 @@ test.describe('Index — structure', () => {
         expect(copied).toBeGreaterThan(10);
     });
 
-    test('no Spline, no Three.js and no easter-egg script before load; morph loads near viewport', async ({ page }) => {
+    test('no Spline and no easter-egg script before load; morph loads near viewport', async ({ page }) => {
         const before = new Set();
         let loadFired = false;
         page.on('request', r => { if (!loadFired) before.add(r.url()); });
@@ -87,7 +94,6 @@ test.describe('Index — structure', () => {
         const early = [...before];
         await expect(page.locator('iframe')).toHaveCount(0);
         expect(early.some(u => /spline/i.test(u))).toBe(false);
-        expect(early.some(u => /three\.min\.js/.test(u))).toBe(false);
         expect(early.some(u => /showcase\.js/.test(u))).toBe(false);
         expect(early.some(u => /extras\.js/.test(u))).toBe(false);
         expect(early.some(u => /\.mp3/.test(u))).toBe(false);
@@ -102,15 +108,33 @@ test.describe('Index — structure', () => {
         expect(fallbackVisible).toBe(true);
     });
 
-    test('dark mode toggle persists with the shared "theme" key', async ({ page }) => {
+    test('dark-first: default is dark, toggle persists with the shared "theme" key', async ({ page }) => {
         await page.goto(BASE);
+        await expect(page.locator('body')).toHaveClass(/dark/);
+        expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dark');
+        await page.click('#themeToggle');
+        await expect(page.locator('body')).toHaveClass(/light/);
+        expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('light');
+        await page.reload();
+        await expect(page.locator('body')).toHaveClass(/light/);
         await page.click('#themeToggle');
         await expect(page.locator('body')).toHaveClass(/dark/);
         expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dark');
-        await page.reload();
-        await expect(page.locator('body')).toHaveClass(/dark/);
-        await page.click('#themeToggle');
-        expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('light');
+    });
+
+    test('flipping the record switches to Claude Mode and back', async ({ page }) => {
+        await page.goto(BASE, { waitUntil: 'load' });
+        await page.waitForTimeout(2500);
+        await page.locator('#vinylTrigger').scrollIntoViewIfNeeded();
+        await page.waitForTimeout(800);
+        const box = await page.locator('#vinylTrigger').boundingBox();
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        await page.waitForTimeout(1200);
+        await expect(page.locator('html')).toHaveClass(/claude-mode/);
+        await expect(page.locator('#photoContainer')).toHaveClass(/vinyl-active/);
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        await page.waitForTimeout(2200);
+        await expect(page.locator('html')).not.toHaveClass(/claude-mode/);
     });
 });
 
@@ -123,7 +147,7 @@ test.describe('Index — reduced motion', () => {
         await expect(page.locator('#agentShowcase')).toHaveClass(/reduced/);
         const h = await page.locator('#agentShowcase').evaluate(el => el.getBoundingClientRect().height);
         expect(h).toBeLessThan(1000);
-        const loaded = await page.evaluate(() => performance.getEntriesByType('resource').some(r => /showcase\.js|three\.min\.js/.test(r.name)));
+        const loaded = await page.evaluate(() => performance.getEntriesByType('resource').some(r => /showcase\.js/.test(r.name)));
         expect(loaded).toBe(false);
     });
 });

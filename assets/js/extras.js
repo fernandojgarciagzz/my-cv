@@ -2,8 +2,9 @@
  * or on the first click of the profile photo). Nothing here is needed for the
  * page to read correctly.
  *
- *   1. Vinyl: click the photo → it flips into a record, spins, and plays
- *      "Hatua Kwa Hatua". Click again (or let the song end) to flip back.
+ *   1. Vinyl: click the photo → it flips into a record, spins, plays
+ *      "Hatua Kwa Hatua" and switches the page (and the galaxy) to Claude
+ *      Mode, the warm palette. Click again (or let the song end) to flip back.
  *   2. Robot runner: when the vinyl activates, a pixel robot runs from the
  *      record to the hero actions and becomes the Playground button. Flipping
  *      back shatters the button.
@@ -49,9 +50,14 @@
                 if (s >= n) { clearInterval(iv); audio.pause(); audio.volume = VOL; if (cb) cb(); }
             }, FADE / n);
         }
+        function claude(on) {
+            document.documentElement.classList.toggle('claude-mode', on);
+            document.body.classList.toggle('claude-mode', on);
+        }
         function activate() {
             playing = true;
             container.classList.add('vinyl-active');
+            claude(true);
             spinTimer = setTimeout(function () {
                 if (playing) { container.classList.add('vinyl-spinning'); fadeIn(); }
             }, 800);
@@ -63,6 +69,7 @@
             fadeOut(function () {
                 audio.currentTime = 0;
                 container.classList.remove('vinyl-active');
+                claude(false);
             });
         }
         trigger.addEventListener('click', function (e) {
@@ -73,6 +80,7 @@
             clearTimeout(spinTimer);
             container.classList.remove('vinyl-spinning');
             container.classList.remove('vinyl-active');
+            claude(false);
             playing = false;
         });
     })();
