@@ -28,11 +28,11 @@ const visibleContent = () => {
 };
 
 test.describe('Index — structure', () => {
-    test('hero has the name, the galaxy canvas, then the tagline and three proof numbers', async ({ page }) => {
+    test('hero has the words, the galaxy canvas, then the tagline and three proof numbers', async ({ page }) => {
         await page.goto(BASE);
-        await expect(page.locator('h1')).toHaveAttribute('aria-label', 'Fernando García');
+        await expect(page.locator('.hero-first')).toBeVisible();
         await expect(page.locator('#space')).toHaveCount(1);
-        await expect(page.locator('.intro .display')).toContainText('Architecting the Future of Agentic Processes');
+        await expect(page.locator('h1')).toContainText('Architecting the Future of Agentic Processes');
         await expect(page.locator('.intro .proof-row li')).toHaveCount(3);
         await expect(page.locator('.intro .eyebrow')).toContainText('Solutions Product Manager');
         await page.locator('.intro').scrollIntoViewIfNeeded();
