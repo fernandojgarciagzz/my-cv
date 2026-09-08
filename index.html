@@ -318,87 +318,129 @@
         .morph.no-webgl #agentShowcaseCanvas, .morph.reduced #agentShowcaseCanvas { display: none; }
 
         /* ==========================================================
-           CHAPTERS — sticky label · one headline · original content
+           CHAPTERS — the flight log. A route line runs down the left
+           rail with a lit node per chapter; each chapter sits in its own
+           faint nebula; roles are log entries on a dashed orbit.
            ========================================================== */
         .chapters { position: relative; }
         .chapters::before { content: ''; position: absolute; inset: 0; z-index: -1; background: rgba(var(--bg-rgb), 0.3); }
-        .chapter { padding: var(--space-chapter) var(--gutter); scroll-margin-top: var(--nav-h); }
+        .route {
+            position: absolute; top: 0; bottom: 0; width: 1px; z-index: 0; pointer-events: none;
+            left: calc(50% - 35.2rem);
+            background: linear-gradient(to bottom, transparent, var(--line) 6%, var(--line) 94%, transparent);
+        }
+        .route::after {
+            content: ''; position: absolute; left: 0; top: 0; width: 1px; height: 100%;
+            background: linear-gradient(to bottom, var(--accent), var(--accent-glow));
+            transform: scaleY(var(--route, 0)); transform-origin: top; transition: transform 0.25s linear;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        .chapter { position: relative; padding: var(--space-chapter) var(--gutter); scroll-margin-top: var(--nav-h); overflow: clip; }
         .chapter + .chapter { border-top: 1px solid var(--line-2); }
+        .chapter::before {
+            content: ''; position: absolute; z-index: -1; pointer-events: none;
+            width: min(58vw, 760px); height: min(58vw, 760px); border-radius: 50%;
+            top: -12%; left: -18%; opacity: 0.8;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 62%);
+        }
+        .chapter:nth-child(even)::before { left: auto; right: -18%; top: 10%; }
         .chapter-inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure)) minmax(0, 1fr); column-gap: 2.5rem; }
         .chapter-label {
             grid-column: 1; justify-self: end; width: var(--rail); position: sticky; top: calc(var(--nav-h) + 1.5rem); align-self: start;
             display: flex; flex-direction: column; gap: 0.3rem; font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label);
             text-transform: uppercase; color: var(--ink-3); line-height: 1.5;
         }
-        .chapter-label .num { color: var(--accent); font-family: var(--font-display); font-weight: 600; }
+        .chapter-label .num { position: relative; color: var(--accent); font-family: var(--font-display); font-weight: 600; }
+        .chapter-label .num::before {
+            content: ''; position: absolute; left: -1.2rem; top: 0.45em; width: 7px; height: 7px; margin-left: -3px; border-radius: 50%;
+            background: var(--accent); box-shadow: 0 0 0 3px rgba(var(--bg-rgb), 1), 0 0 14px var(--accent), 0 0 28px var(--accent-glow);
+        }
         .chapter-body { grid-column: 2; min-width: 0; }
         .h2 { font-family: var(--font-display); font-size: var(--t-h2); font-weight: 600; line-height: var(--lh-heading); letter-spacing: var(--track-h2); margin-bottom: 0.9rem; text-wrap: balance; }
         .section-desc { color: var(--ink-2); max-width: 34rem; margin-bottom: 2.5rem; }
-        .about-text { margin-bottom: 1.2rem; }
-        .about-personal { font-size: var(--t-small); line-height: var(--lh-small); color: var(--ink-3); font-style: italic; margin-top: 0.4rem; }
 
-        /* Timeline */
+        /* About: the why, with the trajectory beside it */
+        .about-grid { display: grid; grid-template-columns: minmax(0, 1fr) 11rem; column-gap: 2.5rem; align-items: start; }
+        .about-text { margin-bottom: 1.2rem; }
+        .about-text:first-of-type { font-size: var(--t-lead); line-height: 1.5; color: var(--ink); }
+        .about-personal { font-size: var(--t-small); line-height: var(--lh-small); color: var(--ink-3); font-style: italic; margin-top: 0.4rem; }
+        .trajectory { position: sticky; top: calc(var(--nav-h) + 6rem); list-style: none; display: grid; gap: 0; padding-left: 1.1rem; border-left: 1px dashed var(--line); margin-top: 0.6rem; }
+        .trajectory li { position: relative; padding: 0 0 1.6rem 0.4rem; font-size: var(--t-micro); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); line-height: 1.5; }
+        .trajectory li:last-child { padding-bottom: 0; }
+        .trajectory li::before { content: ''; position: absolute; left: -1.5rem; top: 0.45em; width: 7px; height: 7px; margin-left: -3px; border-radius: 50%; background: var(--bg); border: 1px solid var(--accent); }
+        .trajectory li.now::before { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+        .trajectory b { display: block; font-family: var(--font-display); font-size: var(--t-small); font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink); }
+        .trajectory li.now b { color: var(--accent); }
+
+        /* Experience: log entries on a dashed orbit */
         .timeline { position: relative; padding-left: 2.5rem; }
-        .timeline::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--line); }
-        .timeline::after { content: ''; position: absolute; left: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: flowDown 4s ease-in-out infinite; opacity: 0.6; }
+        .timeline::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 0; border-left: 1px dashed var(--line); transform: scaleY(var(--tl, 1)); transform-origin: top; transition: transform 0.2s linear; }
+        .timeline::after { content: ''; position: absolute; left: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: flowDown 4s ease-in-out infinite; opacity: 0.6; }
         @keyframes flowDown { 0% { top: 0; opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.7; } 100% { top: 100%; opacity: 0; } }
-        .timeline-item { position: relative; padding-bottom: 3rem; }
-        .timeline-item:last-child { padding-bottom: 0; }
-        .timeline-dot { position: absolute; left: -2rem; top: 6px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .timeline-dot.active { background: var(--accent-glow); border: 2px solid var(--accent); }
-        .timeline-dot.active::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
+        .timeline-item { position: relative; margin-bottom: 1.1rem; padding: 1.25rem 1.4rem 1.2rem; background: var(--card); border: 1px solid var(--line-2); border-radius: 12px; transition: border-color 0.3s, box-shadow 0.3s; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-item:hover { border-color: var(--line); }
+        .timeline-item:first-child { border-color: rgba(143, 176, 210, 0.3); box-shadow: 0 0 0 1px rgba(143, 176, 210, 0.06), 0 12px 40px rgba(0, 0, 0, 0.25); }
+        .timeline-dot { position: absolute; left: calc(-2.5rem + 0px); top: 1.55rem; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg); }
+        .timeline-dot.active { border: 1.5px solid var(--accent); box-shadow: 0 0 16px var(--accent-glow); }
+        .timeline-dot.active::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2s ease-in-out infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.4); } }
-        .timeline-dot.completed { background: var(--green); }
-        .timeline-dot.completed::after { content: '✓'; color: #FFFFFF; font-size: 0.55rem; font-weight: 700; }
+        .timeline-dot.completed { border: 1px solid var(--line); }
+        .timeline-dot.completed::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); }
         .timeline-header { display: flex; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.2rem; }
         .timeline-company { font-family: var(--font-display); font-size: var(--t-lead); font-weight: 600; letter-spacing: -0.01em; }
         .timeline-badge { font-size: var(--t-micro); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 4px; background: var(--accent-glow); color: var(--accent); }
         .workflow-status { font-size: var(--t-micro); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; margin-left: auto; }
-        .workflow-status.running { color: var(--accent); }
-        .workflow-status.done { color: var(--green); }
+        .workflow-status.running { color: var(--accent); text-shadow: 0 0 12px var(--accent-glow); }
+        .workflow-status.done { color: var(--ink-3); }
         .timeline-role { font-size: var(--t-small); color: var(--ink-3); margin-bottom: 0.8rem; }
         .timeline-bullets { list-style: none; }
         .timeline-bullets li { position: relative; padding-left: 1.2rem; margin-bottom: 0.5rem; font-size: var(--t-small); line-height: var(--lh-small); color: var(--ink-2); }
         .timeline-bullets li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; border-radius: 50%; background: var(--line); }
         .timeline-bullets li strong { color: var(--ink); font-weight: 500; }
 
-        /* Cards */
-        .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.6rem; transition: border-color 0.25s, background-color 0.25s, transform 0.25s; }
-        .card:hover { border-color: var(--accent); background: var(--card-hover); transform: translateY(-2px); }
+        /* Cards: HUD panels with corner ticks */
+        .card { position: relative; background: var(--card); border: 1px solid var(--line-2); border-radius: 12px; padding: 1.6rem; transition: border-color 0.25s, background-color 0.25s, transform 0.25s, box-shadow 0.25s; }
+        .card::before, .card::after { content: ''; position: absolute; width: 10px; height: 10px; border: 1px solid var(--accent); opacity: 0.45; transition: opacity 0.25s; pointer-events: none; }
+        .card::before { top: 6px; left: 6px; border-right: 0; border-bottom: 0; border-top-left-radius: 3px; }
+        .card::after { bottom: 6px; right: 6px; border-left: 0; border-top: 0; border-bottom-right-radius: 3px; }
+        .card:hover { border-color: var(--line); background: var(--card-hover); transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25); }
+        .card:hover::before, .card:hover::after { opacity: 1; }
         .card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
         .agent-type { font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem; }
         .card h3 { font-family: var(--font-display); font-size: var(--t-lead); font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; margin-bottom: 0.4rem; }
         .card p { font-size: var(--t-small); line-height: var(--lh-small); color: var(--ink-2); }
-        .learning-card { border-left: 3px solid var(--accent); margin-top: 1rem; }
+        .learning-card { border-left: 2px solid var(--accent); margin-top: 1rem; }
         .edu-school { color: var(--accent) !important; font-weight: 500; }
         .edu-year { font-size: var(--t-micro) !important; color: var(--ink-3) !important; margin: 0.3rem 0 0.5rem; }
         .edu-detail { list-style: none; font-size: var(--t-micro) !important; color: var(--ink-3) !important; }
 
-        /* Tools */
+        /* Tools: segmented instrument readouts */
         .skills-list { max-width: 36rem; }
         .skill-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-        .skill-name { font-size: var(--t-small); font-weight: 500; color: var(--ink-2); min-width: 15rem; }
-        .skill-bar-bg { flex: 1; height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; }
-        .skill-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); width: 0%; transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .skill-pct { font-size: var(--t-micro); font-weight: 500; color: var(--ink-3); min-width: 2.2rem; text-align: right; }
+        .skill-name { font-size: var(--t-small); font-weight: 500; color: var(--ink-2); width: 18rem; flex-shrink: 0; }
+        .skill-bar-bg { flex: 1; height: 8px; position: relative; -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 10px); mask-image: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 10px); background: var(--line-2); }
+        .skill-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent) 60%, #FFFFFF); width: 0%; transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .skill-pct { font-family: var(--font-display); font-size: var(--t-small); font-weight: 600; color: var(--ink-2); min-width: 2.6rem; text-align: right; }
         .skills-learning { margin-top: 2.5rem; }
         .skills-learning-label { font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3); margin-bottom: 1rem; }
         .tag-row { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-        .learning-tag { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--card); border: 1px solid var(--line); border-radius: 8px; font-size: var(--t-small); font-weight: 500; color: var(--ink-2); transition: border-color 0.3s, color 0.3s; }
+        .learning-tag { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--card); border: 1px solid var(--line-2); border-radius: 8px; font-size: var(--t-small); font-weight: 500; color: var(--ink-2); transition: border-color 0.3s, color 0.3s; }
         .learning-tag:hover { border-color: var(--accent); color: var(--accent); }
-        .learning-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; flex-shrink: 0; }
+        .learning-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2s ease-in-out infinite; flex-shrink: 0; }
         .learning-tag-status { font-size: var(--t-micro); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); }
 
-        /* Hobbies */
-        .hobby-card { display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit; padding: 1rem 1.2rem; }
-        .hobby-card-icon { width: 38px; height: 38px; flex-shrink: 0; display: grid; place-items: center; border-radius: 10px; background: var(--accent); color: var(--btn-ink); }
-        .hobby-card-icon svg { width: 16px; height: 16px; }
+        /* Hobbies: now playing */
+        .hobby-card { display: flex; align-items: center; gap: 1.1rem; text-decoration: none; color: inherit; padding: 1rem 1.2rem; }
+        .hobby-card-icon { width: 44px; height: 30px; flex-shrink: 0; display: flex; align-items: flex-end; gap: 3px; }
+        .hobby-card-icon i { display: block; width: 3px; border-radius: 2px; background: var(--accent); height: var(--h, 40%); animation: wave 1.6s ease-in-out infinite; animation-delay: var(--d, 0s); box-shadow: 0 0 8px var(--accent-glow); }
+        @keyframes wave { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
         .hobby-card-text { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; }
         .hobby-card-title { font-family: var(--font-display); font-weight: 600; font-size: var(--t-lead); }
         .hobby-card-sub { font-size: var(--t-micro); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
         .hobby-card-arrow { color: var(--ink-3); transition: transform 0.25s, color 0.25s; }
         .hobby-card:hover .hobby-card-arrow { color: var(--accent); transform: translateX(3px); }
-        .hobby-tag { display: inline-flex; align-items: center; padding: 0.4rem 0.85rem; border: 1px solid var(--line); border-radius: 100px; font-size: var(--t-small); color: var(--ink-2); font-weight: 500; transition: border-color 0.25s, color 0.25s; }
+        .hobby-tag { display: inline-flex; align-items: center; padding: 0.4rem 0.85rem; border: 1px solid var(--line-2); border-radius: 100px; font-size: var(--t-small); color: var(--ink-2); font-weight: 500; transition: border-color 0.25s, color 0.25s; }
         .hobby-tag:hover { border-color: var(--accent); color: var(--accent); }
 
         /* Dashboards */
@@ -408,13 +450,13 @@
         .dashboard-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.85rem; }
         .dashboard-tag { font-size: var(--t-micro); font-weight: 500; padding: 0.18rem 0.55rem; border-radius: 50px; background: var(--accent-glow); color: var(--accent); letter-spacing: 0.04em; }
         .dashboard-status { display: inline-flex; align-items: center; gap: 0.4rem; font-size: var(--t-micro); font-weight: 500; color: var(--green); margin-top: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
-        .dashboard-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease-in-out infinite; }
+        .dashboard-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s ease-in-out infinite; }
         .dashboard-card-arrow { color: var(--ink-3); flex-shrink: 0; transition: transform 0.25s, color 0.25s; }
         .dashboard-card:hover .dashboard-card-arrow { transform: translate(3px, -3px); color: var(--accent); }
 
-        /* Kindle reader */
-        .kindle-frame { background: linear-gradient(160deg, #3F4D5E, #2A3340); border-radius: 22px; padding: 16px 16px 34px; position: relative; box-shadow: 0 28px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1); margin-top: 0.5rem; }
-        .kindle-frame::after { content: ''; position: absolute; bottom: 12px; left: 50%; width: 52px; height: 6px; border-radius: 4px; background: rgba(255,255,255,0.16); transform: translateX(-50%); }
+        /* Kindle reader: a dark glass slab, paper screen inside */
+        .kindle-frame { background: linear-gradient(160deg, #1B2634, #0E141D); border: 1px solid var(--line-2); border-radius: 22px; padding: 16px 16px 34px; position: relative; box-shadow: 0 28px 64px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.08); margin-top: 0.5rem; }
+        .kindle-frame::after { content: ''; position: absolute; bottom: 12px; left: 50%; width: 52px; height: 6px; border-radius: 4px; background: rgba(255,255,255,0.12); transform: translateX(-50%); }
         .kindle-screen { background: #1C232C; border-radius: 6px; display: grid; grid-template-columns: 15rem 1fr; min-height: 440px; overflow: hidden; }
         html.light .kindle-screen { background: #F1EAD9; }
         .kindle-toc { border-right: 1px solid rgba(255,255,255,0.06); padding: 1.2rem 0.6rem 1.2rem 1rem; display: flex; flex-direction: column; min-width: 0; }
@@ -448,8 +490,14 @@
         /* ==========================================================
            CONTACT
            ========================================================== */
-        .contact { position: relative; padding: var(--space-chapter) var(--gutter); border-top: 1px solid var(--line); scroll-margin-top: var(--nav-h); text-align: center; }
-        .contact::before { content: ''; position: absolute; inset: 0; z-index: -1; background: rgba(var(--bg-rgb), 0.42); }
+        .contact { position: relative; padding: calc(var(--space-chapter) * 1.2) var(--gutter); border-top: 1px solid var(--line); scroll-margin-top: var(--nav-h); text-align: center; overflow: clip; }
+        .contact::before { content: ''; position: absolute; inset: 0; z-index: -1; background: rgba(var(--bg-rgb), 0.3); }
+        .contact::after {
+            content: ''; position: absolute; z-index: -1; pointer-events: none; left: 50%; top: 50%; width: 140vmin; height: 140vmin; transform: translate(-50%, -50%); border-radius: 50%;
+            background: repeating-radial-gradient(circle at center, var(--line-2) 0 1px, transparent 1px 9vmin);
+            -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 55%); mask-image: radial-gradient(circle, #000 0%, transparent 55%);
+            opacity: 0.9;
+        }
         .contact-inner { max-width: var(--measure); margin: 0 auto; }
         .contact .h2 { margin-left: auto; margin-right: auto; }
         .footer-sub { color: var(--ink-2); max-width: 30rem; margin: 0 auto; }
@@ -580,6 +628,12 @@
            ========================================================== */
         @media (max-width: 1099px) {
             .rail { display: none; }
+            .route { display: none; }
+            .chapter-label .num::before { display: none; }
+            .about-grid { grid-template-columns: 1fr; }
+            .trajectory { position: static; display: flex; flex-wrap: wrap; gap: 1.2rem; border-left: 0; padding-left: 0; margin-top: 1.5rem; }
+            .trajectory li { padding: 0 0 0 1.1rem; }
+            .trajectory li::before { left: 0; margin-left: 0; }
             .chapter-inner { grid-template-columns: minmax(0, var(--measure)); justify-content: center; }
             .chapter-label { grid-column: 1; justify-self: stretch; width: auto; position: sticky; top: var(--nav-h); z-index: 5; flex-direction: row; align-items: baseline; gap: 0.75rem; padding: 0.8rem 0; margin-bottom: 1.75rem; background: rgba(var(--bg-rgb), 0.9); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line-2); }
             .chapter-body { grid-column: 1; }
@@ -603,6 +657,9 @@
             .song-note .v { display: block; width: 32px; height: 28px; }
             .album-invite { position: fixed; left: 50%; top: auto; bottom: 1.25rem; transform: translateX(-50%); z-index: 150; }
             .card-grid { grid-template-columns: 1fr; }
+            .timeline { padding-left: 1.6rem; }
+            .timeline-item { padding: 1rem 1rem 0.9rem; }
+            .timeline-dot { left: -1.6rem; }
             .skill-name { min-width: 0; width: 45%; flex-shrink: 0; font-size: var(--t-micro); }
             .skill-row { gap: 0.5rem; }
         }
@@ -632,6 +689,7 @@
             .timeline { --tl: 1 !important; }
             .timeline-bullets li, .timeline-item { opacity: 1; transform: none; }
             .rail { display: none; }
+            .chapters { --route: 1; }
         }
     </style>
 </head>
@@ -753,7 +811,8 @@
         </div>
     </section>
 
-    <div class="chapters">
+    <div class="chapters" id="chapters">
+    <div class="route" aria-hidden="true"></div>
 
     <!-- 01 ABOUT -->
     <section class="chapter" id="about">
@@ -761,9 +820,19 @@
             <aside class="chapter-label"><span class="num">01</span><span>// about</span></aside>
             <div class="chapter-body">
                 <h2 class="h2 reveal">The "Why" Behind the Solutions</h2>
+                <div class="about-grid">
+                <div>
                 <p class="about-text reveal">I am a Data-Driven Engineer with a Master's in Business Intelligence, driven by a passion for uncovering the "why" behind complex bottlenecks to build truly scalable solutions. Currently a Solutions Product Manager at Salesforce, I specialize in the Agentforce platform, where I architect sophisticated agentic workflows that enable manufacturing teams to automate high-stakes processes and work significantly smarter.</p>
                 <p class="about-text reveal">I am a creator at heart, someone whose systems thinking was shaped by Supply Chain, where every dependency matters and things break if you miss the details. That process logic turns out to work anywhere. I now expand the same rigor to Finance, HR, and Industrial Operations, turning messy, fragmented workflows into clean, AI-driven solutions. The goal has never been to just fix what's broken. It's to build what comes next.</p>
                 <p class="about-personal reveal">Outside of architecting data strategies and process automation, I stay sharp through continuous learning, reading, and maintaining a disciplined lifestyle centered on fitness and mindfulness.</p>
+                </div>
+                <ol class="trajectory reveal" aria-label="Trajectory">
+                    <li><b>John Deere</b>2020</li>
+                    <li><b>Metalsa</b>2021 – 2024</li>
+                    <li><b>Regrello</b>2024 – 2025</li>
+                    <li class="now"><b>Salesforce</b>2025 – now</li>
+                </ol>
+                </div>
             </div>
         </div>
     </section>
@@ -947,7 +1016,7 @@
                 <h2 class="h2 reveal">Hobbies &amp; Interests</h2>
                 <div class="reveal" style="margin-top: 2rem;">
                     <a class="card hobby-card" href="music.html">
-                        <span class="hobby-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+                        <span class="hobby-card-icon" aria-hidden="true"><i style="--h:40%;--d:0s"></i><i style="--h:80%;--d:.15s"></i><i style="--h:55%;--d:.3s"></i><i style="--h:95%;--d:.45s"></i><i style="--h:65%;--d:.6s"></i><i style="--h:85%;--d:.75s"></i><i style="--h:45%;--d:.9s"></i></span>
                         <span class="hobby-card-text"><span class="hobby-card-title">Music</span><span class="hobby-card-sub">Listen to Roho</span></span>
                         <span class="hobby-card-arrow" aria-hidden="true">→</span>
                     </a>
@@ -1251,7 +1320,7 @@
         links.addEventListener('click', function (e) { if (e.target.tagName === 'A') { links.classList.remove('open'); menu.setAttribute('aria-expanded', 'false'); } });
 
         // Rhythm: the timeline draws with scroll, the experience label follows the company, the rail tracks the chapter
-        var tl = d.querySelector('.timeline'), rail = d.getElementById('rail'), expSub = d.getElementById('expSub');
+        var tl = d.querySelector('.timeline'), rail = d.getElementById('rail'), expSub = d.getElementById('expSub'), chaptersEl = d.getElementById('chapters');
         if (tl && expSub && 'IntersectionObserver' in window) {
             var items = tl.querySelectorAll('.timeline-item');
             var co = new IntersectionObserver(function (es) {
@@ -1289,6 +1358,11 @@
                     tl.style.setProperty('--tl', tp.toFixed(3));
                 }
                 if (rail) rail.classList.toggle('show', window.scrollY > window.innerHeight * 1.6);
+                if (chaptersEl && !reduce) {
+                    var cr = chaptersEl.getBoundingClientRect();
+                    var rp = Math.max(0, Math.min(1, (window.innerHeight * 0.6 - cr.top) / cr.height));
+                    chaptersEl.style.setProperty('--route', rp.toFixed(3));
+                }
             });
         }
         window.addEventListener('scroll', onScroll, { passive: true });
