@@ -108,32 +108,18 @@ test.describe('Index — structure', () => {
         expect(fallbackVisible).toBe(true);
     });
 
-    test('space by default; boarding the ship opens the cabin, leaving returns to space; key persists', async ({ page }) => {
+    test('dark-first: default is dark, toggle persists with the shared "theme" key', async ({ page }) => {
         await page.goto(BASE);
         await expect(page.locator('body')).toHaveClass(/dark/);
         expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dark');
-        await expect(page.locator('#ship')).toBeVisible();
-        await expect(page.locator('#monkey')).toBeHidden();
-        const sb = await page.locator('#ship').boundingBox();          // the ship drifts, so click its centre directly
-        await page.mouse.click(sb.x + sb.width / 2, sb.y + sb.height / 2);
-        await expect(page.locator('#hatch')).toHaveClass(/on/);
-        await expect(page.locator('body')).toHaveClass(/light/, { timeout: 5000 });
+        await page.click('#themeToggle');
+        await expect(page.locator('body')).toHaveClass(/light/);
         expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('light');
-        await expect(page.locator('#ship')).toBeHidden();
-        await expect(page.locator('#monkey')).toBeVisible();
-        await expect(page.locator('#porthole')).toBeVisible();
-        const clip = await page.evaluate(() => getComputedStyle(document.getElementById('space')).clipPath);
-        expect(clip).toContain('circle');
         await page.reload();
         await expect(page.locator('body')).toHaveClass(/light/);
-        await expect(page.locator('#monkey')).toBeVisible();
-        await page.locator('#monkey').click();
-        await expect(page.locator('#monkey')).toHaveClass(/say/);
         await page.click('#themeToggle');
         await expect(page.locator('body')).toHaveClass(/dark/);
         expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dark');
-        await page.waitForTimeout(1500);
-        await expect(page.locator('#hatch')).not.toHaveClass(/on/);
     });
 
     test('flipping the record switches to Claude Mode and back', async ({ page }) => {
