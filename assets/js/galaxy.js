@@ -109,6 +109,7 @@
             '}'
         ].join('\n')
     });
+    var BASE_SIZE = gMat.uniforms.uSize.value;
     var galaxy = new THREE.Points(gGeo, gMat);
     var gGroup = new THREE.Group();
     gGroup.add(galaxy);
@@ -293,6 +294,7 @@
             // Through the porthole: frame the whole galaxy inside the window, wherever the window is
             var ph = portholePx(), W = window.innerWidth, H = window.innerHeight;
             var D = RADIUS * 1.3 * (H / 2) / (TAN_HALF * ph.r);
+            gMat.uniforms.uSize.value = BASE_SIZE * (D / 8.4) * 0.5;   // points shrink with distance; keep them ~2px in the window
             camera.position.set(0, D * 0.42, D * 0.9);
             camera.lookAt(0, 0, 0);
             camera.setViewOffset(W, H, W / 2 - ph.x, H / 2 - ph.y, W, H);
@@ -310,6 +312,7 @@
             return;
         }
         camera.clearViewOffset();
+        gMat.uniforms.uSize.value = BASE_SIZE;
 
         // Camera: opens a little further out (cleaner start), pulls back through the hero,
         // then keeps looking lower so the galaxy drifts up and out while the stars and dust remain.
