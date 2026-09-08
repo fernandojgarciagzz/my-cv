@@ -2,12 +2,16 @@
  * near-field dust layer on a fixed canvas behind the whole page. Three.js r128
  * is loaded in <head>.
  *
- * FORM = 'blackhole': a thin accretion disc with Keplerian differential
- * rotation, a black event-horizon sphere that occludes everything behind it,
- * a camera-facing lensing halo (photon ring plus the far side of the disc bent
- * over and under the horizon, strongest when the disc is seen edge-on), and a
- * stream of matter falling in from one side. Same particles, same shader and
- * theme as the galaxy; only the positions differ.
+ * FORM = 'blackhole': real gravitational lensing in the vertex shader. Every
+ * particle is re-projected with the point-mass lens equation
+ *   theta = (beta + sqrt(beta^2 + 4 thetaE^2)) / 2,  thetaE^2 = 2 Rs Dls / (Dl Ds)
+ * so the far side of the accretion disc bends over and under the shadow by
+ * itself, light captured inside the shadow disappears, and a second pass draws
+ * the secondary image (the arc under the hole). Doppler beaming brightens the
+ * side of the disc coming toward you. The flow is 3D: matter spirals inward
+ * through the disc (xz), a stream falls in from one side, and two polar jets
+ * stream out along the axis (xy). Same particles, shader family and theme as
+ * the galaxy; the galaxy generator is still here behind FORM.
  *
  * Scroll drives the camera: the galaxy opens the page, pulls back through the
  * hero, settles small above the intro and then drifts up and out. The star
@@ -63,35 +67,39 @@
     var FORM = 'blackhole';
     var COUNT = isMobile ? 22000 : 60000;
     var RADIUS = 4.6, BRANCHES = 3, SPIN = 1.15, RANDOM = 0.32, RPOW = 2.6;
-    var HORIZON = 1.0, DISC_IN = 1.28;
-    var gPos = new Float32Array(COUNT * 3), gRnd = new Float32Array(COUNT * 3), gScl = new Float32Array(COUNT);
+    var RS = 0.5, SHADOW = 1.3, DISC_IN = 1.55;                                   // Schwarzschild radius, visual shadow, inner disc edge
+    var gPos = new Float32Array(COUNT * 3), gRnd = new Float32Array(COUNT * 3), gScl = new Float32Array(COUNT), gKind = new Float32Array(COUNT);
     if (FORM === 'blackhole') {
-        var nDisc = Math.floor(COUNT * 0.86), nStream = COUNT - nDisc;
-        for (var i = 0; i < nDisc; i++) {
-            var i3 = i * 3;
-            var u = Math.random();
-            var r = DISC_IN + (RADIUS - DISC_IN) * Math.pow(u, 2.1);          // dense and hot near the inner edge, thinning fast
+        var nDisc = Math.floor(COUNT * 0.80), nStream = Math.floor(COUNT * 0.08), nJet = COUNT - nDisc - nStream;
+        for (var i = 0; i < nDisc; i++) {                                         // kind 0: the disc
+            var i3 = i * 3, u = Math.random();
+            var r = DISC_IN + (RADIUS - DISC_IN) * Math.pow(u, 1.9);
             var a = Math.random() * Math.PI * 2;
             gPos[i3] = Math.cos(a) * r; gPos[i3 + 1] = 0; gPos[i3 + 2] = Math.sin(a) * r;
             var t = (r - DISC_IN) / (RADIUS - DISC_IN);
-            var thick = 0.012 + 0.07 * t;                                      // paper-thin inside, a little fluffier outside
-            gRnd[i3]     = sgn() * Math.pow(Math.random(), 2.2) * (0.02 + 0.07 * t);
-            gRnd[i3 + 1] = sgn() * Math.pow(Math.random(), 1.6) * thick;
-            gRnd[i3 + 2] = sgn() * Math.pow(Math.random(), 2.2) * (0.02 + 0.07 * t);
-            gScl[i] = (Math.random() < 0.02 ? 2.0 + Math.random() * 1.6 : 0.45 + Math.random() * 0.9) * (1.35 - 0.7 * t);
+            gRnd[i3]     = sgn() * Math.pow(Math.random(), 2.2) * (0.02 + 0.08 * t);
+            gRnd[i3 + 1] = sgn() * Math.pow(Math.random(), 1.6) * (0.012 + 0.09 * t);
+            gRnd[i3 + 2] = sgn() * Math.pow(Math.random(), 2.2) * (0.02 + 0.08 * t);
+            gScl[i] = Math.random() < 0.02 ? 1.8 + Math.random() * 1.4 : 0.45 + Math.random() * 0.9;
+            gKind[i] = 0;
         }
-        for (var k = 0; k < nStream; k++) {                                     // matter falling in from one side
-            var j3 = (nDisc + k) * 3;
-            var q = Math.pow(Math.random(), 0.8);                                // more particles near the disc
-            var sr = 7.2 - (7.2 - DISC_IN) * q;
-            var sa = Math.PI * 0.85 + q * Math.PI * 2.2;
-            var sy = 1.5 * (1 - q) * (1 - q);
-            var spread = 0.05 + 0.45 * (1 - q);
+        for (var k = 0; k < nStream; k++) {                                       // kind 1: matter falling in from one side
+            var j = nDisc + k, j3 = j * 3;
+            var q = Math.pow(Math.random(), 0.8);
+            var sr = 7.6 - (7.6 - DISC_IN) * q, sa = Math.PI * 0.85 + q * Math.PI * 2.2, sy = 1.6 * (1 - q) * (1 - q);
+            var spread = 0.05 + 0.5 * (1 - q);
             gPos[j3] = Math.cos(sa) * sr; gPos[j3 + 1] = sy; gPos[j3 + 2] = Math.sin(sa) * sr;
-            gRnd[j3]     = sgn() * Math.pow(Math.random(), 1.5) * spread;
-            gRnd[j3 + 1] = sgn() * Math.pow(Math.random(), 1.5) * spread * 0.6;
-            gRnd[j3 + 2] = sgn() * Math.pow(Math.random(), 1.5) * spread;
-            gScl[nDisc + k] = 0.35 + Math.random() * 0.7;
+            gRnd[j3] = sgn() * Math.pow(Math.random(), 1.5) * spread; gRnd[j3 + 1] = sgn() * Math.pow(Math.random(), 1.5) * spread * 0.6; gRnd[j3 + 2] = sgn() * Math.pow(Math.random(), 1.5) * spread;
+            gScl[j] = 0.35 + Math.random() * 0.7;
+            gKind[j] = 1;
+        }
+        for (var m = 0; m < nJet; m++) {                                          // kind 2: polar jets
+            var n = nDisc + nStream + m, n3 = n * 3;
+            var h = 0.4 + Math.pow(Math.random(), 0.7) * 5.6, dirn = m % 2 === 0 ? 1 : -1, ja = Math.random() * Math.PI * 2;
+            gPos[n3] = Math.cos(ja) * 0.01; gPos[n3 + 1] = dirn * h; gPos[n3 + 2] = Math.sin(ja) * 0.01;
+            gRnd[n3] = (Math.random() - 0.5) * 0.5; gRnd[n3 + 1] = (Math.random() - 0.5) * 0.3; gRnd[n3 + 2] = (Math.random() - 0.5) * 0.5;
+            gScl[n] = 0.35 + Math.random() * 0.8;
+            gKind[n] = 2;
         }
     } else {
         for (var g = 0; g < COUNT; g++) {
@@ -107,121 +115,113 @@
             gRnd[g3 + 1] = sgn() * Math.pow(Math.random(), RPOW) * rs * vy;
             gRnd[g3 + 2] = sgn() * Math.pow(Math.random(), RPOW) * rs;
             gScl[g] = Math.random() < 0.025 ? 2.2 + Math.random() * 2.2 : 0.45 + Math.random() * 1.1;
+            gKind[g] = 0;
         }
     }
     var gGeo = new THREE.BufferGeometry();
     gGeo.setAttribute('position', new THREE.BufferAttribute(gPos, 3));
     gGeo.setAttribute('aRandom', new THREE.BufferAttribute(gRnd, 3));
     gGeo.setAttribute('aScale', new THREE.BufferAttribute(gScl, 1));
+    gGeo.setAttribute('aKind', new THREE.BufferAttribute(gKind, 1));
 
-    var gMat = new THREE.ShaderMaterial({
-        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-        uniforms: {
-            uTime: { value: 0 }, uSize: { value: isMobile ? 22 : 27 }, uPixelRatio: { value: DPR },
-            uSpin: { value: FORM === 'blackhole' ? 0.26 : 0.09 }, uSpinPow: { value: FORM === 'blackhole' ? 1.5 : 1.0 },
-            uOpacity: { value: 1 }, uRadius: { value: RADIUS },
-            uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
-            uExplode: { value: 0 }
-        },
-        vertexShader: [
-            'uniform float uTime; uniform float uSize; uniform float uPixelRatio; uniform float uRadius; uniform float uSpin; uniform float uSpinPow;',
-            'uniform vec3 uInside; uniform vec3 uOutside;',
-            'uniform float uExplode;',
-            'attribute vec3 aRandom; attribute float aScale;',
-            'varying vec3 vColor;',
-            'void main() {',
-            '  vec3 p = position;',
-            '  float ang = atan(p.x, p.z); float dist = length(p.xz);',
-            '  ang += uTime * uSpin / pow(max(dist, 0.6), uSpinPow);',   // differential rotation (Keplerian for the black hole)
-            '  p.x = cos(ang) * dist; p.z = sin(ang) * dist;',
-            '  p += aRandom;',
-            // boring mode: every particle flies outward from the core and fades
-            '  float ex = uExplode * uExplode;',
-            '  p += normalize(p + vec3(0.001, 0.0, 0.0)) * ex * 18.0 + aRandom * ex * 12.0;',
-            '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
-            '  gl_Position = projectionMatrix * mv;',
-            '  gl_PointSize = uSize * aScale * uPixelRatio * (1.0 / -mv.z);',
-            '  vColor = mix(uInside, uOutside, clamp(dist / uRadius, 0.0, 1.0));',
-            '}'
-        ].join('\n'),
-        fragmentShader: [
-            'uniform float uOpacity; uniform float uExplode; varying vec3 vColor;',
-            'void main() {', SOFT_DISC,
-            '  a = a * a * (3.0 - 2.0 * a); a = pow(a, 1.6);',
-            '  gl_FragColor = vec4(vColor, a * uOpacity * (1.0 - uExplode));',
-            '}'
-        ].join('\n')
-    });
+    var BH = FORM === 'blackhole';
+    function makeGalaxyMaterial(secondary) {
+        return new THREE.ShaderMaterial({
+            transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+            uniforms: {
+                uTime: { value: 0 }, uSize: { value: isMobile ? 22 : 27 }, uPixelRatio: { value: DPR },
+                uSpin: { value: BH ? 0.26 : 0.09 }, uSpinPow: { value: BH ? 1.5 : 1.0 },
+                uOpacity: { value: 1 }, uRadius: { value: RADIUS }, uInner: { value: DISC_IN },
+                uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
+                uExplode: { value: 0 },
+                uBH: { value: new THREE.Vector3(0, 0, -8) }, uRs: { value: BH ? RS : 0 }, uShadow: { value: SHADOW },
+                uSecondary: { value: secondary ? 1 : 0 }, uFlow: { value: BH ? 0.028 : 0 }, uDoppler: { value: BH ? 1 : 0 }
+            },
+            vertexShader: [
+                'uniform float uTime; uniform float uSize; uniform float uPixelRatio; uniform float uRadius; uniform float uInner; uniform float uSpin; uniform float uSpinPow;',
+                'uniform vec3 uInside; uniform vec3 uOutside; uniform float uExplode;',
+                'uniform vec3 uBH; uniform float uRs; uniform float uShadow; uniform float uSecondary; uniform float uFlow; uniform float uDoppler;',
+                'attribute vec3 aRandom; attribute float aScale; attribute float aKind;',
+                'varying vec3 vColor; varying float vAlpha;',
+                'void main() {',
+                '  vec3 p = position; float ang = atan(p.x, p.z); float r0 = length(p.xz);',
+                '  vec3 q; vec3 tdir = vec3(0.0); float fade = 1.0; float tcol = 0.0;',
+                '  if (aKind < 0.5) {',
+                '    float span = uRadius - uInner + fract(aScale * 7.31 + aRandom.z * 53.0) * 3.2;',   // wrap radius spread 4.6–7.8: no hard outer rim
+                '    float r = uInner + mod(r0 - uInner + span - uTime * uFlow, span);',
+                '    ang += uTime * uSpin / pow(max(r, 0.6), uSpinPow);',
+                '    q = vec3(sin(ang) * r, 0.0, cos(ang) * r) + aRandom;',
+                '    tdir = vec3(cos(ang), 0.0, -sin(ang));',
+                '    tcol = clamp((r - uInner) / (uRadius - uInner), 0.0, 1.0);',
+                '  } else if (aKind < 1.5) {',
+                '    ang += uTime * uSpin / pow(max(r0, 0.6), uSpinPow);',
+                '    q = vec3(sin(ang) * r0, p.y, cos(ang) * r0) + aRandom;',
+                '    tdir = vec3(cos(ang), 0.0, -sin(ang));',
+                '    tcol = clamp((r0 - uInner) / (uRadius - uInner), 0.0, 1.0);',
+                '  } else {',
+                '    float h0 = abs(p.y); float dn = sign(p.y);',
+                '    float h = 0.4 + mod(h0 - 0.4 + uTime * 0.9 * (0.7 + aScale * 0.4), 5.6);',
+                '    float rad = 0.05 + 0.15 * h;',
+                '    float a2 = ang + uTime * 1.1 + h * 0.5;',
+                '    q = vec3(cos(a2) * rad, dn * h, sin(a2) * rad) + aRandom * (0.2 + 0.15 * h);',
+                '    fade = 1.0 - h / 6.2; tcol = 1.0;',
+                '  }',
+                '  float ex = uExplode * uExplode;',
+                '  q += normalize(q + vec3(0.001, 0.0, 0.0)) * ex * 18.0 + aRandom * ex * 12.0;',
+                '  vec3 pv = (modelViewMatrix * vec4(q, 1.0)).xyz;',
+                '  float dop = 0.0;',
+                '  if (aKind < 1.5) { vec3 tv = normalize((modelViewMatrix * vec4(tdir, 0.0)).xyz); dop = dot(tv, -normalize(pv)) * uDoppler; }',
+                '  float bright = 1.0 + 0.55 * dop;',
+                '  float Ds = length(pv); float Dl = length(uBH);',
+                '  vec3 axis = uBH / Dl; vec3 dir = pv / Ds;',
+                '  float cb = clamp(dot(dir, axis), -1.0, 1.0); float beta = acos(cb);',
+                '  float Dls = Ds - Dl;',
+                '  float tE2 = max(0.0, 2.0 * uRs * Dls / (Dl * Ds));',
+                '  float root = sqrt(beta * beta + 4.0 * tE2);',
+                '  float theta = uSecondary > 0.5 ? 0.5 * (beta - root) : 0.5 * (beta + root);',
+                '  vec3 perp = dir - axis * cb; float pl = length(perp);',
+                '  vec3 pn = pl > 1e-4 ? perp / pl : normalize(cross(axis, vec3(0.0, 1.0, 0.0)));',
+                '  vec3 nd = axis * cos(theta) + pn * sin(theta);',
+                '  pv = nd * Ds;',
+                '  float shadowAng = atan(uShadow, Dl);',
+                '  float visible = (Dls > 0.0 && abs(theta) < shadowAng) ? 0.0 : 1.0;',
+                '  if (uSecondary > 0.5 && tE2 <= 0.0) visible = 0.0;',
+                '  gl_Position = projectionMatrix * vec4(pv, 1.0);',
+                '  float sizeK = aKind < 0.5 ? (1.25 - 0.75 * tcol) : 1.0;',                       // hot and bold inside, faint far out
+                '  gl_PointSize = uSize * aScale * uPixelRatio * bright * sizeK * (1.0 / max(-pv.z, 0.1));',
+                '  vec3 base = aKind > 1.5 ? mix(uOutside, vec3(1.0), 0.55) : mix(uInside, uOutside, tcol);',
+                '  vColor = mix(base, dop > 0.0 ? vec3(1.0) : uOutside, abs(dop) * 0.35);',
+                '  vAlpha = visible * fade * (uSecondary > 0.5 ? 0.5 : 1.0);',
+                '}'
+            ].join('\n'),
+            fragmentShader: [
+                'uniform float uOpacity; varying vec3 vColor; varying float vAlpha;',
+                'void main() {', SOFT_DISC,
+                '  a = a * a * (3.0 - 2.0 * a); a = pow(a, 1.6);',
+                '  gl_FragColor = vec4(vColor, a * uOpacity * vAlpha);',
+                '}'
+            ].join('\n')
+        });
+    }
+    var gMat = makeGalaxyMaterial(false);
+    var gMat2 = BH ? makeGalaxyMaterial(true) : null;
+    var gMats = gMat2 ? [gMat, gMat2] : [gMat];
     var galaxy = new THREE.Points(gGeo, gMat);
     var gGroup = new THREE.Group();
     gGroup.add(galaxy);
     gGroup.rotation.z = 0.14;
     scene.add(gGroup);
 
-    /* ── Event horizon + lensing halo (black hole only) ───────────────── */
-    var horizon = null, halo = null, hMat = null;
-    if (FORM === 'blackhole') {
-        horizon = new THREE.Mesh(new THREE.SphereGeometry(HORIZON, 48, 32), new THREE.MeshBasicMaterial({ color: 0x000000 }));
-        horizon.renderOrder = -1;                                           // drawn first, writes depth: hides what is behind it
+    /* ── Shadow sphere + secondary image (black hole only) ────────────── */
+    var horizon = null, galaxy2 = null;
+    if (BH) {
+        horizon = new THREE.Mesh(new THREE.SphereGeometry(SHADOW, 48, 32), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+        horizon.renderOrder = -1;
         gGroup.add(horizon);
         galaxy.renderOrder = 1;
-
-        // Camera-facing ring: the photon ring, plus the far side of the disc bent over and under the horizon
-        var HC = isMobile ? 4000 : 9000;
-        var hPos = new Float32Array(HC * 3), hScl = new Float32Array(HC), hSeed = new Float32Array(HC);
-        for (var h = 0; h < HC; h++) {
-            var h3 = h * 3, kind = h < HC * 0.35 ? 0 : (h < HC * 0.8 ? 1 : 2);   // 0 photon ring · 1 upper arc · 2 lower arc
-            var ang, rr, scl;
-            if (kind === 0) {                                                  // thin, bright, hugging the horizon
-                ang = Math.random() * Math.PI * 2;
-                rr = 1.05 + Math.pow(Math.random(), 2.0) * 0.13;
-                scl = 0.7 + Math.random() * 0.8;
-            } else if (kind === 1) {                                           // far side of the disc bent over the top
-                var sp = (Math.random() + Math.random() - 1) * 1.35;            // triangular spread, densest at the top
-                ang = Math.PI / 2 + sp;
-                rr = 1.08 + Math.pow(Math.random(), 1.5) * 0.95;
-                scl = 0.5 + Math.random() * 1.0;
-            } else {                                                           // and bent under, fainter
-                var sp2 = (Math.random() + Math.random() - 1) * 0.95;
-                ang = -Math.PI / 2 + sp2;
-                rr = 1.06 + Math.pow(Math.random(), 1.7) * 0.6;
-                scl = 0.45 + Math.random() * 0.8;
-            }
-            hPos[h3] = Math.cos(ang) * rr; hPos[h3 + 1] = Math.sin(ang) * rr; hPos[h3 + 2] = (Math.random() - 0.5) * 0.05;
-            hScl[h] = scl;
-            hSeed[h] = Math.random();
-        }
-        var hGeo = new THREE.BufferGeometry();
-        hGeo.setAttribute('position', new THREE.BufferAttribute(hPos, 3));
-        hGeo.setAttribute('aScale', new THREE.BufferAttribute(hScl, 1));
-        hGeo.setAttribute('aSeed', new THREE.BufferAttribute(hSeed, 1));
-        hMat = new THREE.ShaderMaterial({
-            transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-            uniforms: { uTime: { value: 0 }, uPixelRatio: { value: DPR }, uOpacity: { value: 0.9 }, uColor: { value: new THREE.Color('#FFE3C2') }, uSize: { value: isMobile ? 24 : 30 } },
-            vertexShader: [
-                'uniform float uPixelRatio; uniform float uSize; uniform float uTime; attribute float aScale; attribute float aSeed; varying float vSeed;',
-                'void main() {',
-                '  vec3 p = position;',
-                '  float a = atan(p.y, p.x) + uTime * 0.25; float r = length(p.xy);',   // the ring shimmers around
-                '  p.x = cos(a) * r; p.y = sin(a) * r;',
-                '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
-                '  gl_Position = projectionMatrix * mv;',
-                '  gl_PointSize = uSize * aScale * uPixelRatio * (1.0 / -mv.z);',
-                '  vSeed = aSeed;',
-                '}'
-            ].join('\n'),
-            fragmentShader: [
-                'uniform float uOpacity; uniform vec3 uColor; uniform float uTime; varying float vSeed;',
-                'void main() {', SOFT_DISC,
-                '  a = a * a * (3.0 - 2.0 * a); a = pow(a, 1.5);',
-                '  float tw = 0.75 + 0.25 * sin(uTime * 1.7 + vSeed * 40.0);',
-                '  gl_FragColor = vec4(uColor, a * tw * uOpacity);',
-                '}'
-            ].join('\n')
-        });
-        halo = new THREE.Points(hGeo, hMat);
-        halo.renderOrder = 2;
-        gGroup.add(halo);
+        galaxy2 = new THREE.Points(gGeo, gMat2);
+        galaxy2.renderOrder = 1;
+        gGroup.add(galaxy2);
     }
 
     /* ── Star field ─────────────────────────────────────────────────── */
@@ -337,8 +337,7 @@
     function lerpTheme(k) {
         cur.inside.lerp(tgt.inside, k); cur.outside.lerp(tgt.outside, k); cur.star.lerp(tgt.star, k); cur.dust.lerp(tgt.dust, k);
         cur.gOp += (tgt.gOp - cur.gOp) * k; cur.sOp += (tgt.sOp - cur.sOp) * k; cur.dOp += (tgt.dOp - cur.dOp) * k;
-        gMat.uniforms.uInside.value.copy(cur.inside); gMat.uniforms.uOutside.value.copy(cur.outside);
-        if (hMat) hMat.uniforms.uColor.value.copy(cur.inside);
+        gMats.forEach(function (m) { m.uniforms.uInside.value.copy(cur.inside); m.uniforms.uOutside.value.copy(cur.outside); });
         sMat.uniforms.uColor.value.copy(cur.star);
         dMat.uniforms.uColor.value.copy(cur.dust);
     }
@@ -404,16 +403,19 @@
         pin.addEventListener('pointercancel', endDrag);
     }
 
-    var camLocal = new THREE.Vector3(), discUp = new THREE.Vector3(), invG = new THREE.Matrix4();
-    function orientHalo(fade) {
-        // face the camera (in the group's frame) and fade with the viewing angle: strongest edge-on
-        halo.lookAt(camera.position);                              // world-space target: the ring faces the camera
-        discUp.set(0, 1, 0).transformDirection(gGroup.matrixWorld);
-        var edge = 1 - Math.abs(discUp.dot(camera.position.clone().sub(shipPosDummy).normalize()));
-        hMat.uniforms.uOpacity.value = (0.35 + 0.65 * edge) * fade;
-        hMat.uniforms.uTime.value = gMat.uniforms.uTime.value;
+    var bhView = new THREE.Vector3();
+    function syncMats() {
+        camera.updateMatrixWorld();
+        camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+        bhView.set(0, 0, 0).applyMatrix4(camera.matrixWorldInverse);
+        for (var i = 0; i < gMats.length; i++) {
+            var u = gMats[i].uniforms;
+            u.uBH.value.copy(bhView);
+            u.uTime.value = gMat.uniforms.uTime.value;
+            u.uOpacity.value = gMat.uniforms.uOpacity.value;
+            u.uExplode.value = gMat.uniforms.uExplode.value;
+        }
     }
-    var shipPosDummy = new THREE.Vector3(0, 0, 0);
 
     function place(t) {
         var p = scrollP;
@@ -436,7 +438,7 @@
         var fade = p < 0.85 ? 1 : (p < 2.3 ? Math.max(0.3, 1 - (p - 0.85) * 1.3) : Math.max(0, 0.3 * (1 - (p - 2.3) / 0.7)));
         galaxy.visible = fade > 0.002 && explode < 1;
         gMat.uniforms.uOpacity.value = cur.gOp * fade;
-        if (halo) { orientHalo(fade); horizon.visible = fade > 0.002 && explode < 1; halo.visible = fade > 0.002 && explode < 1; }
+        if (BH) { horizon.visible = fade > 0.002 && explode < 1; galaxy2.visible = galaxy.visible; }
         gMat.uniforms.uExplode.value = explode;
         sMat.uniforms.uOpacity.value = cur.sOp * (1 - explode);
         var dustIn = Math.max(0, Math.min(1, (p - 0.75) / 0.6));   // dust only once the galaxy has receded
@@ -450,6 +452,7 @@
         gMat.uniforms.uTime.value = t;
         sMat.uniforms.uTime.value = t;
         dMat.uniforms.uTime.value = t;
+        syncMats();
     }
 
     function resize() {
@@ -496,8 +499,6 @@
         window.addEventListener('scroll', function () { if (dirty) renderStatic(); }, { passive: true });
         window.addEventListener('resize', function () { renderStatic(); });
     }
-    window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; },
-        haloOnly: function (on) { galaxy.visible = !on; if (horizon) horizon.visible = !on; },
-        haloInfo: function () { return halo ? { op: hMat.uniforms.uOpacity.value, size: hMat.uniforms.uSize.value, col: hMat.uniforms.uColor.value.getHexString(), q: halo.quaternion.toArray().map(function (v) { return +v.toFixed(2); }), vis: halo.visible, n: halo.geometry.attributes.position.count } : null; } };
+    window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; }, form: FORM };
     start();
 })();
