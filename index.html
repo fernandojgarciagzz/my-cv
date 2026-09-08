@@ -546,11 +546,12 @@
                 repeating-linear-gradient(180deg, transparent 0 279px, #ECECEC 279px 280px);
         }
         html.light .space-glow, html.light .hero-hint { display: none; }
-        html.light #space, html.light .space-fallback {
+        html.light #space, html.light.no-webgl .space-fallback {
             display: block; z-index: 2; background: #05070A;
             clip-path: circle(var(--ph-r, 90px) at var(--ph-x, calc(100vw - 122px)) var(--ph-y, 178px));
         }
-        html.light .space-fallback { color: #D8E3F3; opacity: 1; }
+        html.light .space-fallback { display: none; }
+        html.light.no-webgl .space-fallback { color: #D8E3F3; opacity: 1; }
         .porthole {
             position: fixed; z-index: 3; pointer-events: none; display: none; border-radius: 50%;
             left: calc(var(--ph-x, calc(100vw - 122px)) - var(--ph-r, 90px)); top: calc(var(--ph-y, 178px) - var(--ph-r, 90px));

@@ -291,15 +291,18 @@
 
         var vps = window.scrollY / window.innerHeight;         // viewports scrolled
         if (inCabin()) {
-            // Through the porthole: frame the whole galaxy inside the window, wherever the window is
+            // Through the porthole: park the camera straight ahead and move the galaxy to the
+            // world point that projects onto the window, sized to fit inside it
             var ph = portholePx(), W = window.innerWidth, H = window.innerHeight;
-            var D = RADIUS * 1.3 * (H / 2) / (TAN_HALF * ph.r);
-            gMat.uniforms.uSize.value = BASE_SIZE * (D / 8.4) * 0.5;   // points shrink with distance; keep them ~2px in the window
-            camera.position.set(0, D * 0.42, D * 0.9);
+            var D = RADIUS * 1.35 * (H / 2) / (TAN_HALF * ph.r);
+            gMat.uniforms.uSize.value = BASE_SIZE * (D / 8.4) * 0.3;   // points shrink with distance; keep them ~1.5px in the window
+            camera.position.set(0, 0, D);
             camera.lookAt(0, 0, 0);
-            camera.setViewOffset(W, H, W / 2 - ph.x, H / 2 - ph.y, W, H);
+            var halfH = TAN_HALF * D, halfW = halfH * (W / H);
+            var nx = (ph.x / W) * 2 - 1, ny = 1 - (ph.y / H) * 2;
+            gGroup.position.set(nx * halfW, ny * halfH, 0);
             gGroup.rotation.y = t * 0.03 + vps * 0.35 + drag.ry;
-            gGroup.rotation.x = clamp(drag.rx, -0.9, 0.9);
+            gGroup.rotation.x = clamp(0.55 + drag.rx, -0.2, 1.2);    // oblique view of the disc
             gGroup.updateMatrixWorld();
             galaxy.visible = true;
             gMat.uniforms.uOpacity.value = cur.gOp;
@@ -311,8 +314,8 @@
             gMat.uniforms.uTime.value = t; sMat.uniforms.uTime.value = t; dMat.uniforms.uTime.value = t;
             return;
         }
-        camera.clearViewOffset();
         gMat.uniforms.uSize.value = BASE_SIZE;
+        gGroup.position.set(0, 0, 0);
 
         // Camera: opens a little further out (cleaner start), pulls back through the hero,
         // then keeps looking lower so the galaxy drifts up and out while the stars and dust remain.
