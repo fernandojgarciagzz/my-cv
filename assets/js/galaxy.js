@@ -11,9 +11,11 @@
  * and tilt it with inertia. Touch devices scroll normally; horizontal drags
  * rotate.
  *
- * Theme classes on <html> retint everything and blend smoothly:
- *   (default)     dark space, additive warm-core / slate-arm galaxy
- *   .light        slate ink on paper, normal blending
+ * Theme classes on <html>:
+ *   (default)     space — the galaxy is the hero, then recedes behind the page
+ *   .light        the cabin — the same scene framed through a porthole (CSS
+ *                 vars --ph-x/--ph-y/--ph-r on <html> say where), using a
+ *                 view offset so the galaxy sits exactly in the window
  *   .claude-mode  amber galaxy, warm stars and dust (the vinyl easter egg)
  *
  * prefers-reduced-motion: no rotation, twinkle, drag or cursor response; a
@@ -80,13 +82,11 @@
         uniforms: {
             uTime: { value: 0 }, uSize: { value: isMobile ? 24 : 30 }, uPixelRatio: { value: DPR },
             uOpacity: { value: 1 }, uRadius: { value: RADIUS },
-            uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
-            uExplode: { value: 0 }
+            uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') }
         },
         vertexShader: [
             'uniform float uTime; uniform float uSize; uniform float uPixelRatio; uniform float uRadius;',
             'uniform vec3 uInside; uniform vec3 uOutside;',
-            'uniform float uExplode;',
             'attribute vec3 aRandom; attribute float aScale;',
             'varying vec3 vColor;',
             'void main() {',
@@ -95,9 +95,6 @@
             '  ang += (1.0 / max(dist, 0.25)) * uTime * 0.09;',   // differential rotation: inner arms turn faster
             '  p.x = cos(ang) * dist; p.z = sin(ang) * dist;',
             '  p += aRandom;',
-            // boring mode: every particle flies outward from the core and fades
-            '  float ex = uExplode * uExplode;',
-            '  p += normalize(p + vec3(0.001, 0.0, 0.0)) * ex * 18.0 + aRandom * ex * 12.0;',
             '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
             '  gl_Position = projectionMatrix * mv;',
             '  gl_PointSize = uSize * aScale * uPixelRatio * (1.0 / -mv.z);',
@@ -105,10 +102,10 @@
             '}'
         ].join('\n'),
         fragmentShader: [
-            'uniform float uOpacity; uniform float uExplode; varying vec3 vColor;',
+            'uniform float uOpacity; varying vec3 vColor;',
             'void main() {', SOFT_DISC,
             '  a = a * a * (3.0 - 2.0 * a); a = pow(a, 1.6);',
-            '  gl_FragColor = vec4(vColor, a * uOpacity * (1.0 - uExplode));',
+            '  gl_FragColor = vec4(vColor, a * uOpacity);',
             '}'
         ].join('\n')
     });
@@ -210,16 +207,16 @@
 
     /* ── Theme ───────────────────────────────────────────────────────── */
     var THEMES = {
-        dark:        { inside: '#FFE3C2', outside: '#4F78A8', star: '#D8E3F3', dust: '#9FB8D6', gOp: 1.00, sOp: 0.85, dOp: 0.66, add: true },
-        darkClaude:  { inside: '#FFD3A8', outside: '#C2623D', star: '#F0D6BE', dust: '#E8B48F', gOp: 1.00, sOp: 0.80, dOp: 0.66, add: true },
-        light:       { inside: '#2A425C', outside: '#7EA0BB', star: '#3B5775', dust: '#3B5775', gOp: 0.80, sOp: 0.22, dOp: 0.24, add: false },
-        lightClaude: { inside: '#9E4A2A', outside: '#E5A785', star: '#B85C3A', dust: '#B85C3A', gOp: 0.80, sOp: 0.22, dOp: 0.24, add: false }
+        dark:        { inside: '#FFE3C2', outside: '#4F78A8', star: '#D8E3F3', dust: '#9FB8D6', gOp: 1.00, sOp: 0.85, dOp: 0.6, add: true },
+        darkClaude:  { inside: '#FFD3A8', outside: '#C2623D', star: '#F0D6BE', dust: '#E8B48F', gOp: 1.00, sOp: 0.80, dOp: 0.6, add: true }
     };
-    function themeKey() {
-        var l = root.classList.contains('light'), c = root.classList.contains('claude-mode');
-        return l ? (c ? 'lightClaude' : 'light') : (c ? 'darkClaude' : 'dark');
+    function themeKey() { return root.classList.contains('claude-mode') ? 'darkClaude' : 'dark'; }
+    function inCabin() { return root.classList.contains('light'); }
+    function portholePx() {
+        var cs = getComputedStyle(root);
+        return { x: parseFloat(cs.getPropertyValue('--ph-x')) || window.innerWidth - 122, y: parseFloat(cs.getPropertyValue('--ph-y')) || 178, r: parseFloat(cs.getPropertyValue('--ph-r')) || 90 };
     }
-    function mk() { return { inside: new THREE.Color(), outside: new THREE.Color(), star: new THREE.Color(), dust: new THREE.Color(), gOp: 1, sOp: 0.85, dOp: 0.5 }; }
+    function mk() { return { inside: new THREE.Color(), outside: new THREE.Color(), star: new THREE.Color(), dust: new THREE.Color(), gOp: 1, sOp: 0.85, dOp: 0.6 }; }
     var cur = mk(), tgt = mk();
     function setTarget() {
         var t = THEMES[themeKey()];
@@ -236,23 +233,6 @@
         dMat.uniforms.uColor.value.copy(cur.dust);
     }
     setTarget(); lerpTheme(1);
-
-    /* ── Boring mode: explode on the way out, implode on the way back ─── */
-    var explode = root.classList.contains('light') ? 1 : 0;
-    var exFrom = explode, exTo = explode, exT0 = 0, EX_DUR = 1100;
-    function startExplode(to) {
-        if (reduce) { explode = exFrom = exTo = to; if (to === 1) window.dispatchEvent(new CustomEvent('space:exploded')); dirty = true; start(); return; }
-        exFrom = explode; exTo = to; exT0 = performance.now(); start();
-    }
-    function stepExplode(now) {
-        if (explode === exTo) return;
-        var k = Math.min(1, (now - exT0) / EX_DUR);
-        var e = exTo === 1 ? k * k * k : 1 - Math.pow(1 - k, 3);
-        explode = exFrom + (exTo - exFrom) * e;
-        if (k >= 1) { explode = exTo; if (exTo === 1) window.dispatchEvent(new CustomEvent('space:exploded')); }
-    }
-    window.addEventListener('space:explode', function () { startExplode(1); });
-    window.addEventListener('space:implode', function () { startExplode(0); });
 
     /* ── Scroll, pointer, drag ──────────────────────────────────────── */
     var scrollP = 0, dirty = true;
@@ -280,6 +260,7 @@
         pin.classList.add('grab');
         pin.addEventListener('pointerdown', function (e) {
             if (e.button !== undefined && e.button !== 0) return;
+            if (e.target.closest && e.target.closest('.ship')) return;
             drag.on = true; drag.x = e.clientX; drag.y = e.clientY; drag.vx = 0; drag.vy = 0;
             pin.classList.add('grabbing');
             try { pin.setPointerCapture(e.pointerId); } catch (err) {}
@@ -307,6 +288,29 @@
         tiltY += (mx * 0.38 * hoverK - tiltY) * 0.045;
         if (!drag.on) { drag.ry += drag.vy; drag.rx = clamp(drag.rx + drag.vx, -0.75, 0.75); drag.vy *= 0.94; drag.vx *= 0.9; }
 
+        var vps = window.scrollY / window.innerHeight;         // viewports scrolled
+        if (inCabin()) {
+            // Through the porthole: frame the whole galaxy inside the window, wherever the window is
+            var ph = portholePx(), W = window.innerWidth, H = window.innerHeight;
+            var D = RADIUS * 1.3 * (H / 2) / (TAN_HALF * ph.r);
+            camera.position.set(0, D * 0.42, D * 0.9);
+            camera.lookAt(0, 0, 0);
+            camera.setViewOffset(W, H, W / 2 - ph.x, H / 2 - ph.y, W, H);
+            gGroup.rotation.y = t * 0.03 + vps * 0.35 + drag.ry;
+            gGroup.rotation.x = clamp(drag.rx, -0.9, 0.9);
+            gGroup.updateMatrixWorld();
+            galaxy.visible = true;
+            gMat.uniforms.uOpacity.value = cur.gOp;
+            sMat.uniforms.uOpacity.value = cur.sOp;
+            dMat.uniforms.uOpacity.value = cur.dOp * 0.8;
+            stars.position.y = -vps * 1.2;
+            stars.rotation.y = t * 0.003;
+            dMat.uniforms.uScroll.value = vps * 1.6;               // the ship feels underway as you scroll
+            gMat.uniforms.uTime.value = t; sMat.uniforms.uTime.value = t; dMat.uniforms.uTime.value = t;
+            return;
+        }
+        camera.clearViewOffset();
+
         // Camera: opens a little further out (cleaner start), pulls back through the hero,
         // then keeps looking lower so the galaxy drifts up and out while the stars and dust remain.
         camera.position.set(0, 3.5 + zoom * 2.6, 7.6 + zoom * 5.6);
@@ -316,14 +320,11 @@
         gGroup.updateMatrixWorld();
 
         var fade = p < 0.85 ? 1 : (p < 2.3 ? Math.max(0.3, 1 - (p - 0.85) * 1.3) : Math.max(0, 0.3 * (1 - (p - 2.3) / 0.7)));
-        galaxy.visible = fade > 0.002 && explode < 1;
+        galaxy.visible = fade > 0.002;
         gMat.uniforms.uOpacity.value = cur.gOp * fade;
-        gMat.uniforms.uExplode.value = explode;
-        sMat.uniforms.uOpacity.value = cur.sOp * (1 - explode);
+        sMat.uniforms.uOpacity.value = cur.sOp;
         var dustIn = Math.max(0, Math.min(1, (p - 0.75) / 0.6));   // dust only once the galaxy has receded
-        dMat.uniforms.uOpacity.value = cur.dOp * (1 - explode) * dustIn;
-
-        var vps = window.scrollY / window.innerHeight;         // viewports scrolled
+        dMat.uniforms.uOpacity.value = cur.dOp * dustIn;
         stars.position.y = -vps * 2.2;
         stars.rotation.y = t * 0.003;
         dMat.uniforms.uScroll.value = vps;
@@ -354,12 +355,10 @@
         raf = null;
         if (!visible) return;
         var t = clock.getElapsedTime();
-        stepExplode(performance.now());
         lerpTheme(0.06);
         place(t);
         renderer.render(scene, camera);
         markLive();
-        if (explode >= 1 && root.classList.contains('light')) return;   // boring mode: nothing to draw, stop the loop
         raf = requestAnimationFrame(frame);
     }
     function renderStatic() {
@@ -377,6 +376,6 @@
         window.addEventListener('scroll', function () { if (dirty) renderStatic(); }, { passive: true });
         window.addEventListener('resize', function () { renderStatic(); });
     }
-    window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; } };
+    window.__space = { rotationY: function () { return gGroup.rotation.y; }, cabin: inCabin };
     start();
 })();
