@@ -8,9 +8,8 @@
  *
  * Interaction: particles near the cursor scatter in random 3D directions
  * (each has its own direction and flutter, with only a small push away from
- * the pointer, so it reads as a startled swarm rather than a hole); the whole
- * galaxy also tilts gently toward the cursor, and you can drag anywhere in
- * the hero to spin and tilt it with inertia. Touch devices scroll normally;
+ * the pointer, so it reads as a startled swarm rather than a hole), and you
+ * can drag anywhere in the hero to spin and tilt it with inertia. Touch devices scroll normally;
  * horizontal drags rotate.
  *
  * Theme classes on <html> retint everything and blend smoothly:
@@ -84,7 +83,7 @@
             uOpacity: { value: 1 }, uRadius: { value: RADIUS },
             uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
             uExplode: { value: 0 },
-            uMouse: { value: new THREE.Vector3(999, 0, 999) }, uMouseStrength: { value: 0 }, uMouseRadius: { value: 1.5 }
+            uMouse: { value: new THREE.Vector3(999, 0, 999) }, uMouseStrength: { value: 0 }, uMouseRadius: { value: 1.25 }
         },
         vertexShader: [
             'uniform float uTime; uniform float uSize; uniform float uPixelRatio; uniform float uRadius;',
@@ -99,13 +98,21 @@
             '  ang += (1.0 / max(dist, 0.25)) * uTime * 0.09;',   // differential rotation: inner arms turn faster
             '  p.x = cos(ang) * dist; p.z = sin(ang) * dist;',
             '  p += aRandom;',
+            // cursor: each particle near the pointer scatters along its own random 3D direction
+            // (biased out of the disc), fluttering in time, with a small push away from the pointer
+            '  vec2 dm = p.xz - uMouse.xz; float md = length(dm);',
+            '  float f = 1.0 - smoothstep(0.0, uMouseRadius, md); f = f * f * (3.0 - 2.0 * f) * uMouseStrength;',
+            '  vec3 rnd = normalize(aRandom * vec3(1.0, 2.2, 1.0) + vec3(0.013, 0.021, -0.017));',
+            '  vec2 away = md > 0.0001 ? dm / md : vec2(1.0, 0.0);',
+            '  float wob = 0.7 + 0.4 * sin(uTime * 2.6 + aScale * 37.0 + rnd.x * 21.0);',
+            '  p += (rnd * 0.9 + vec3(away.x, 0.0, away.y) * 0.3) * f * wob * 0.85;',
             // boring mode: every particle flies outward from the core and fades
             '  float ex = uExplode * uExplode;',
             '  p += normalize(p + vec3(0.001, 0.0, 0.0)) * ex * 18.0 + aRandom * ex * 12.0;',
             '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
             '  gl_Position = projectionMatrix * mv;',
-            '  gl_PointSize = uSize * aScale * uPixelRatio * (1.0 / -mv.z);',
-            '  vColor = mix(uInside, uOutside, clamp(dist / uRadius, 0.0, 1.0));',
+            '  gl_PointSize = uSize * aScale * uPixelRatio * (1.0 + f * 0.25) * (1.0 / -mv.z);',
+            '  vColor = mix(uInside, uOutside, clamp(dist / uRadius, 0.0, 1.0)) + vec3(0.12) * f;',   // scattered ones glow a touch
             '}'
         ].join('\n'),
         fragmentShader: [
@@ -198,11 +205,11 @@
             '  H *= 1.2; W *= 1.2;',
             '  p.x = mod(p.x + W, 2.0 * W) - W; p.y = mod(p.y + H, 2.0 * H) - H;',
             '  vec2 m = vec2(uMouse.x * W / 1.2, uMouse.y * H / 1.2);',
-            '  vec2 d = p.xy - m; float md = length(d); float r = 0.3 * -p.z;',
+            '  vec2 d = p.xy - m; float md = length(d); float r = 0.38 * -p.z;',
             '  float f = 1.0 - smoothstep(0.0, r, md); f = f * f * (3.0 - 2.0 * f) * uMouseStrength;',
             '  vec3 rnd = normalize(vec3(sin(aSeed * 91.0), cos(aSeed * 57.0), sin(aSeed * 13.0) * 0.5));',
             '  float wob = 0.75 + 0.35 * sin(uTime * 2.2 + aSeed * 40.0);',
-            '  p += (rnd * 0.8 + vec3(md > 0.0001 ? d / md : vec2(1.0, 0.0), 0.0) * 0.35) * f * r * 0.9 * wob;',
+            '  p += (rnd * 0.8 + vec3(md > 0.0001 ? d / md : vec2(1.0, 0.0), 0.0) * 0.35) * f * r * 0.7 * wob;',
             '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
             '  gl_Position = projectionMatrix * mv;',
             '  gl_PointSize = aScale * uPixelRatio * (13.0 / -mv.z);',
@@ -269,7 +276,7 @@
     /* ── Scroll, pointer, drag ──────────────────────────────────────── */
     var scrollP = 0, dirty = true;
     var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: 0, ry: 0 };
-    var mx = 0, my = 0, smx = 0, smy = 0, mouseIn = false, mouseK = 0, tiltX = 0, tiltY = 0;
+    var mx = 0, my = 0, smx = 0, smy = 0, mouseIn = false, mouseK = 0;
     if (!reduce && window.matchMedia('(hover: hover)').matches) {
         window.addEventListener('mousemove', function (e) {
             mx = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -331,8 +338,6 @@
         var zoom = Math.min(pe, 1.6);
         var after = Math.max(0, p - 1.6);                       // how far past the intro we are
         var hoverK = drag.on ? 0 : Math.max(0, 1 - after);      // full in the hero, gone once past the intro
-        tiltX += (-my * 0.14 * hoverK - tiltX) * 0.045;         // mouse up = look more from above, never edge-on
-        tiltY += (mx * 0.26 * hoverK - tiltY) * 0.045;
         smx += (mx - smx) * 0.12; smy += (my - smy) * 0.12;     // the swarm trails the cursor slightly
         var wantK = (mouseIn && !drag.on) ? hoverK : 0;
         mouseK += (wantK - mouseK) * 0.08;
@@ -345,8 +350,8 @@
         // then keeps looking lower so the galaxy drifts up and out while the stars and dust remain.
         camera.position.set(0, 3.5 + zoom * 2.6, 7.6 + zoom * 5.6);
         camera.lookAt(0, -(zoom + after * 0.9) * 1.15, 0);
-        gGroup.rotation.y = t * 0.018 + zoom * 1.1 + drag.ry + tiltY;
-        gGroup.rotation.x = clamp(drag.rx + tiltX, -0.9, 0.9);
+        gGroup.rotation.y = t * 0.018 + zoom * 1.1 + drag.ry;
+        gGroup.rotation.x = clamp(drag.rx, -0.9, 0.9);
         gGroup.updateMatrixWorld();
         if (mouseK > 0.01) updateGalaxyMouse();
 
