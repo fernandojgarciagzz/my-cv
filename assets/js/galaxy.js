@@ -11,6 +11,12 @@
  * and tilt it with inertia. Touch devices scroll normally; horizontal drags
  * rotate.
  *
+ * The ship: a small metallic saucer (lathe hull, emissive ring and windows,
+ * engine glow, PMREM reflections from a procedural sky) orbits just outside
+ * the disc. Its screen position is published as --ship-x/--ship-y/--ship-s on
+ * <html> so the page can place the hit target and open the hatch from it.
+ * Boarding flies the camera into the ship.
+ *
  * Theme classes on <html>:
  *   (default)     space — the galaxy is the hero, then recedes behind the page
  *   .light        the cabin — the same scene framed through a porthole (CSS
@@ -206,6 +212,78 @@
     dust.frustumCulled = false;
     camera.add(dust);
 
+    /* ── The ship ─────────────────────────────────────────────────────── */
+    var ship, shipGlow;
+    (function buildShip() {
+        // Reflections: a procedural equirectangular sky (dark above, warm galaxy band, cold below) through PMREM
+        var ec = document.createElement('canvas'); ec.width = 512; ec.height = 256;
+        var g = ec.getContext('2d');
+        var grd = g.createLinearGradient(0, 0, 0, 256);
+        grd.addColorStop(0.00, '#05070c'); grd.addColorStop(0.40, '#16233a'); grd.addColorStop(0.49, '#ffe3c2');
+        grd.addColorStop(0.53, '#7fa0c4'); grd.addColorStop(0.62, '#0c1424'); grd.addColorStop(1.00, '#000000');
+        g.fillStyle = grd; g.fillRect(0, 0, 512, 256);
+        for (var i = 0; i < 140; i++) { g.globalAlpha = 0.25 + Math.random() * 0.75; g.fillStyle = '#ffffff'; g.fillRect(Math.random() * 512, Math.random() * 256, 1.5, 1.5); }
+        g.globalAlpha = 1;
+        var envTex = new THREE.CanvasTexture(ec); envTex.mapping = THREE.EquirectangularReflectionMapping;
+        var pmrem = new THREE.PMREMGenerator(renderer); pmrem.compileEquirectangularShader();
+        var envMap = pmrem.fromEquirectangular(envTex).texture; pmrem.dispose(); envTex.dispose();
+
+        var prof = [[0, -0.16], [0.36, -0.17], [0.7, -0.12], [0.92, -0.05], [1.0, 0.02], [0.9, 0.09], [0.62, 0.15], [0.46, 0.19], [0.42, 0.27], [0.33, 0.4], [0.18, 0.48], [0, 0.5]];
+        var hull = new THREE.Mesh(
+            new THREE.LatheGeometry(prof.map(function (q) { return new THREE.Vector2(q[0], q[1]); }), 96),
+            new THREE.MeshStandardMaterial({ color: 0xcfd5de, metalness: 0.94, roughness: 0.26, envMap: envMap, envMapIntensity: 1.5 })
+        );
+        var ring = new THREE.Mesh(new THREE.TorusGeometry(0.8, 0.022, 12, 96),
+            new THREE.MeshStandardMaterial({ color: 0x8fb0d2, emissive: 0x8fb0d2, emissiveIntensity: 2.4, metalness: 0.2, roughness: 0.4 }));
+        ring.rotation.x = Math.PI / 2; ring.position.y = 0.01;
+        var dome = new THREE.Mesh(new THREE.SphereGeometry(0.3, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2),
+            new THREE.MeshPhysicalMaterial({ color: 0xbcd0e6, metalness: 0.15, roughness: 0.06, envMap: envMap, envMapIntensity: 2, transparent: true, opacity: 0.8, clearcoat: 1, clearcoatRoughness: 0.05 }));
+        dome.position.y = 0.2;
+        var winMat = new THREE.MeshStandardMaterial({ color: 0xfff1d6, emissive: 0xfff1d6, emissiveIntensity: 3 });
+        var wins = new THREE.Group();
+        for (var k = 0; k < 12; k++) {
+            var a = k / 12 * Math.PI * 2;
+            var w = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.035, 0.02), winMat);
+            w.position.set(Math.cos(a) * 0.68, 0.1, Math.sin(a) * 0.68); w.lookAt(0, 0.1, 0); wins.add(w);
+        }
+        var gc = document.createElement('canvas'); gc.width = gc.height = 128;
+        var gg = gc.getContext('2d'); var rg = gg.createRadialGradient(64, 64, 0, 64, 64, 64);
+        rg.addColorStop(0, 'rgba(160,190,225,1)'); rg.addColorStop(0.35, 'rgba(143,176,210,0.45)'); rg.addColorStop(1, 'rgba(143,176,210,0)');
+        gg.fillStyle = rg; gg.fillRect(0, 0, 128, 128);
+        shipGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(gc), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.9 }));
+        shipGlow.scale.set(1.7, 0.6, 1); shipGlow.position.y = -0.22;
+
+        ship = new THREE.Group();
+        ship.add(hull, ring, dome, wins, shipGlow);
+        ship.scale.setScalar(0.3);
+        scene.add(ship);                                        // world frame: it stays on the far side of the disc
+        galaxy.renderOrder = 1;                                 // particles draw after the hull so it occludes what is behind it
+
+        scene.add(new THREE.PointLight(0xffe3c2, 2.6, 40));    // the galaxy core lights the ship from inside
+        var rim = new THREE.DirectionalLight(0x8fb0d2, 1.2); rim.position.set(6, 3, -4); scene.add(rim);
+        var key = new THREE.DirectionalLight(0xffffff, 0.9); key.position.set(-4, 6, 5); scene.add(key);
+        scene.add(new THREE.AmbientLight(0x1a2434, 1.2));
+    })();
+    var shipPos = new THREE.Vector3(), boardFly = null;
+    function publishShip(visibleNow) {
+        if (!visibleNow) { root.style.setProperty('--ship-s', '0px'); return; }
+        shipPos.setFromMatrixPosition(ship.matrixWorld);
+        var dist = camera.position.distanceTo(shipPos);
+        var v = shipPos.clone().project(camera);
+        if (v.z > 1) { root.style.setProperty('--ship-s', '0px'); return; }
+        var px = (v.x + 1) / 2 * window.innerWidth, py = (1 - v.y) / 2 * window.innerHeight;
+        var size = (0.62 / (TAN_HALF * dist)) * (window.innerHeight / 2);
+        if (px < 40 || px > window.innerWidth - 40 || py < 80 || py > window.innerHeight - 40) { root.style.setProperty('--ship-s', '0px'); return; }
+        root.style.setProperty('--ship-x', px.toFixed(1) + 'px');
+        root.style.setProperty('--ship-y', py.toFixed(1) + 'px');
+        root.style.setProperty('--ship-s', Math.max(44, size).toFixed(1) + 'px');
+    }
+    window.addEventListener('space:board', function () {
+        if (reduce || !ship.visible) return;
+        shipPos.setFromMatrixPosition(ship.matrixWorld);
+        boardFly = { t0: performance.now(), from: camera.position.clone(), target: shipPos.clone().add(camera.position.clone().sub(shipPos).normalize().multiplyScalar(0.9)) };
+    });
+
     /* ── Theme ───────────────────────────────────────────────────────── */
     var THEMES = {
         dark:        { inside: '#FFE3C2', outside: '#4F78A8', star: '#D8E3F3', dust: '#9FB8D6', gOp: 1.00, sOp: 0.85, dOp: 0.6, add: true },
@@ -305,6 +383,8 @@
             gGroup.rotation.x = clamp(0.55 + drag.rx, -0.2, 1.2);    // oblique view of the disc
             gGroup.updateMatrixWorld();
             galaxy.visible = true;
+            ship.visible = false; boardFly = null;
+            publishShip(false);
             gMat.uniforms.uOpacity.value = cur.gOp;
             sMat.uniforms.uOpacity.value = cur.sOp;
             dMat.uniforms.uOpacity.value = cur.dOp * 0.8;
@@ -331,6 +411,23 @@
         sMat.uniforms.uOpacity.value = cur.sOp;
         var dustIn = Math.max(0, Math.min(1, (p - 0.75) / 0.6));   // dust only once the galaxy has receded
         dMat.uniforms.uOpacity.value = cur.dOp * dustIn;
+
+        // The ship cruises back and forth along the far side of the disc, banking gently; it fades with the galaxy
+        var sa = Math.PI + 0.45 + (Math.PI - 0.9) * (0.5 + 0.5 * Math.sin(t * 0.06));
+        ship.position.set(Math.cos(sa) * 5.6, 1.7 + 0.25 * Math.sin(t * 0.21), Math.sin(sa) * 5.6 - 0.6);
+        ship.rotation.set(0.14, t * 0.45, 0.12 * Math.cos(t * 0.06));
+        ship.visible = fade > 0.2;
+        shipGlow.material.opacity = 0.7 + 0.25 * Math.sin(t * 5);
+        gGroup.updateMatrixWorld();
+        publishShip(ship.visible);
+
+        if (boardFly) {                                         // flying into the ship while the hatch opens
+            var fk = Math.min(1, (performance.now() - boardFly.t0) / 1150), fe = fk * fk * (3 - 2 * fk);
+            camera.position.lerpVectors(boardFly.from, boardFly.target, fe);
+            shipPos.setFromMatrixPosition(ship.matrixWorld);
+            camera.lookAt(shipPos);
+            if (fk >= 1) boardFly = null;
+        }
         stars.position.y = -vps * 2.2;
         stars.rotation.y = t * 0.003;
         dMat.uniforms.uScroll.value = vps;
