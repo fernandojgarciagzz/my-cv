@@ -231,7 +231,9 @@
     <script>
     (function(){
         const btn = document.getElementById('darkToggle');
-        const dark = localStorage.getItem('dark') === 'true';
+        const stored = localStorage.getItem('dark');
+        // Dark by default; follow the main page's shared `theme` key until this page's own toggle is used
+        const dark = stored === null ? localStorage.getItem('theme') !== 'light' : stored === 'true';
         if (dark) { document.body.classList.add('dark'); btn.innerHTML = '&#x2600;'; }
         btn.addEventListener('click', () => {
             document.body.classList.toggle('dark');

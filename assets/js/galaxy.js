@@ -6,10 +6,12 @@
  * field and the dust layer stay for the whole page (the dust rides with the
  * camera and streams past as you scroll), so you are always still in space.
  *
- * Interaction: the whole galaxy tilts and turns toward the cursor (a 3D
- * hover, no particle effects), and you can drag anywhere in the hero to spin
- * and tilt it with inertia. Touch devices scroll normally; horizontal drags
- * rotate.
+ * Interaction: particles near the cursor scatter in random 3D directions
+ * (each has its own direction and flutter, with only a small push away from
+ * the pointer, so it reads as a startled swarm rather than a hole); the whole
+ * galaxy also tilts gently toward the cursor, and you can drag anywhere in
+ * the hero to spin and tilt it with inertia. Touch devices scroll normally;
+ * horizontal drags rotate.
  *
  * Theme classes on <html> retint everything and blend smoothly:
  *   (default)     dark space, additive warm-core / slate-arm galaxy
@@ -81,12 +83,14 @@
             uTime: { value: 0 }, uSize: { value: isMobile ? 24 : 30 }, uPixelRatio: { value: DPR },
             uOpacity: { value: 1 }, uRadius: { value: RADIUS },
             uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
-            uExplode: { value: 0 }
+            uExplode: { value: 0 },
+            uMouse: { value: new THREE.Vector3(999, 0, 999) }, uMouseStrength: { value: 0 }, uMouseRadius: { value: 1.5 }
         },
         vertexShader: [
             'uniform float uTime; uniform float uSize; uniform float uPixelRatio; uniform float uRadius;',
             'uniform vec3 uInside; uniform vec3 uOutside;',
             'uniform float uExplode;',
+            'uniform vec3 uMouse; uniform float uMouseStrength; uniform float uMouseRadius;',
             'attribute vec3 aRandom; attribute float aScale;',
             'varying vec3 vColor;',
             'void main() {',
@@ -176,10 +180,12 @@
         transparent: true, depthWrite: false, blending: THREE.NormalBlending,
         uniforms: {
             uTime: { value: 0 }, uPixelRatio: { value: DPR }, uOpacity: { value: 0.5 }, uColor: { value: new THREE.Color('#9FB8D6') },
-            uScroll: { value: 0 }, uAspect: { value: 1 }, uTanHalf: { value: TAN_HALF }, uDrift: { value: reduce ? 0 : 1 }
+            uScroll: { value: 0 }, uAspect: { value: 1 }, uTanHalf: { value: TAN_HALF }, uDrift: { value: reduce ? 0 : 1 },
+            uMouse: { value: new THREE.Vector2(9, 9) }, uMouseStrength: { value: 0 }
         },
         vertexShader: [
             'uniform float uTime; uniform float uPixelRatio; uniform float uScroll; uniform float uAspect; uniform float uTanHalf; uniform float uDrift;',
+            'uniform vec2 uMouse; uniform float uMouseStrength;',
             'attribute float aScale; attribute float aSeed; varying float vA;',
             'void main() {',
             '  vec3 p = position;',
@@ -191,6 +197,12 @@
             '  p.y += uScroll * 2.0 * H * (0.22 + 0.38 * near);',
             '  H *= 1.2; W *= 1.2;',
             '  p.x = mod(p.x + W, 2.0 * W) - W; p.y = mod(p.y + H, 2.0 * H) - H;',
+            '  vec2 m = vec2(uMouse.x * W / 1.2, uMouse.y * H / 1.2);',
+            '  vec2 d = p.xy - m; float md = length(d); float r = 0.3 * -p.z;',
+            '  float f = 1.0 - smoothstep(0.0, r, md); f = f * f * (3.0 - 2.0 * f) * uMouseStrength;',
+            '  vec3 rnd = normalize(vec3(sin(aSeed * 91.0), cos(aSeed * 57.0), sin(aSeed * 13.0) * 0.5));',
+            '  float wob = 0.75 + 0.35 * sin(uTime * 2.2 + aSeed * 40.0);',
+            '  p += (rnd * 0.8 + vec3(md > 0.0001 ? d / md : vec2(1.0, 0.0), 0.0) * 0.35) * f * r * 0.9 * wob;',
             '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
             '  gl_Position = projectionMatrix * mv;',
             '  gl_PointSize = aScale * uPixelRatio * (13.0 / -mv.z);',
@@ -257,14 +269,15 @@
     /* ── Scroll, pointer, drag ──────────────────────────────────────── */
     var scrollP = 0, dirty = true;
     var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: 0, ry: 0 };
-    var mx = 0, my = 0, tiltX = 0, tiltY = 0;                   // cursor-driven tilt of the whole galaxy
+    var mx = 0, my = 0, smx = 0, smy = 0, mouseIn = false, mouseK = 0, tiltX = 0, tiltY = 0;
     if (!reduce && window.matchMedia('(hover: hover)').matches) {
         window.addEventListener('mousemove', function (e) {
             mx = (e.clientX / window.innerWidth - 0.5) * 2;
             my = (e.clientY / window.innerHeight - 0.5) * 2;
+            mouseIn = true;
         }, { passive: true });
-        document.addEventListener('mouseleave', function () { mx = 0; my = 0; });
-        window.addEventListener('blur', function () { mx = 0; my = 0; });
+        document.addEventListener('mouseleave', function () { mx = 0; my = 0; mouseIn = false; });
+        window.addEventListener('blur', function () { mx = 0; my = 0; mouseIn = false; });
     }
 
     function readScroll() {
@@ -297,14 +310,35 @@
         pin.addEventListener('pointercancel', endDrag);
     }
 
+    var ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), inv = new THREE.Matrix4();
+    var rO = new THREE.Vector3(), rD = new THREE.Vector3();
+    function updateGalaxyMouse() {                             // pointer → point on the disc, in the galaxy's own frame
+        ndc.set(smx, -smy);
+        ray.setFromCamera(ndc, camera);
+        inv.copy(gGroup.matrixWorld).invert();
+        rO.copy(ray.ray.origin).applyMatrix4(inv);
+        rD.copy(ray.ray.direction).transformDirection(inv);
+        var u = gMat.uniforms.uMouse.value;
+        if (Math.abs(rD.y) < 1e-4) { u.set(999, 0, 999); return; }
+        var k = -rO.y / rD.y;
+        if (k < 0) { u.set(999, 0, 999); return; }
+        u.set(rO.x + rD.x * k, 0, rO.z + rD.z * k);
+    }
+
     function place(t) {
         var p = scrollP;
         var pe = p < 1 ? p * p * (3 - 2 * p) : p;
         var zoom = Math.min(pe, 1.6);
         var after = Math.max(0, p - 1.6);                       // how far past the intro we are
         var hoverK = drag.on ? 0 : Math.max(0, 1 - after);      // full in the hero, gone once past the intro
-        tiltX += (-my * 0.2 * hoverK - tiltX) * 0.045;          // mouse up = look more from above, never edge-on
-        tiltY += (mx * 0.38 * hoverK - tiltY) * 0.045;
+        tiltX += (-my * 0.14 * hoverK - tiltX) * 0.045;         // mouse up = look more from above, never edge-on
+        tiltY += (mx * 0.26 * hoverK - tiltY) * 0.045;
+        smx += (mx - smx) * 0.12; smy += (my - smy) * 0.12;     // the swarm trails the cursor slightly
+        var wantK = (mouseIn && !drag.on) ? hoverK : 0;
+        mouseK += (wantK - mouseK) * 0.08;
+        gMat.uniforms.uMouseStrength.value = mouseK;
+        dMat.uniforms.uMouseStrength.value = mouseK;
+        dMat.uniforms.uMouse.value.set(smx, -smy);
         if (!drag.on) { drag.ry += drag.vy; drag.rx = clamp(drag.rx + drag.vx, -0.75, 0.75); drag.vy *= 0.94; drag.vx *= 0.9; }
 
         // Camera: opens a little further out (cleaner start), pulls back through the hero,
@@ -314,6 +348,7 @@
         gGroup.rotation.y = t * 0.018 + zoom * 1.1 + drag.ry + tiltY;
         gGroup.rotation.x = clamp(drag.rx + tiltX, -0.9, 0.9);
         gGroup.updateMatrixWorld();
+        if (mouseK > 0.01) updateGalaxyMouse();
 
         var fade = p < 0.85 ? 1 : (p < 2.3 ? Math.max(0.3, 1 - (p - 0.85) * 1.3) : Math.max(0, 0.3 * (1 - (p - 2.3) / 0.7)));
         galaxy.visible = fade > 0.002 && explode < 1;
@@ -377,6 +412,6 @@
         window.addEventListener('scroll', function () { if (dirty) renderStatic(); }, { passive: true });
         window.addEventListener('resize', function () { renderStatic(); });
     }
-    window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; } };
+    window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; }, mouseStrength: function () { return mouseK; } };
     start();
 })();
