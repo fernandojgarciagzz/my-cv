@@ -842,16 +842,12 @@
         /* ── Dark mode ── */
         const body = document.body;
         const toggle = document.getElementById('darkToggle');
-        const stored = localStorage.getItem('roho-dark');
-        // Dark by default; follow the main page's shared `theme` key until this page's own toggle is used
-        if (stored === 'true' || (!stored && localStorage.getItem('theme') !== 'light')) {
-            body.classList.add('dark');
-            toggle.textContent = '☀️';
-        }
+        // Dark is always the default; the toggle only changes this visit
+        body.classList.add('dark');
+        toggle.textContent = '☀️';
         toggle.addEventListener('click', () => {
             const isDark = body.classList.toggle('dark');
             toggle.textContent = isDark ? '☀️' : '🌙';
-            localStorage.setItem('roho-dark', isDark);
         });
 
         /* ── Track list ── */

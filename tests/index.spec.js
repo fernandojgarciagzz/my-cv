@@ -108,25 +108,21 @@ test.describe('Index — structure', () => {
         expect(fallbackVisible).toBe(true);
     });
 
-    test('space by default; the toggle explodes the galaxy into the CV print preview; key persists', async ({ page }) => {
+    test('always dark on load; the toggle explodes the galaxy into the CV print preview for this visit only', async ({ page }) => {
+        await page.addInitScript(() => { try { localStorage.setItem('theme', 'light'); } catch (e) {} });   // a stale preference must not win
         await page.goto(BASE);
         await expect(page.locator('body')).toHaveClass(/dark/);
         expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dark');
         await expect(page.locator('#cv')).toBeHidden();
         await page.click('#themeToggle');
         await expect(page.locator('body')).toHaveClass(/light/, { timeout: 5000 });
-        expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('light');
         await expect(page.locator('#cv')).toBeVisible();
         await expect(page.locator('.sheet')).toHaveCount(2);
         await expect(page.locator('.page')).toBeHidden();
         await expect(page.locator('.sheet').first()).toContainText('Architecting the Future of Agentic Processes');
         await expect(page.locator('#cvPrint')).toBeVisible();
         await page.reload();
-        await expect(page.locator('body')).toHaveClass(/light/);
-        await expect(page.locator('#cv')).toBeVisible();
-        await page.click('#themeToggle');
         await expect(page.locator('body')).toHaveClass(/dark/);
-        expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dark');
         await expect(page.locator('#cv')).toBeHidden();
     });
 
