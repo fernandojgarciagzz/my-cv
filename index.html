@@ -696,12 +696,10 @@
 <body>
     <script>
     (function () {
-        var h = document.documentElement, t = null;
-        h.classList.add('js');
-        try { t = localStorage.getItem('theme'); } catch (e) {}
-        if (!t) { t = 'dark'; try { localStorage.setItem('theme', 'dark'); } catch (e) {} }
-        var cls = t === 'dark' ? 'dark' : 'light';
-        h.classList.add(cls); document.body.classList.add(cls);
+        // Dark is always the default: every visit starts in space. The toggle only changes this visit.
+        var h = document.documentElement;
+        h.classList.add('js', 'dark'); document.body.classList.add('dark');
+        try { localStorage.setItem('theme', 'dark'); } catch (e) {}
     })();
     </script>
     <a class="skip" href="#about">Skip to content</a>
@@ -1288,8 +1286,8 @@
         var d = document, h = d.documentElement, b = d.body;
         var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        // Theme — shared `theme` key; classes mirrored on <html> and <body>.
-        // Dark is space. "Light" is boring mode: the galaxy explodes first, then the page goes black-on-white.
+        // Theme — classes mirrored on <html> and <body>. Dark is space and always the default.
+        // "Light" is the CV print preview: the galaxy explodes first, then the sheets appear. Not persisted.
         var tg = d.getElementById('themeToggle'), switching = false;
         function applyTheme(dark) {
             [h, b].forEach(function (el) { el.classList.toggle('dark', dark); el.classList.toggle('light', !dark); });
@@ -1297,7 +1295,6 @@
             tg.setAttribute('aria-label', dark ? 'Switch to boring mode' : 'Back to space');
         }
         function setTheme(dark) {
-            try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
             if (dark) { applyTheme(true); window.dispatchEvent(new CustomEvent('space:implode')); return; }
             var galaxyOnScreen = h.classList.contains('space-live') && window.scrollY < window.innerHeight * 2.2;
             if (reduce || !galaxyOnScreen) { applyTheme(false); return; }
