@@ -32,7 +32,7 @@ test.describe('Index — structure', () => {
         await page.goto(BASE);
         await expect(page.locator('.hero-first')).toBeVisible();
         await expect(page.locator('#space')).toHaveCount(1);
-        await expect(page.locator('h1')).toContainText('Architecting the Future of Agentic Processes');
+        await expect(page.locator('.intro h1')).toContainText('Architecting the Future of Agentic Processes');
         await expect(page.locator('.intro .proof-row li')).toHaveCount(3);
         await expect(page.locator('.intro .eyebrow')).toContainText('Solutions Product Manager');
         await page.locator('.intro').scrollIntoViewIfNeeded();
@@ -108,18 +108,36 @@ test.describe('Index — structure', () => {
         expect(fallbackVisible).toBe(true);
     });
 
-    test('dark-first: default is dark, toggle persists with the shared "theme" key', async ({ page }) => {
+    test('space by default; the toggle explodes the galaxy into the CV print preview; key persists', async ({ page }) => {
         await page.goto(BASE);
         await expect(page.locator('body')).toHaveClass(/dark/);
         expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dark');
+        await expect(page.locator('#cv')).toBeHidden();
         await page.click('#themeToggle');
-        await expect(page.locator('body')).toHaveClass(/light/);
+        await expect(page.locator('body')).toHaveClass(/light/, { timeout: 5000 });
         expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('light');
+        await expect(page.locator('#cv')).toBeVisible();
+        await expect(page.locator('.sheet')).toHaveCount(2);
+        await expect(page.locator('.page')).toBeHidden();
+        await expect(page.locator('.sheet').first()).toContainText('Architecting the Future of Agentic Processes');
+        await expect(page.locator('#cvPrint')).toBeVisible();
         await page.reload();
         await expect(page.locator('body')).toHaveClass(/light/);
+        await expect(page.locator('#cv')).toBeVisible();
         await page.click('#themeToggle');
         await expect(page.locator('body')).toHaveClass(/dark/);
         expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dark');
+        await expect(page.locator('#cv')).toBeHidden();
+    });
+
+    test('printing from either mode outputs the CV sheets only', async ({ page }) => {
+        await page.goto(BASE);
+        await page.emulateMedia({ media: 'print' });
+        await expect(page.locator('#cv')).toBeVisible();
+        await expect(page.locator('.nav')).toBeHidden();
+        await expect(page.locator('.page')).toBeHidden();
+        const canvasShown = await page.locator('#space').evaluate(el => getComputedStyle(el).display !== 'none');
+        expect(canvasShown).toBe(false);
     });
 
     test('flipping the record switches to Claude Mode and back', async ({ page }) => {

@@ -494,28 +494,86 @@
         .rail a:hover span, .rail a:focus-visible span { opacity: 1; transform: translateY(-50%); }
 
         /* ==========================================================
-           BORING MODE — space gone, no motion, black and white
+           PRINT PREVIEW — html.light: the portfolio typeset as a CV on A4
+           sheets, on a desk. The same sheets are what the printer gets.
            ========================================================== */
-        html.light #space, html.light .space-glow, html.light .space-fallback, html.light .interlude, html.light .hero-hint,
-        html.light .photo::before, html.light .chapters::before, html.light .intro::before, html.light .timeline::after { display: none; }
-        html.light .rail { display: none; }
-        html.light .timeline { --tl: 1 !important; }
-        html.light .timeline-bullets li, html.light .timeline-item { opacity: 1; transform: none; }
-        html.light .hero-pin { cursor: default !important; }
-        html.light .reveal, html.light .reveal-media { opacity: 1; transform: none; transition: none; }
-        html.light *, html.light *::before, html.light *::after { animation: none !important; transition: none !important; }
-        html.light .btn-primary:hover { background: #000000; color: #FFFFFF; transform: none; }
-        html.light .card:hover { transform: none; border-color: #000000; }
-        html.light .kindle-frame { background: #000000; box-shadow: none; }
-        html.light .kindle-frame::after { background: #FFFFFF; }
-        html.light .kindle-screen { background: #FFFFFF; }
-        html.light .kindle-toc, html.light .kindle-toc-header, html.light .kindle-toc-item, html.light .kindle-reader-pane, html.light .kindle-reader-note, html.light .kindle-reader-meta, html.light .kindle-page-indicator { color: #000000; border-color: #D9D9D9; }
-        html.light .kindle-toc-item.active { background: #F0F0F0; }
-        html.light .kindle-toc-item:hover { background: #F5F5F5; }
-        html.light .kindle-reader-rule { border-top-color: #D9D9D9; }
-        html.light .skill-bar-fill { background: #000000; }
-        html.light .vinyl-active .photo-wrap { border-color: #000000; box-shadow: none; }
-        html.exploding .nav, html.exploding .page { pointer-events: none; }
+        html.light body { background: #E4E4E2; background-image: none; }
+        html.light #space, html.light .space-glow, html.light .space-fallback, html.light .page, html.light .rail, html.light .nav-links, html.light #robotRunnerCanvas { display: none !important; }
+        html.light .nav { background: rgba(228, 228, 226, 0.92); border-bottom-color: #D2D2D0; }
+        .cv { display: none; padding: calc(var(--nav-h) + 2.5rem) 1rem 4rem; }
+        html.light .cv { display: block; }
+        .cv-toolbar {
+            width: min(794px, 100%); margin: 0 auto 1.1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+            font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase; color: #6A6A68;
+        }
+        .cv-print { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; border-radius: 999px; background: #111111; color: #FFFFFF; font-size: var(--t-small); font-weight: 500; letter-spacing: 0; text-transform: none; }
+        .cv-print:hover { background: #333333; }
+        .sheet {
+            width: min(794px, 100%); min-height: 1123px; margin: 0 auto 1.5rem; padding: 46px 50px 44px;
+            background: #FFFFFF; color: #111111; box-shadow: 0 1px 2px rgba(0,0,0,0.12), 0 18px 40px rgba(0,0,0,0.14);
+            position: relative; font-size: 10.5px; line-height: 1.42; animation: sheetIn 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+        }
+        .sheet + .sheet { animation-delay: 0.12s; }
+        @keyframes sheetIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+        .sheet a { color: inherit; text-decoration: none; }
+        .sheet .pg { position: absolute; right: 50px; bottom: 22px; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A8A88; }
+        .cv-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; padding-bottom: 14px; border-bottom: 1.5px solid #111111; margin-bottom: 18px; }
+        .cv-name { font-family: var(--font-display); font-size: 27px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; text-transform: uppercase; }
+        .cv-title { font-size: 12px; font-weight: 500; margin-top: 8px; }
+        .cv-tag { font-size: 11px; color: #555553; margin-top: 3px; }
+        .cv-contact { text-align: right; font-size: 10px; line-height: 1.6; color: #333331; white-space: nowrap; }
+        .cv-cols { display: grid; grid-template-columns: 200px 1fr; column-gap: 28px; }
+        .cv-cols.even { grid-template-columns: 1fr 1fr; }
+        .cv-books { columns: 1; }
+        .cv-h { font-size: 9.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #111111; margin: 0 0 8px; padding-bottom: 4px; border-bottom: 1px solid #D8D8D6; }
+        .cv-block { margin-bottom: 14px; }
+        .cv-block p { margin: 0 0 6px; }
+        .cv-num { display: flex; gap: 10px; align-items: baseline; margin-bottom: 7px; }
+        .cv-num b { font-family: var(--font-display); font-size: 17px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; min-width: 44px; }
+        .cv-num span { font-size: 10px; line-height: 1.35; color: #333331; }
+        .cv-kv { margin: 0 0 6px; font-size: 10.5px; }
+        .cv-kv b { font-weight: 600; display: block; }
+        .cv-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 10px; }
+        .cv-bar span { flex: 1; }
+        .cv-bar i { display: block; width: 62px; height: 4px; background: #E6E6E4; border-radius: 2px; overflow: hidden; }
+        .cv-bar i::after { content: ''; display: block; height: 100%; width: var(--w); background: #111111; }
+        .cv-bar em { font-style: normal; font-size: 9px; color: #6A6A68; min-width: 28px; text-align: right; }
+        .cv-role { margin-bottom: 11px; break-inside: avoid; }
+        .cv-role-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+        .cv-role-h b { font-size: 12px; font-weight: 600; }
+        .cv-role-h span { font-size: 9.5px; color: #6A6A68; white-space: nowrap; }
+        .cv-role-t { font-size: 10.5px; color: #333331; margin: 1px 0 5px; }
+        .cv-role ul { list-style: none; padding: 0; margin: 0; }
+        .cv-role li { position: relative; padding-left: 10px; margin-bottom: 2px; font-size: 10px; line-height: 1.4; }
+        .cv-role li::before { content: ''; position: absolute; left: 0; top: 6px; width: 3px; height: 3px; border-radius: 50%; background: #111111; }
+        .cv-role li b { font-weight: 600; }
+        .cv-line { font-size: 10.5px; margin: 0 0 4px; }
+        .cv-line b { font-weight: 600; }
+        .cv-books { columns: 2; column-gap: 20px; font-size: 10.5px; }
+        .cv-cols.even .cv-books { columns: 1; }
+        .cv-books li { break-inside: avoid; margin-bottom: 3px; list-style: none; }
+        .cv-books li span { color: #6A6A68; }
+        .cv-foot { margin-top: 18px; padding-top: 10px; border-top: 1px solid #D8D8D6; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #6A6A68; }
+        @media screen and (max-width: 720px) {
+            .cv-cols { grid-template-columns: 1fr; }
+            .cv-head { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+            .cv-contact { text-align: left; white-space: normal; }
+            .sheet { padding: 28px 22px; min-height: 0; }
+            .sheet .pg { position: static; display: block; margin-top: 16px; }
+        }
+        @media print {
+            @page { size: A4; margin: 11mm 12mm 11mm; }
+            html, body { background: #FFFFFF !important; }
+            .nav, .rail, .hatch, #space, .space-glow, .space-fallback, .page, .cv-toolbar, #robotRunnerCanvas, .skip { display: none !important; }
+            .cv { display: block !important; padding: 0; }
+            .sheet { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; animation: none; page-break-after: always; break-after: page; }
+            .sheet:last-child { page-break-after: auto; break-after: auto; }
+            .sheet .pg { position: fixed; bottom: 0; right: 0; }
+            .cv-bar i::after { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .cv-role li::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .cv-role li { line-height: 1.36; }
+            .cv-block { margin-bottom: 12px; }
+        }
 
         /* ==========================================================
            RESPONSIVE
@@ -983,6 +1041,174 @@
     </div><!-- /chapters -->
     </div><!-- /page -->
 
+    <!-- PRINT PREVIEW / CV — shown in light mode on screen, and always when printing -->
+    <div class="cv" id="cv" aria-label="Printable CV">
+        <div class="cv-toolbar">
+            <span>Print preview · 2 pages · A4</span>
+            <button class="cv-print" id="cvPrint" type="button">Print · Save as PDF</button>
+        </div>
+
+        <article class="sheet" aria-label="Page 1">
+            <header class="cv-head">
+                <div>
+                    <h1 class="cv-name">Fernando García</h1>
+                    <p class="cv-title">Solutions Product Manager, Salesforce (Agentforce)</p>
+                    <p class="cv-tag">Architecting the Future of Agentic Processes</p>
+                </div>
+                <div class="cv-contact">
+                    <a href="mailto:fernando.jgarciagzz@gmail.com">fernando.jgarciagzz@gmail.com</a><br>
+                    <a href="https://www.linkedin.com/in/fernandogarciagzz/">linkedin.com/in/fernandogarciagzz</a><br>
+                    <a href="https://fernandogarciag.com">fernandogarciag.com</a><br>
+                    Monterrey, Mexico · Remote
+                </div>
+            </header>
+            <div class="cv-cols">
+                <aside>
+                    <div class="cv-block">
+                        <h2 class="cv-h">Impact</h2>
+                        <div class="cv-num"><b>20%</b><span>working capital reduction across the Toyota program supply chain</span></div>
+                        <div class="cv-num"><b>99%+</b><span>accuracy on AI-generated task outputs across agent blueprints</span></div>
+                        <div class="cv-num"><b>2nd</b><span>CLAUT Innovation Award, automotive cluster</span></div>
+                    </div>
+                    <div class="cv-block">
+                        <h2 class="cv-h">Core Skills</h2>
+                        <p class="cv-kv"><b>Product &amp; Solutions</b>Agentic Orchestration, No-Code Workflow Design, Quality Assurance</p>
+                        <p class="cv-kv"><b>AI &amp; Automation</b>Generative AI (Claude / GPT / Gemini), Agentic Testing &amp; Automation, Prompt Engineering</p>
+                        <p class="cv-kv"><b>Business Intelligence</b>Power BI (Advanced), Tableau, Looker Studio, QAD ERP, Data Modeling</p>
+                        <p class="cv-kv"><b>Domain Expertise</b>Demand Planning, Production Control, Logistics, S&amp;OP Strategy, Automotive Supply Chain</p>
+                        <p class="cv-kv"><b>AI Technical Development</b>AI-native builder and evangelist. I ship with Claude Code, Codex, and Cursor every day: this site, internal tools, and Claude Code plugins published to the marketplace and downloaded by colleagues across Salesforce. Everything lives on GitHub. If it can be built with AI, I'll build it.</p>
+                    </div>
+                </aside>
+                <main>
+                    <div class="cv-block">
+                        <h2 class="cv-h">The "Why" Behind the Solutions</h2>
+                        <p>I am a Data-Driven Engineer with a Master's in Business Intelligence, driven by a passion for uncovering the "why" behind complex bottlenecks to build truly scalable solutions. Currently a Solutions Product Manager at Salesforce, I specialize in the Agentforce platform, where I architect sophisticated agentic workflows that enable manufacturing teams to automate high-stakes processes and work significantly smarter.</p>
+                        <p>I am a creator at heart, someone whose systems thinking was shaped by Supply Chain, where every dependency matters and things break if you miss the details. That process logic turns out to work anywhere. I now expand the same rigor to Finance, HR, and Industrial Operations, turning messy, fragmented workflows into clean, AI-driven solutions. The goal has never been to just fix what's broken. It's to build what comes next.</p>
+                    </div>
+                    <div class="cv-block">
+                        <h2 class="cv-h">Professional Journey</h2>
+                        <div class="cv-role">
+                            <div class="cv-role-h"><b>Salesforce</b><span>May 2026 – Present · Remote — Mexico</span></div>
+                            <p class="cv-role-t">Solutions Product Manager · Current</p>
+                            <ul>
+                                <li><b>Multi-Vertical Solutioning:</b> Architect and deploy Agentforce solutions across supply chain, finance, and HR verticals, owning end-to-end solution design from business requirements through production implementation.</li>
+                                <li><b>AI Product Strategy:</b> Bridge product management and technical solutioning by defining how Salesforce agents interact with external enterprise platforms like Tableau, Slack, and SAP to deliver integrated, intelligent workflows.</li>
+                                <li><b>Product Roadmap Influence:</b> Partner with product, engineering, and AI teams to shape the Agentforce feature roadmap, translating enterprise client feedback and real-world workflow gaps into prioritized product improvements.</li>
+                                <li><b>Business Impact Translation:</b> Operate at the intersection of AI, platform integration, and multi-vertical product strategy, translating complex agent architectures into clear, measurable business outcomes for enterprise stakeholders.</li>
+                            </ul>
+                        </div>
+                        <div class="cv-role">
+                            <div class="cv-role-h"><b>Salesforce</b><span>Nov 2025 – Apr 2026</span></div>
+                            <p class="cv-role-t">Quality Engineer</p>
+                            <ul>
+                                <li><b>Agentic Orchestration:</b> Engineered "AgentSuite," a master fully agentic blueprint that orchestrates complex child workflows to execute real-world use case scenarios daily. I developed an automated self-evaluation layer where agents audit their own responses, ensuring high-fidelity outputs across the entire agent suite.</li>
+                                <li><b>Customer Success AI:</b> Developed and deployed a Slack-based Service Agent that leverages full product documentation to provide real-time support. This agent acts as an intelligent filter for internal and external queries, resolving doubts instantly and significantly reducing the volume of manual Customer Support cases.</li>
+                                <li><b>Cross-Functional Feedback:</b> Collaborates directly with Product and Engineering teams to refine agent capabilities, identifying logic gaps in new releases and translating them into improved system architecture.</li>
+                                <li><b>Strategic Testing:</b> Leverages deep supply chain expertise to design "out-of-the-box" test scenarios that mirror complex industrial workflows, increasing platform robustness and resilience.</li>
+                            </ul>
+                        </div>
+                        <div class="cv-role">
+                            <div class="cv-role-h"><b>Regrello</b><span>Oct 2024 – Oct 2025 · Acquired by Salesforce</span></div>
+                            <p class="cv-role-t">Industry Analyst</p>
+                            <ul>
+                                <li><b>Operational Automation:</b> "Lemurized" (automated) high-complexity supply chain and finance blueprints to run on a daily cadence. This system measures platform output consistency over time, providing a continuous pulse on the reliability of agentic interactions in industrial environments.</li>
+                                <li><b>Intelligent Solution Design:</b> Architected "Golden Blueprints" featuring advanced task logic, field mappings, and conditional branching for global supply chain and finance workflows.</li>
+                                <li><b>AI &amp; Prompt Refinement:</b> Engineered and refined high-precision prompts to improve AI-generated task responses, ensuring 99%+ accuracy and consistency across diverse agent outputs.</li>
+                                <li><b>Strategic Quality Assurance:</b> Led "Golden Test" simulations and rigorous QA cycles to identify edge-case logic gaps and workflow inconsistencies prior to production deployment.</li>
+                                <li><b>BI Architecture &amp; Reporting:</b> Transformed raw platform data into actionable intelligence by designing operational dashboards and KPI reports in Google Looker Studio, enabling data-driven decision-making for stakeholders.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </main>
+            </div>
+            <span class="pg">Fernando García · 1 / 2</span>
+        </article>
+
+        <article class="sheet" aria-label="Page 2">
+            <div class="cv-block">
+                <h2 class="cv-h">Professional Journey (continued)</h2>
+                <div class="cv-role">
+                    <div class="cv-role-h"><b>Metalsa</b><span>2022 – Oct 2024 · Toyota Program</span></div>
+                    <p class="cv-role-t">Production Planning Specialist</p>
+                    <ul>
+                        <li><b>Operational Impact:</b> Led the finished product planning for Toyota chassis, managing the Master Production Schedule (MPS) and sales forecasting within the QAD ERP system to ensure 100% assembly fulfillment.</li>
+                        <li><b>Financial Optimization:</b> Partnered with the Supply Chain Director to optimize demand planning and inventory projections, successfully reducing working capital by over 20% through rigorous historical forecast analysis.</li>
+                        <li><b>Strategic Business Intelligence:</b> Architected and deployed the entire suite of Power BI S&amp;OP Dashboards for the Toyota and Stellantis business units. These tools became the primary source of truth for Plant Managers and Directors to track production and global inventory levels.</li>
+                        <li><b>Award-Winning Innovation:</b> Awarded 2nd Place in the Automotive Cluster (CLAUT) Innovation Contest for excellence in supply chain improvement and process optimization.</li>
+                        <li><b>Demand Analysis:</b> Conducted deep-dive analysis of customer demand variations to engineer inventory buffers that protected capital flow while maintaining lean manufacturing standards.</li>
+                    </ul>
+                </div>
+                <div class="cv-role">
+                    <div class="cv-role-h"><b>Metalsa</b><span>2021 – 2022</span></div>
+                    <p class="cv-role-t">Logistics &amp; Demand Planning Specialist</p>
+                    <ul>
+                        <li><b>Supplier Intervention:</b> Traveled to supplier facilities across the US and Mexico to identify production bottlenecks. I worked on-site with suppliers to resolve delays and ensure critical components reached the production lines on time.</li>
+                        <li><b>Component Planning:</b> Managed the planning and inventory for all necessary components. I analyzed customer demand to ensure we had the right materials to meet finished-product goals.</li>
+                        <li><b>Logistics Coordination:</b> Acted as the daily point of contact for external logistics teams. I tracked all incoming deliveries and made strategic decisions on when to expedite materials to prevent line stoppages.</li>
+                        <li><b>Supply Chain Resilience:</b> Managed the end-to-end logistics for both local and imported components, maintaining a steady flow of materials for high-volume automotive production.</li>
+                        <li><b>Process Improvement:</b> Led the management and rotation of plastic pallets and returnable packaging, optimizing the physical flow of materials between suppliers and the plant.</li>
+                    </ul>
+                </div>
+                <div class="cv-role">
+                    <div class="cv-role-h"><b>Metalsa</b><span>2021 · Stellantis Project</span></div>
+                    <p class="cv-role-t">Production Control Intern</p>
+                    <ul><li><b>Demand Analysis:</b> Supported MPS planning and demand analysis for major automotive production projects.</li></ul>
+                </div>
+                <div class="cv-role">
+                    <div class="cv-role-h"><b>John Deere</b><span>2020</span></div>
+                    <p class="cv-role-t">Design Engineering Intern</p>
+                    <ul><li><b>Engineering Simulation:</b> Performed Finite Element Analysis (FEA) and topological optimization for industrial designs.</li></ul>
+                </div>
+            </div>
+            <div class="cv-cols even">
+                <div>
+                <div class="cv-block">
+                    <h2 class="cv-h">Tools &amp; Proficiency</h2>
+                    <div class="cv-bar"><span>Agentforce for Supply Chain</span><i style="--w: 100%"></i><em>100%</em></div>
+                    <div class="cv-bar"><span>Claude Code, GPT / Codex, Cursor, Gemini</span><i style="--w: 100%"></i><em>100%</em></div>
+                    <div class="cv-bar"><span>Excel</span><i style="--w: 95%"></i><em>95%</em></div>
+                    <div class="cv-bar"><span>Power BI</span><i style="--w: 90%"></i><em>90%</em></div>
+                    <div class="cv-bar"><span>Tableau</span><i style="--w: 80%"></i><em>80%</em></div>
+                    <div class="cv-bar"><span>Google Looker Studio</span><i style="--w: 75%"></i><em>75%</em></div>
+                    <p class="cv-kv" style="margin-top: 8px"><b>Currently exploring</b>Python, SQL · up next</p>
+                </div>
+                <div class="cv-block">
+                    <h2 class="cv-h">Education</h2>
+                    <p class="cv-kv"><b>Master's in Business Intelligence</b>University of Barcelona &amp; OBS Business School · 2023 – 2024</p>
+                    <p class="cv-kv"><b>B.S. in Mechanical Engineering with Management</b>Universidad de Monterrey (UDEM) · 2017 – 2021 · Academic Excellence Scholarship · Certificates in Leadership, Spirituality &amp; Social Justice</p>
+                </div>
+                </div>
+                <div>
+                    <div class="cv-block">
+                        <h2 class="cv-h">Dashboards</h2>
+                        <p class="cv-line"><b>The AI Race</b> · <a href="https://ai-race-dashboard.onrender.com">ai-race-dashboard.onrender.com</a></p>
+                        <p class="cv-line">A live tracker of benchmarks, pricing, open-source downloads, and capabilities across the top AI companies. Python · Dash · Plotly · Live Data.</p>
+                    </div>
+                    <div class="cv-block">
+                        <h2 class="cv-h">Hobbies &amp; Interests</h2>
+                        <p class="cv-line"><b>Music</b> · Roho, an album with its own player at <a href="https://fernandogarciag.com/music.html">fernandogarciag.com/music.html</a></p>
+                        <p class="cv-line">Soccer · Travel · Running · Hyrox / Gym · Cooking · Padel · Outdoors · AI · Mindfulness</p>
+                        <p class="cv-line" style="color:#555553">Outside of architecting data strategies and process automation, I stay sharp through continuous learning, reading, and maintaining a disciplined lifestyle centered on fitness and mindfulness.</p>
+                    </div>
+                    <div class="cv-block">
+                    <h2 class="cv-h">Books I Recommend</h2>
+                    <ul class="cv-books">
+                        <li>The Power of Your Subconscious Mind <span>· Joseph Murphy</span></li>
+                        <li>The Power of Now <span>· Eckhart Tolle</span></li>
+                        <li>A New Earth <span>· Eckhart Tolle</span></li>
+                        <li>Secrets of the Millionaire Mind <span>· T. Harv Eker</span></li>
+                        <li>Think and Grow Rich <span>· Napoleon Hill</span></li>
+                        <li>The Almanack of Naval Ravikant <span>· Eric Jorgenson</span></li>
+                        <li>Manifest <span>· Roxie Nafousi</span></li>
+                    </ul>
+                    </div>
+                </div>
+            </div>
+            <p class="cv-foot">Based in Monterrey, Mexico · Working Remotely for Salesforce · fernandogarciag.com</p>
+            <span class="pg">Fernando García · 2 / 2</span>
+        </article>
+    </div>
+
     <audio id="easterEggAudio" preload="none">
         <source src="Hatua Kwa Hatua (Remastered).mp3" type="audio/mpeg">
     </audio>
@@ -1014,6 +1240,8 @@
             setTimeout(finish, 1800);
             window.dispatchEvent(new CustomEvent('space:explode'));
         }
+        var cvPrint = d.getElementById('cvPrint');
+        if (cvPrint) cvPrint.addEventListener('click', function () { window.print(); });
         applyTheme(h.classList.contains('dark'));
         tg.addEventListener('click', function () { setTheme(!h.classList.contains('dark')); });
 
