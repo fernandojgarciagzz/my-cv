@@ -1,15 +1,21 @@
-/* Agent Showcase — sticky scrollytelling section with a morphing 3D point cloud.
+/* Agent Showcase — scroll-driven morphing 3D point cloud.
  *
- * Four forms, scroll-driven via a tall outer section with a 100vh sticky pinned
- * canvas inside. Scroll progress through the section interpolates particle
- * positions between adjacent forms.
+ * Loaded lazily by index.html only when #agentShowcase is within 600px of the
+ * viewport (never under prefers-reduced-motion, never without WebGL). The
+ * section layout (200vh outer, sticky pin, static SVG fallback) lives in
+ * index.html's CSS; this file only draws. On first successful render it adds
+ * `is-live` to the section so the fallback fades out; on any failure it adds
+ * `no-webgl` so the fallback stays and the section collapses to one screen.
+ *
+ * Four forms, scroll-driven: scroll progress through the section interpolates
+ * particle positions between adjacent forms.
  *
  *   0. Intelligence  — two-hemisphere brain + cerebellum + brain stem
  *   1. Agents        — four mini bust silhouettes in a row
  *   2. Process       — DNA-style double helix with rungs
  *   3. Orchestration — icosahedron edge wireframe + core cluster
  *
- * Theming: reads --sf-blue from CSS, repaints on dark/Claude-mode toggle.
+ * Theming: reads --accent from CSS, repaints on dark-mode toggle.
  * Mobile: 800 particles + shorter section. Reduced motion: skips entirely.
  */
 (function () {
@@ -23,21 +29,21 @@
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     const PARTICLE_COUNT = isMobile ? 2640 : 5400;
 
-    /* Inject section + canvas styles. The outer section is 280vh tall (220vh
-     * mobile); inside it, .agent-showcase-pin is sticky at top:0 with
-     * height:100vh — this gives us 1.8 / 1.2 viewport-heights of scrolling
-     * before the pin releases, paced over the four form transitions. */
-    const style = document.createElement('style');
-    style.textContent = [
-        '.agent-showcase{position:relative;height:280vh;z-index:1;background:var(--bg-primary);}',
-        '.agent-showcase-pin{position:sticky;top:0;height:100vh;width:100%;overflow:hidden;display:flex;align-items:center;justify-content:center;}',
-        '#' + CANVAS_ID + '{position:absolute;inset:0;width:100%;height:100%;display:block;}',
-        '@media (max-width:768px){.agent-showcase{height:220vh;}}'
-    ].join('');
-    document.head.appendChild(style);
+    function markFailed() {
+        var sec = document.getElementById(SECTION_ID);
+        if (sec) sec.classList.add('no-webgl');
+    }
+
+    function hasWebGL() {
+        try {
+            var c = document.createElement('canvas');
+            return !!(c.getContext('webgl') || c.getContext('experimental-webgl'));
+        } catch (e) { return false; }
+    }
 
     function loadThree() {
         return new Promise(function (resolve, reject) {
+            if (!hasWebGL()) return reject(new Error('WebGL unavailable'));
             if (window.THREE) return resolve();
             const s = document.createElement('script');
             s.src = THREE_CDN;
@@ -343,7 +349,7 @@
 
         function updateColors() {
             const styles = getComputedStyle(document.body);
-            const blue = (styles.getPropertyValue('--sf-blue') || '#3B5775').trim();
+            const blue = (styles.getPropertyValue('--accent') || '#3B5775').trim();
             try {
                 pointMat.color.set(blue);
                 // Light mode: darken further so the dots read as deep slate
@@ -397,6 +403,7 @@
 
         const clock = new THREE.Clock();
         const numForms = forms.length;
+        let live = false;
 
         function animate() {
             requestAnimationFrame(animate);
@@ -440,6 +447,7 @@
             camera.lookAt(0, 0, 0);
 
             renderer.render(scene, camera);
+            if (!live) { live = true; section.classList.add('is-live'); }
         }
         animate();
     }
@@ -447,6 +455,7 @@
     loadThree()
         .then(init)
         .catch(function (err) {
-            console.warn('[showcase] Three.js failed to load:', err);
+            console.warn('[showcase] not started:', err && err.message ? err.message : err);
+            markFailed();
         });
 })();

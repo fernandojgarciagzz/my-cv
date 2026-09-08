@@ -19,12 +19,13 @@ const MOBILE = { width: 390, height: 844 };
 test.describe('Playground — Desktop', () => {
     test.use({ viewport: DESKTOP });
 
-    test('page loads with warm Roho theme', async ({ page }) => {
+    test('page loads dark by default, warm Roho light theme after the toggle', async ({ page }) => {
         await page.goto(BASE);
-        // Background should be warm off-white (#FAF6F1) or dark equivalent
-        const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-        // rgb(250, 246, 241) = #FAF6F1
-        expect(bg).toContain('250');
+        await expect(page.locator('body')).toHaveClass(/dark/);
+        await page.click('#darkToggle');
+        await expect(page.locator('body')).not.toHaveClass(/dark/);
+        // Background settles to warm off-white after the colour transition: rgb(250, 246, 241) = #FAF6F1
+        await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor), { timeout: 4000 }).toContain('250');
     });
 
     test('game canvas is full viewport height', async ({ page }) => {
@@ -86,16 +87,16 @@ test.describe('Playground — Desktop', () => {
         await expect(bar).toContainText('high score: 100');
     });
 
-    test('dark mode toggle works', async ({ page }) => {
+    test('dark mode toggle works (dark by default)', async ({ page }) => {
         await page.goto(BASE);
         const body = page.locator('body');
-        await expect(body).not.toHaveClass(/dark/);
-
-        await page.click('#darkToggle');
         await expect(body).toHaveClass(/dark/);
 
         await page.click('#darkToggle');
         await expect(body).not.toHaveClass(/dark/);
+
+        await page.click('#darkToggle');
+        await expect(body).toHaveClass(/dark/);
     });
 
     test('mute toggle switches SVG icons', async ({ page }) => {

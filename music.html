@@ -843,7 +843,8 @@
         const body = document.body;
         const toggle = document.getElementById('darkToggle');
         const stored = localStorage.getItem('roho-dark');
-        if (stored === 'true' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        // Dark by default; follow the main page's shared `theme` key until this page's own toggle is used
+        if (stored === 'true' || (!stored && localStorage.getItem('theme') !== 'light')) {
             body.classList.add('dark');
             toggle.textContent = '☀️';
         }
