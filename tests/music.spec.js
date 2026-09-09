@@ -76,17 +76,17 @@ test.describe('Roho — structure', () => {
         await expect(page.locator('#playerName')).toHaveText('Kuwa Hapa Sa');
     });
 
-    test('the toggle blows the hole apart into the light side for this visit only, and back', async ({ page }) => {
+    test('the toggle turns the page white for this visit only and keeps the hole, drawn in ink', async ({ page }) => {
         await page.goto(BASE, { waitUntil: 'load' });
         await expect(page.locator('html')).toHaveClass(/space-live/, { timeout: 6000 });
         await page.click('#darkToggle');
-        await expect(page.locator('html')).toHaveClass(/light/, { timeout: 4000 });
-        await expect(page.locator('html')).not.toHaveClass(/claude-mode/);
-        const spaceShown = await page.locator('#space').evaluate(el => getComputedStyle(el).display !== 'none');
-        expect(spaceShown).toBe(false);
+        await expect(page.locator('html')).toHaveClass(/light/);
+        await expect(page.locator('html')).toHaveClass(/claude-mode/);          // the warm palette stays
+        // the canvas fades in over 1.2 s, so give it time; it must stay on the page
+        await expect.poll(() => page.locator('#space').evaluate(el => getComputedStyle(el).display !== 'none' && getComputedStyle(el).opacity === '1'), { timeout: 4000 }).toBe(true);
         await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor), { timeout: 4000 }).toBe('rgb(255, 255, 255)');
         await page.click('#darkToggle');
-        await expect(page.locator('html')).toHaveClass(/claude-mode/);
+        await expect(page.locator('html')).toHaveClass(/dark/);
         await expect(page.locator('html')).not.toHaveClass(/light/);
         // a fresh load is dark again
         await page.reload({ waitUntil: 'load' });

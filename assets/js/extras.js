@@ -42,7 +42,7 @@
                     if (playing && container.classList.contains('vinyl-spinning')) view.play();
                 };
                 if (window.Vinyl) { go(); return; }
-                var s = document.createElement('script'); s.src = 'assets/js/vinyl.js?v=1'; s.onload = go; document.body.appendChild(s);
+                var s = document.createElement('script'); s.src = 'assets/js/vinyl.js?v=3'; s.onload = go; document.body.appendChild(s);
             });
         }
         mountVinyl();

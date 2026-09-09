@@ -493,6 +493,12 @@
         }
     }
 
+    // on a white page a half-faded void is a grey coin: keep it solid while the hole is the scene, then let it go
+    function voidOpacity(fade) {
+        var onWhite = root.classList.contains('light') && explode < 0.001;
+        var k = onWhite ? clamp((fade - 0.5) / 0.28, 0, 1) : 1;
+        return (onWhite ? Math.min(1, fade * 1.15) * k : fade) * (1 - explode);
+    }
     function place(t) {
         var p = scrollP;
         var pe = p < 1 ? p * p * (3 - 2 * p) : p;
@@ -515,7 +521,7 @@
         if (ambient) fade *= 0.85 - 0.35 * clamp((p - 0.5) / 0.5, 0, 1);      // a background: quieter still once the page scrolls over it
         galaxy.visible = fade > 0.002 && explode < 1;
         gMat.uniforms.uOpacity.value = cur.gOp * fade;
-        if (BH) { galaxy2.visible = galaxy.visible; shadowDisc.visible = galaxy.visible && explode < 0.999; shadowDisc.material.opacity = fade * (1 - explode); shadowDisc.scale.setScalar(Math.max(0.001, 1 - explode)); shadowDisc.lookAt(camera.position); }
+        if (BH) { galaxy2.visible = galaxy.visible; shadowDisc.visible = galaxy.visible && explode < 0.999; shadowDisc.material.opacity = voidOpacity(fade); shadowDisc.scale.setScalar(Math.max(0.001, 1 - explode)); shadowDisc.lookAt(camera.position); }
         gMat.uniforms.uExplode.value = explode;
         sMat.uniforms.uOpacity.value = cur.sOp * (1 - explode);
         var dustIn = Math.max(0, Math.min(1, (p - 0.75) / 0.6));   // dust only once the galaxy has receded

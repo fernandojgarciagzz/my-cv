@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Covered+By+Your+Grace&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-    <script src="assets/js/galaxy.js?v=4" defer></script>
-    <script src="assets/js/vinyl.js?v=1" defer></script>
+    <script src="assets/js/galaxy.js?v=5" defer></script>
+    <script src="assets/js/vinyl.js?v=3" defer></script>
     <style>
         /* ==========================================================
            TOKENS — the site's system, in the warm (Claude) palette.
@@ -73,7 +73,7 @@
         /* Space: the black hole rides behind the whole page (assets/js/galaxy.js, ambient mode) */
         #space { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; }
         html.space-live #space { opacity: 1; }
-        html.no-webgl #space, html.light #space { display: none; }
+        html.no-webgl #space { display: none; }
         .page { position: relative; z-index: 1; }
 
         /* ==========================================================
@@ -347,28 +347,17 @@
     <script>
     (function () {
 
-        /* ── Theme: always dark on load; the toggle changes this visit only and, like home, the light
-              side arrives once the hole has blown apart ── */
+        /* ── Theme: always dark on load; the toggle changes this visit only. The album stays in the warm
+              palette on both sides, and the black hole stays too: on the light side it is drawn in ink ── */
         const h = document.documentElement;
         const body = document.body;
         const toggle = document.getElementById('darkToggle');
-        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         function applyTheme(dark) {
-            [h, body].forEach(el => { el.classList.toggle('dark', dark); el.classList.toggle('claude-mode', dark); el.classList.toggle('light', !dark); });
+            [h, body].forEach(el => { el.classList.toggle('dark', dark); el.classList.toggle('light', !dark); el.classList.add('claude-mode'); });
             toggle.setAttribute('aria-pressed', String(dark));
         }
-        let switching = false;
-        function setTheme(dark) {
-            if (dark) { applyTheme(true); window.dispatchEvent(new CustomEvent('space:implode')); return; }
-            if (reduce || !h.classList.contains('space-live') || switching) { applyTheme(false); return; }
-            switching = true; let done = false;
-            const finish = () => { if (done) return; done = true; switching = false; applyTheme(false); };
-            window.addEventListener('space:exploded', finish, { once: true });
-            setTimeout(finish, 1800);
-            window.dispatchEvent(new CustomEvent('space:explode'));
-        }
         applyTheme(true);
-        toggle.addEventListener('click', () => setTheme(!h.classList.contains('dark')));
+        toggle.addEventListener('click', () => applyTheme(!h.classList.contains('dark')));
 
         /* ── Nav ── */
         const nav = document.getElementById('navbar');

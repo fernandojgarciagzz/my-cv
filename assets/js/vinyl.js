@@ -22,7 +22,7 @@
     var LABEL_R = 0.335, HOLE_R = 0.026;                     // a 12" record: 100 mm label, 7 mm hole
     var RPM = 2.4;                                           // seconds per turn on screen (33⅓ reads too fast at this size)
 
-    var renderer = null, scene, camera, tiltG, spinG, faceMat, labelMat, label, dirLight;
+    var renderer = null, scene, camera, tiltG, spinG, faceMat, labelMat, label, dirLight, shadow;
     var views = [], raf = null, last = 0, supported = !!THREE;
 
     /* ── Scene: built once, shared by every view ─────────────────────── */
@@ -140,7 +140,7 @@
         var sg = sc.getContext('2d'), grad = sg.createRadialGradient(128, 128, 60, 128, 128, 128);
         grad.addColorStop(0, 'rgba(0,0,0,0.85)'); grad.addColorStop(0.72, 'rgba(0,0,0,0.5)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
         sg.fillStyle = grad; sg.fillRect(0, 0, 256, 256);
-        var shadow = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false, opacity: 0.55 }));
+        shadow = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false, opacity: 0.55 }));
         shadow.position.set(0.05, -0.12, -0.09);
         tiltG.add(shadow);
         return true;
@@ -291,6 +291,7 @@
         tiltG.rotation.set(-view.tilt + view.hx, view.hy, 0);
         spinG.rotation.set(Math.sin(view.angle) * wob, Math.cos(view.angle * 1.0) * wob, -view.angle);
         labelMat.map = view.tex; labelMat.needsUpdate = labelMat.map !== view.tex;
+        shadow.material.opacity = document.documentElement.classList.contains('light') ? 0.16 : 0.55;   // a lighter touch on a white page
         scene.updateMatrixWorld(true);
         var m = spinG.matrixWorld;
         faceMat.uniforms.uN.value.set(0, 0, 1).transformDirection(m);
@@ -318,6 +319,11 @@
     }
     function wake() { if (!raf && !document.hidden) raf = requestAnimationFrame(frame); }
     document.addEventListener('visibilitychange', function () { if (!document.hidden) { last = 0; wake(); } });
+    // the page's theme changes the shadow a record throws: redraw every record when it does
+    if (window.MutationObserver) {
+        new MutationObserver(function () { for (var i = 0; i < views.length; i++) views[i].dirty = true; wake(); })
+            .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    }
 
     window.Vinyl = { create: create, get supported() { return supported; } };
 })();
