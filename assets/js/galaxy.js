@@ -168,13 +168,15 @@
                 // disc: slow accretion inflow; below the inner edge matter plunges into the hole (tighter spiral,
                 // fading) before it is reborn at a soft outer edge. Wrap radius is spread so there is no hard rim.
                 '    float span = uRadius - uPlunge + fract(aScale * 7.31 + aRandom.z * 53.0) * 3.2;',
-                '    float r = uPlunge + mod(r0 - uPlunge + span - uTime * uFlow, span);',
+                '    float cyc = mod(r0 - uPlunge + span - uTime * uFlow, span);',
+                '    float r = uPlunge + cyc;',
+                '    fade *= smoothstep(0.0, 0.6, span - cyc);',                                   // reborn at the rim: fade in, never pop
                 '    float plunge = 1.0 - smoothstep(uPlunge, uInner, r);',
                 '    ang += uTime * uSpin / pow(max(r, 0.6), uSpinPow) + plunge * plunge * 3.0;',
                 '    q = vec3(sin(ang) * r, 0.0, cos(ang) * r) + aRandom * (1.0 - plunge * 0.7);',
                 '    tdir = vec3(cos(ang), 0.0, -sin(ang));',
                 '    tcol = clamp((r - uInner) / (uRadius - uInner), 0.0, 1.0);',
-                '    fade = 1.0 - plunge * 0.55; plungeK = plunge;',
+                '    fade *= 1.0 - plunge * 0.55; plungeK = plunge;',
                 '  } else if (aKind < 1.5) {',
                 '    ang += uTime * uSpin / pow(max(r0, 0.6), uSpinPow);',
                 '    q = vec3(sin(ang) * r0, p.y, cos(ang) * r0) + aRandom;',
@@ -220,7 +222,7 @@
                 '    fade *= 0.25 + 0.75 * smoothstep(0.0, shadowAng, ath);',
                 '    theta = sgn * (shadowAng * 1.02 + (shadowAng - ath) * 0.3);',
                 '  }',
-                '  if (inShadow > 0.5 && behind < 0.5) { if (aKind > 1.5 && aKind < 2.5) fade *= 0.15; if (aKind < 0.5) fade *= (1.0 - plungeK) * 0.55; }',
+                '  if (inShadow > 0.5 && behind < 0.5) { if (aKind > 1.5 && aKind < 2.5) fade *= 0.02; if (aKind < 0.5) fade *= (1.0 - plungeK) * 0.55; }',
                 '  if (uSecondary > 0.5 && tE2 <= 0.0) visible = 0.0;',
                 // the photon ring is a glow, not a wire: near the shadow edge, jitter the angle a little and use
                 // bigger, dimmer points
@@ -424,7 +426,7 @@
 
     /* ── Scroll, pointer, drag ──────────────────────────────────────── */
     var scrollP = 0, dirty = true;
-    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? 0.1 : 0, ry: 0 };   // opening tilt: a touch more from above
+    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? -0.27 : 0, ry: 0 };   // opening tilt: the disc seen nearly edge-on, camera a few degrees above its plane
     var mx = 0, my = 0, tiltX = 0, tiltY = 0;                   // cursor-driven tilt of the whole galaxy
     if (!reduce && window.matchMedia('(hover: hover)').matches) {
         window.addEventListener('mousemove', function (e) {
@@ -488,7 +490,7 @@
         var zoom = Math.min(pe, 1.6);
         var after = Math.max(0, p - 1.6);                       // how far past the intro we are
         var hoverK = drag.on ? 0 : Math.max(0, 1 - after);      // full in the hero, gone once past the intro
-        tiltX += (-my * 0.2 * hoverK - tiltX) * 0.045;          // mouse up = look more from above, never edge-on
+        tiltX += (-my * (my > 0 ? 0.06 : 0.2) * hoverK - tiltX) * 0.045;   // mouse up = look more from above; mouse down never dips below the disc
         tiltY += (mx * 0.38 * hoverK - tiltY) * 0.045;
         if (!drag.on) { drag.ry += drag.vy; drag.rx = clamp(drag.rx + drag.vx, -0.75, 0.75); drag.vy *= 0.94; drag.vx *= 0.9; }
 
@@ -496,7 +498,7 @@
         // then keeps looking lower so the galaxy drifts up and out while the stars and dust remain.
         camera.position.set(0, (FORM === 'blackhole' ? 2.75 : 3.5) + zoom * 2.6, 7.6 + zoom * 5.6);   // ~20° above the disc
         camera.lookAt(0, -(zoom + after * 0.9) * 1.15, 0);
-        gGroup.rotation.y = t * 0.018 + zoom * 1.1 + drag.ry + tiltY;
+        gGroup.rotation.y = (BH ? 0.0 : t * 0.018) + zoom * 1.1 + drag.ry + tiltY;   // the black hole keeps its pose; only the disc spins
         gGroup.rotation.x = clamp(drag.rx + tiltX, -0.9, 0.9);
         gGroup.updateMatrixWorld();
 
