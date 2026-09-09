@@ -381,14 +381,14 @@
         /* ── World ──────────────────────────────────────────────────── */
         var state = 'idle';
         var score = 0, best = parseInt(localStorage.getItem('orbitHi'), 10) || 0;
-        var elapsed = 0, shake = 0, thrusting = false, sinceStart = 0, deadFor = 0, scoreBonus = 0;
+        var elapsed = 0, shake = 0, thrusting = false, sinceStart = 0, deadFor = 0, scoreBonus = 0, clock = 0;
         var ship = { x: 0, y: 0, vy: 0, len: 0 };
         var rocks = [], cores = [], bits = [], back = [], front = [];
         var spawnIn = 0, coreIn = 0;
 
         var GRAV = 1.28, THRUST = 2.82, VMAX = 0.78;     // in screen heights per second: heavy, but it answers
         function speed() { return W * Math.min(0.46, 0.30 + score * 0.0011); }
-        function shipLen() { return clamp(H * 0.085, 26, 54); }
+        function shipLen() { return clamp(H * 0.105, 34, 76); }
         function shipR() { return shipLen() * 0.30; }
 
         function buildTerrain() {
@@ -420,11 +420,23 @@
             return pts.length ? pts[pts.length - 1].y : H;
         }
 
+        var ROCK_TONES = [                                  // dark rock, warm only where the hole reaches it
+            ['#6B5545', '#33261E', '#080605'],
+            ['#775A40', '#3A2819', '#080504'],
+            ['#5D4E44', '#2C221C', '#070504'],
+            ['#7A5838', '#3B2717', '#090604']
+        ];
         function makeRock(x, y, r) {
-            var n = Math.floor(rand(9, 13)), verts = [], craters = [], i;
-            for (i = 0; i < n; i++) verts.push(rand(0.74, 1.06));
-            for (i = 0; i < 3; i++) craters.push({ a: rand(0, Math.PI * 2), d: rand(0.15, 0.6), s: rand(0.1, 0.26) });
-            return { x: x, y: y, r: r, verts: verts, craters: craters, rot: rand(0, Math.PI * 2), spin: rand(-0.6, 0.6), vy: rand(-0.05, 0.05) * H, k: rand(0.9, 1.35) };
+            var n = Math.floor(rand(10, 15)), verts = [], craters = [], dots = [], i;
+            for (i = 0; i < n; i++) verts.push({ r: rand(0.70, 1.10), a: rand(-0.5, 0.5) });
+            var nc = r > H * 0.06 ? 5 : 3;
+            for (i = 0; i < nc; i++) craters.push({ a: rand(0, Math.PI * 2), d: rand(0.12, 0.62), s: rand(0.09, 0.24), e: rand(0.6, 1) });
+            for (i = 0; i < 14; i++) dots.push({ a: rand(0, Math.PI * 2), d: rand(0.1, 0.86), s: rand(0.012, 0.038) });
+            return {
+                x: x, y: y, r: r, verts: verts, craters: craters, dots: dots,
+                rot: rand(0, Math.PI * 2), spin: rand(-0.55, 0.55), vy: rand(-0.05, 0.05) * H,
+                k: rand(0.9, 1.35), ar: rand(0.68, 1.0), tone: ROCK_TONES[Math.floor(Math.random() * ROCK_TONES.length)]
+            };
         }
         function spawnRocks() {
             var top = H * 0.06, bot = heightAt(front, W) - H * 0.06;
@@ -500,6 +512,7 @@
 
         /* ── Step ───────────────────────────────────────────────────── */
         function update(dt) {
+            clock += dt;
             sinceStart += dt;
             var i;
             if (state === 'idle') {
@@ -586,30 +599,71 @@
             for (i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
             ctx.strokeStyle = rim; ctx.lineWidth = 1.6; ctx.stroke();
         }
+        // The light comes off the black hole, up and to the right. The rock tumbles under it: the
+        // silhouette is built in the rock's own frame, then filled in screen space so the terminator
+        // stays put while the body turns.
+        var LX = 0.84, LY = -0.54;
         function drawRock(k) {
+            var r = k.r, v = k.verts, n = v.length, i, step = Math.PI * 2 / n;
+            function at(j) {                                 // vertex j, in the rock's own frame
+                var idx = ((j % n) + n) % n, a = idx * step + v[idx].a * step * 0.55, rr = r * v[idx].r;
+                return [Math.cos(a) * rr, Math.sin(a) * rr];
+            }
             ctx.save();
-            ctx.translate(k.x, k.y); ctx.rotate(k.rot);
-            var n = k.verts.length, i;
+            ctx.translate(k.x, k.y);
+            ctx.rotate(k.rot);
+            ctx.scale(1, k.ar);
             ctx.beginPath();
-            for (i = 0; i < n; i++) {
-                var a = (i / n) * Math.PI * 2, rr = k.r * k.verts[i];
-                var x = Math.cos(a) * rr, y = Math.sin(a) * rr;
-                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            var p0 = at(0), p1 = at(1);
+            ctx.moveTo((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2);
+            for (i = 1; i <= n; i++) {                       // through the vertices, kept rocky
+                var c0 = at(i), c1 = at(i + 1);
+                ctx.quadraticCurveTo(c0[0], c0[1], (c0[0] + c1[0]) / 2, (c0[1] + c1[1]) / 2);
             }
             ctx.closePath();
-            var g = ctx.createLinearGradient(-k.r * 0.7, -k.r * 0.7, k.r * 0.6, k.r * 0.8);
-            g.addColorStop(0, '#7a5f4e'); g.addColorStop(0.42, '#33251d'); g.addColorStop(1, '#110c0a');
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(k.x, k.y);                         // the body turned; the light does not
+            var g = ctx.createRadialGradient(LX * r * 0.62, LY * r * 0.62, r * 0.04, LX * r * 0.28, LY * r * 0.28, r * 1.42);
+            g.addColorStop(0, k.tone[0]); g.addColorStop(0.26, k.tone[1]); g.addColorStop(0.72, k.tone[2]); g.addColorStop(1, '#050403');
             ctx.fillStyle = g; ctx.fill();
-            ctx.strokeStyle = 'rgba(255, 174, 106, 0.42)'; ctx.lineWidth = 1.2; ctx.stroke();
-            for (i = 0; i < k.craters.length; i++) {
-                var c = k.craters[i], cx = Math.cos(c.a) * k.r * c.d, cy = Math.sin(c.a) * k.r * c.d;
-                ctx.beginPath(); ctx.arc(cx, cy, k.r * c.s, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0,0,0,0.34)'; ctx.fill();
-                ctx.beginPath(); ctx.arc(cx, cy, k.r * c.s, Math.PI * 1.1, Math.PI * 1.9);
-                ctx.strokeStyle = 'rgba(255,214,180,0.13)'; ctx.lineWidth = 1; ctx.stroke();
+
+            var rim = ctx.createLinearGradient(LX * r, LY * r, -LX * r, -LY * r);
+            rim.addColorStop(0, 'rgba(255, 206, 160, 0.8)');
+            rim.addColorStop(0.28, 'rgba(255, 174, 106, 0.16)');
+            rim.addColorStop(0.62, 'rgba(255, 174, 106, 0)');
+            ctx.strokeStyle = rim; ctx.lineWidth = Math.max(1, r * 0.035); ctx.stroke();
+
+            ctx.clip();                                      // everything below stays inside the rock
+            ctx.rotate(k.rot);
+            var lx = LX * Math.cos(k.rot) + LY * Math.sin(k.rot);      // where the light sits from here
+            var ly = -LX * Math.sin(k.rot) + LY * Math.cos(k.rot);
+            var la = Math.atan2(ly, lx);
+            for (i = 0; i < k.dots.length; i++) {            // grit
+                var d = k.dots[i];
+                ctx.beginPath();
+                ctx.arc(Math.cos(d.a) * r * d.d, Math.sin(d.a) * r * d.d * k.ar, r * d.s, 0, Math.PI * 2);
+                ctx.fillStyle = i % 2 ? 'rgba(0,0,0,0.34)' : 'rgba(255, 224, 190, 0.07)';
+                ctx.fill();
+            }
+            for (i = 0; i < k.craters.length; i++) {         // craters: lit far wall, shadowed near wall
+                var c = k.craters[i], cx = Math.cos(c.a) * r * c.d, cy = Math.sin(c.a) * r * c.d * k.ar, cr = r * c.s;
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.beginPath(); ctx.ellipse(0, 0, cr, cr * c.e, c.a, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.36)'; ctx.fill();
+                ctx.beginPath();
+                ctx.arc(0, 0, cr * 0.86, la + Math.PI * 0.42, la + Math.PI * 1.58);
+                ctx.strokeStyle = 'rgba(255, 206, 165, 0.20)'; ctx.lineWidth = Math.max(0.8, cr * 0.26); ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, 0, cr * 1.02, la - Math.PI * 0.5, la + Math.PI * 0.5);
+                ctx.strokeStyle = 'rgba(255, 200, 155, 0.10)'; ctx.lineWidth = Math.max(0.7, cr * 0.15); ctx.stroke();
+                ctx.restore();
             }
             ctx.restore();
         }
+
         function drawCore(c) {
             var pulse = 1 + Math.sin(c.ph) * 0.14;
             var g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r * 3.4 * pulse);
@@ -621,60 +675,196 @@
             ctx.fillStyle = '#FFF1E2';
             ctx.beginPath(); ctx.arc(c.x, c.y, c.r * 0.62 * pulse, 0, Math.PI * 2); ctx.fill();
         }
-        function drawShip(alive) {
-            var L = shipLen(), w = L * 0.42;
-            var tilt = clamp(ship.vy / (VMAX * H), -1, 1) * 0.42;
-            ctx.save();
-            ctx.translate(ship.x, ship.y);
-            ctx.rotate(tilt);
-            if (thrusting && alive) {                                   // the plume
-                var f = L * (0.45 + Math.random() * 0.5);
-                var pg = ctx.createLinearGradient(-L * 0.46, 0, -L * 0.46 - f, 0);
-                pg.addColorStop(0, 'rgba(255, 240, 220, 0.95)');
-                pg.addColorStop(0.35, 'rgba(255, 174, 106, 0.75)');
-                pg.addColorStop(1, 'rgba(184, 83, 46, 0)');
-                ctx.beginPath();
-                ctx.moveTo(-L * 0.44, -w * 0.3);
-                ctx.quadraticCurveTo(-L * 0.46 - f * 0.6, -w * 0.1, -L * 0.46 - f, 0);
-                ctx.quadraticCurveTo(-L * 0.46 - f * 0.6, w * 0.1, -L * 0.44, w * 0.3);
-                ctx.closePath();
-                ctx.fillStyle = pg; ctx.fill();
+        // The hull is drawn once into an offscreen canvas and reused: it costs nothing per frame and
+        // pays for a lot of detail. The plume, the glow and the nav lights are live on top of it.
+        var hullC = null, hullL = 0;
+        function buildHull(L) {
+            var S = 3, pad = 0.12 * L, w = (1.16 + 0.24) * L, h = (0.92 + 0.24) * L;
+            var c = document.createElement('canvas');
+            c.width = Math.ceil(w * S); c.height = Math.ceil(h * S);
+            var g = c.getContext('2d');
+            g.setTransform(S, 0, 0, S, (0.60 * L + pad) * S, (0.46 * L + pad) * S);
+            var grad;
+
+            function hullPath() {
+                g.beginPath();
+                g.moveTo(0.52 * L, 0);
+                g.bezierCurveTo(0.34 * L, -0.13 * L, 0.06 * L, -0.185 * L, -0.20 * L, -0.185 * L);
+                g.lineTo(-0.40 * L, -0.15 * L);
+                g.lineTo(-0.44 * L, -0.115 * L);
+                g.lineTo(-0.44 * L, 0.115 * L);
+                g.lineTo(-0.40 * L, 0.15 * L);
+                g.lineTo(-0.20 * L, 0.185 * L);
+                g.bezierCurveTo(0.06 * L, 0.185 * L, 0.34 * L, 0.13 * L, 0.52 * L, 0);
+                g.closePath();
             }
-            ctx.beginPath();                                            // fins
-            ctx.moveTo(-L * 0.16, -w * 0.4); ctx.lineTo(-L * 0.5, -w * 0.98); ctx.lineTo(-L * 0.42, -w * 0.3);
-            ctx.closePath();
-            ctx.moveTo(-L * 0.16, w * 0.4); ctx.lineTo(-L * 0.5, w * 0.98); ctx.lineTo(-L * 0.42, w * 0.3);
-            ctx.closePath();
-            ctx.fillStyle = '#B8532E'; ctx.fill();
-            ctx.beginPath();                                            // hull
-            ctx.moveTo(L * 0.5, 0);
-            ctx.quadraticCurveTo(L * 0.16, -w * 0.5, -L * 0.24, -w * 0.46);
-            ctx.lineTo(-L * 0.44, -w * 0.32);
-            ctx.quadraticCurveTo(-L * 0.5, 0, -L * 0.44, w * 0.32);
-            ctx.lineTo(-L * 0.24, w * 0.46);
-            ctx.quadraticCurveTo(L * 0.16, w * 0.5, L * 0.5, 0);
-            ctx.closePath();
-            var hg = ctx.createLinearGradient(0, -w * 0.5, 0, w * 0.5);
-            hg.addColorStop(0, '#FBF3EA'); hg.addColorStop(0.55, '#D9C3B0'); hg.addColorStop(1, '#8A6552');
-            ctx.fillStyle = hg; ctx.fill();
-            ctx.strokeStyle = 'rgba(45, 26, 14, 0.55)'; ctx.lineWidth = 1; ctx.stroke();
-            ctx.beginPath();                                            // window
-            ctx.arc(L * 0.12, -w * 0.03, w * 0.2, 0, Math.PI * 2);
-            ctx.fillStyle = '#20303F'; ctx.fill();
-            ctx.strokeStyle = '#FFAE6A'; ctx.lineWidth = 1.4; ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(L * 0.09, -w * 0.09, w * 0.08, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 241, 226, 0.6)'; ctx.fill();
+
+            // fins, behind the hull
+            g.beginPath();
+            g.moveTo(-0.06 * L, -0.15 * L); g.lineTo(-0.47 * L, -0.44 * L); g.lineTo(-0.39 * L, -0.12 * L); g.closePath();
+            g.moveTo(-0.06 * L, 0.15 * L); g.lineTo(-0.47 * L, 0.44 * L); g.lineTo(-0.39 * L, 0.12 * L); g.closePath();
+            grad = g.createLinearGradient(0, -0.44 * L, 0, 0.44 * L);
+            grad.addColorStop(0, '#E08A5E'); grad.addColorStop(0.5, '#A8462A'); grad.addColorStop(1, '#5E2415');
+            g.fillStyle = grad; g.fill();
+            g.strokeStyle = 'rgba(20, 10, 6, 0.5)'; g.lineWidth = 0.9; g.stroke();
+
+            // engine bell
+            g.beginPath();
+            g.moveTo(-0.42 * L, -0.115 * L); g.lineTo(-0.57 * L, -0.165 * L);
+            g.lineTo(-0.57 * L, 0.165 * L); g.lineTo(-0.42 * L, 0.115 * L); g.closePath();
+            grad = g.createLinearGradient(0, -0.17 * L, 0, 0.17 * L);
+            grad.addColorStop(0, '#8E8177'); grad.addColorStop(0.45, '#4A4038'); grad.addColorStop(1, '#1B1613');
+            g.fillStyle = grad; g.fill();
+            g.beginPath(); g.ellipse(-0.565 * L, 0, 0.028 * L, 0.163 * L, 0, 0, Math.PI * 2);
+            grad = g.createLinearGradient(0, -0.16 * L, 0, 0.16 * L);
+            grad.addColorStop(0, '#2A211C'); grad.addColorStop(0.5, '#0A0706'); grad.addColorStop(1, '#1A1310');
+            g.fillStyle = grad; g.fill();
+
+            // hull
+            hullPath();
+            grad = g.createLinearGradient(0, -0.185 * L, 0, 0.185 * L);
+            grad.addColorStop(0, '#FFF8F0'); grad.addColorStop(0.16, '#F0E2D2');
+            grad.addColorStop(0.42, '#CDB6A1'); grad.addColorStop(0.72, '#8A6653');
+            grad.addColorStop(1, '#3E2C22');
+            g.fillStyle = grad; g.fill();
+
+            g.save(); g.clip();
+            grad = g.createLinearGradient(0, -0.10 * L, 0, 0.02 * L);       // a specular band along the shoulder
+            grad.addColorStop(0, 'rgba(255,255,255,0)'); grad.addColorStop(0.5, 'rgba(255,255,255,0.5)');
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            g.fillStyle = grad; g.fillRect(-0.6 * L, -0.10 * L, 1.2 * L, 0.12 * L);
+
+            grad = g.createLinearGradient(0.24 * L, 0, 0.56 * L, 0);        // the nose cone
+            grad.addColorStop(0, 'rgba(184, 83, 46, 0)'); grad.addColorStop(0.35, 'rgba(184, 83, 46, 0.92)');
+            grad.addColorStop(1, 'rgba(226, 128, 82, 0.95)');
+            g.fillStyle = grad; g.fillRect(0.24 * L, -0.2 * L, 0.34 * L, 0.4 * L);
+
+            grad = g.createLinearGradient(-0.44 * L, 0, -0.16 * L, 0);      // a darker tail band
+            grad.addColorStop(0, 'rgba(24, 16, 12, 0.55)'); grad.addColorStop(1, 'rgba(24, 16, 12, 0)');
+            g.fillStyle = grad; g.fillRect(-0.46 * L, -0.2 * L, 0.32 * L, 0.4 * L);
+
+            g.strokeStyle = 'rgba(38, 22, 14, 0.34)'; g.lineWidth = 1;      // panel lines
+            [0.03, -0.16, -0.30].forEach(function (px) {
+                g.beginPath(); g.moveTo(px * L, -0.2 * L);
+                g.quadraticCurveTo((px + 0.03) * L, 0, px * L, 0.2 * L); g.stroke();
+            });
+            g.strokeStyle = 'rgba(255, 236, 214, 0.20)'; g.lineWidth = 0.8;
+            [0.045, -0.145].forEach(function (px) {
+                g.beginPath(); g.moveTo(px * L, -0.2 * L);
+                g.quadraticCurveTo((px + 0.03) * L, 0, px * L, 0.2 * L); g.stroke();
+            });
+            g.restore();
+
+            g.lineWidth = 1.3;                                              // rim light off the hole, above
+            grad = g.createLinearGradient(0, -0.19 * L, 0, 0.05 * L);
+            grad.addColorStop(0, 'rgba(255, 240, 220, 0.95)'); grad.addColorStop(1, 'rgba(255, 240, 220, 0)');
+            hullPath(); g.strokeStyle = grad; g.stroke();
+            grad = g.createLinearGradient(0, 0.02 * L, 0, 0.19 * L);        // bounce off the ground below
+            grad.addColorStop(0, 'rgba(184, 83, 46, 0)'); grad.addColorStop(1, 'rgba(226, 128, 82, 0.55)');
+            hullPath(); g.strokeStyle = grad; g.stroke();
+
+            // canopy
+            g.save();
+            g.translate(0.19 * L, -0.022 * L); g.rotate(-0.12);
+            g.beginPath(); g.ellipse(0, 0, 0.125 * L, 0.075 * L, 0, 0, Math.PI * 2);
+            grad = g.createRadialGradient(-0.03 * L, -0.03 * L, 0.005 * L, 0, 0, 0.13 * L);
+            grad.addColorStop(0, '#4E6B80'); grad.addColorStop(0.55, '#22323F'); grad.addColorStop(1, '#0E1620');
+            g.fillStyle = grad; g.fill();
+            g.save(); g.clip();
+            g.beginPath(); g.ellipse(-0.04 * L, -0.05 * L, 0.10 * L, 0.035 * L, -0.35, 0, Math.PI * 2);
+            g.fillStyle = 'rgba(255, 244, 232, 0.42)'; g.fill();
+            g.restore();
+            g.strokeStyle = 'rgba(255, 190, 140, 0.75)'; g.lineWidth = 1.1; g.stroke();
+            g.restore();
+
+            hullC = c; hullL = L;
+            return { w: w, h: h, ox: 0.60 * L + pad, oy: 0.46 * L + pad };
+        }
+        var hullBox = null;
+        function drawShip(alive) {
+            var L = shipLen();
+            if (!hullC || hullL !== L) hullBox = buildHull(L);
+            var tilt = clamp(ship.vy / (VMAX * H), -1, 1) * 0.42;
+            var shiver = thrusting && alive ? rand(-0.4, 0.4) : 0;
+            ctx.save();
+            ctx.translate(ship.x, ship.y + shiver);
+            ctx.rotate(tilt);
+
+            if (alive) {                                            // the plume, behind the nozzle
+                var flick = 0.78 + 0.22 * Math.sin(clock * 41) * Math.sin(clock * 26.3);
+                var f = thrusting ? L * (0.55 + 0.85 * flick) : L * 0.12 * flick;
+                var mouth = -0.56 * L;
+                ctx.globalCompositeOperation = 'lighter';
+                var gr = f * 0.62 + L * 0.09;
+                ctx.save();
+                ctx.translate(mouth - f * 0.34, 0); ctx.scale(1.5, 0.62);
+                var glow = ctx.createRadialGradient(0, 0, 0, 0, 0, gr);
+                glow.addColorStop(0, 'rgba(255, 196, 140, ' + (thrusting ? 0.46 : 0.2) + ')');
+                glow.addColorStop(0.5, 'rgba(255, 160, 95, ' + (thrusting ? 0.16 : 0.07) + ')');
+                glow.addColorStop(1, 'rgba(255, 150, 80, 0)');
+                ctx.fillStyle = glow;
+                ctx.beginPath(); ctx.arc(0, 0, gr, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+                if (thrusting) {
+                    var cone = ctx.createLinearGradient(mouth, 0, mouth - f, 0);
+                    cone.addColorStop(0, 'rgba(255, 248, 238, 0.95)');
+                    cone.addColorStop(0.28, 'rgba(255, 196, 136, 0.72)');
+                    cone.addColorStop(1, 'rgba(200, 90, 40, 0)');
+                    ctx.beginPath();
+                    ctx.moveTo(mouth, -0.14 * L);
+                    ctx.quadraticCurveTo(mouth - f * 0.45, -0.09 * L, mouth - f, 0);
+                    ctx.quadraticCurveTo(mouth - f * 0.45, 0.09 * L, mouth, 0.14 * L);
+                    ctx.closePath();
+                    ctx.fillStyle = cone; ctx.fill();
+                    var core = ctx.createLinearGradient(mouth, 0, mouth - f * 0.55, 0);
+                    core.addColorStop(0, 'rgba(255, 255, 252, 0.95)');
+                    core.addColorStop(1, 'rgba(255, 226, 190, 0)');
+                    ctx.beginPath();
+                    ctx.moveTo(mouth, -0.062 * L);
+                    ctx.quadraticCurveTo(mouth - f * 0.3, -0.03 * L, mouth - f * 0.55, 0);
+                    ctx.quadraticCurveTo(mouth - f * 0.3, 0.03 * L, mouth, 0.062 * L);
+                    ctx.closePath();
+                    ctx.fillStyle = core; ctx.fill();
+                    for (var d = 0; d < 3; d++) {                     // shock diamonds down the jet
+                        var dt2 = 0.2 + d * 0.19, dr = (0.052 - d * 0.012) * L * flick;
+                        ctx.beginPath();
+                        ctx.ellipse(mouth - f * dt2, 0, dr * 1.5, dr, 0, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(255, 252, 246, ' + (0.5 - d * 0.13) + ')';
+                        ctx.fill();
+                    }
+                }
+                ctx.globalCompositeOperation = 'source-over';
+            }
+
+            ctx.drawImage(hullC, -hullBox.ox, -hullBox.oy, hullBox.w, hullBox.h);
+
+            if (alive) {                                            // nav lights on the fin tips
+                var beat = (clock % 1.6) < 0.16, beat2 = ((clock + 0.8) % 1.6) < 0.16;
+                [[-0.45 * L, -0.42 * L, '#FF8A6A', beat], [-0.45 * L, 0.42 * L, '#EAF3FF', beat2]].forEach(function (n) {
+                    if (!n[3]) return;
+                    ctx.globalCompositeOperation = 'lighter';
+                    var lg = ctx.createRadialGradient(n[0], n[1], 0, n[0], n[1], L * 0.11);
+                    lg.addColorStop(0, n[2]); lg.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = lg;
+                    ctx.beginPath(); ctx.arc(n[0], n[1], L * 0.11, 0, Math.PI * 2); ctx.fill();
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.beginPath(); ctx.arc(n[0], n[1], L * 0.016, 0, Math.PI * 2); ctx.fill();
+                });
+            }
             ctx.restore();
         }
+
         function render() {
             ctx.clearRect(0, 0, W, H);
             ctx.save();
             if (shake > 0) ctx.translate(rand(-1, 1) * shake * 9, rand(-1, 1) * shake * 9);
 
-            var haze = ctx.createLinearGradient(0, H * 0.72, 0, H * 0.93);
-            haze.addColorStop(0, 'rgba(255, 174, 106, 0)'); haze.addColorStop(1, 'rgba(184, 83, 46, 0.13)');
-            ctx.fillStyle = haze; ctx.fillRect(0, H * 0.72, W, H * 0.21);
+            var haze = ctx.createLinearGradient(0, H * 0.66, 0, H);
+            haze.addColorStop(0, 'rgba(255, 174, 106, 0)');
+            haze.addColorStop(0.75, 'rgba(184, 83, 46, 0.12)');
+            haze.addColorStop(1, 'rgba(184, 83, 46, 0.16)');
+            ctx.fillStyle = haze; ctx.fillRect(0, H * 0.66, W, H * 0.34);
             drawTerrain(back, ['rgba(60, 42, 31, 0.9)', 'rgba(12, 8, 6, 0.96)'], 'rgba(184, 83, 46, 0.38)');
             drawTerrain(front, ['#3B2A1F', '#090605'], 'rgba(255, 174, 106, 0.66)');
 
