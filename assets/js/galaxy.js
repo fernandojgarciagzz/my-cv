@@ -222,7 +222,13 @@
                 '    fade *= 0.25 + 0.75 * smoothstep(0.0, shadowAng, ath);',
                 '    theta = sgn * (shadowAng * 1.02 + (shadowAng - ath) * 0.3);',
                 '  }',
-                '  if (inShadow > 0.5 && behind < 0.5) { if (aKind > 1.5 && aKind < 2.5) fade *= 0.02; if (aKind < 0.5) fade *= (1.0 - plungeK) * 0.55; }',
+                // matter in front of the hole: keep the void dark, but ramp the dimming in from the rim so the band
+                // crossing the shadow has no step where it enters (in front of the shadow, nothing really dims)
+                '  if (inShadow > 0.5 && behind < 0.5) {',
+                '    float deep = smoothstep(shadowAng, shadowAng * 0.55, abs(theta));',
+                '    if (aKind > 1.5 && aKind < 2.5) fade *= mix(1.0, 0.02, deep);',
+                '    if (aKind < 0.5) fade *= mix(1.0, (1.0 - plungeK) * 0.55, deep);',
+                '  }',
                 '  if (uSecondary > 0.5 && tE2 <= 0.0) visible = 0.0;',
                 // the photon ring is a glow, not a wire: near the shadow edge, jitter the angle a little and use
                 // bigger, dimmer points
@@ -428,6 +434,7 @@
     var scrollP = 0, dirty = true;
     var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? -0.27 : 0, ry: 0 };   // opening tilt: the disc seen nearly edge-on, camera a few degrees above its plane
     var mx = 0, my = 0, tiltX = 0, tiltY = 0;                   // cursor-driven tilt of the whole galaxy
+    var SCROLL = BH ? { yaw: -1.1, tilt: 0.0 } : { yaw: 1.1, tilt: 0.0 };   // how the view moves as the hero scrolls away
     if (!reduce && window.matchMedia('(hover: hover)').matches) {
         window.addEventListener('mousemove', function (e) {
             mx = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -498,8 +505,8 @@
         // then keeps looking lower so the galaxy drifts up and out while the stars and dust remain.
         camera.position.set(0, (FORM === 'blackhole' ? 2.75 : 3.5) + zoom * 2.6, 7.6 + zoom * 5.6);   // ~20° above the disc
         camera.lookAt(0, -(zoom + after * 0.9) * 1.15, 0);
-        gGroup.rotation.y = (BH ? 0.0 : t * 0.018) + zoom * 1.1 + drag.ry + tiltY;   // the black hole keeps its pose; only the disc spins
-        gGroup.rotation.x = clamp(drag.rx + tiltX, -0.9, 0.9);
+        gGroup.rotation.y = (BH ? 0.0 : t * 0.018) + zoom * SCROLL.yaw + drag.ry + tiltY;   // the black hole keeps its pose; only the disc spins
+        gGroup.rotation.x = clamp(drag.rx + tiltX + zoom * SCROLL.tilt, -0.9, 0.9);
         gGroup.updateMatrixWorld();
 
         var fade = p < 0.85 ? 1 : Math.max(0, 1 - (p - 0.85) / 1.05);          // fully gone by p ≈ 1.9, before the morph section
@@ -567,6 +574,7 @@
         window.addEventListener('resize', function () { renderStatic(); });
     }
     window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; }, form: FORM,
-        pose: function (rx, ry, rz) { drag.rx = rx; drag.ry = ry; drag.vx = 0; drag.vy = 0; if (rz !== undefined) gGroup.rotation.z = rz; } };
+        pose: function (rx, ry, rz) { drag.rx = rx; drag.ry = ry; drag.vx = 0; drag.vy = 0; if (rz !== undefined) gGroup.rotation.z = rz; },
+        scroll: function (yaw, tilt) { SCROLL.yaw = yaw; SCROLL.tilt = tilt; } };
     start();
 })();
