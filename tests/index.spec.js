@@ -2,7 +2,7 @@
 const { test, expect } = require('@playwright/test');
 
 const BASE = 'http://localhost:8080/index.html';
-const ANCHORS = ['about', 'experience', 'skills', 'tools', 'education', 'dashboards', 'contact'];
+const ANCHORS = ['about', 'experience', 'built', 'skills', 'tools', 'education', 'dashboards', 'contact'];
 const VIEWPORTS = [
     { name: 'phone', width: 390, height: 844 },
     { name: 'tablet', width: 834, height: 1194 },
