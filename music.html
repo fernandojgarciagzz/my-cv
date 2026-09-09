@@ -1,806 +1,315 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark claude-mode">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roho — Fernando García</title>
     <meta name="robots" content="noindex">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#120C0A">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Covered+By+Your+Grace&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="assets/js/galaxy.js?v=4" defer></script>
+    <script src="assets/js/vinyl.js?v=1" defer></script>
     <style>
-        body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
+        /* ==========================================================
+           TOKENS — the site's system, in the warm (Claude) palette.
+           Roho always opens dark; the toggle only changes this visit.
+           ========================================================== */
         :root {
-            --bg:        #FAF6F1;
-            --bg-2:      #F2EBE2;
-            --bg-card:   #EFE7DC;
-            --rust:      #D97757;
-            --rust-dark: #C4633F;
-            --rust-dim:  rgba(217,119,87,0.15);
-            --text:      #2D1A0E;
-            --text-2:    #7A5C48;
-            --text-3:    #A8866E;
-            --border:    rgba(217,119,87,0.2);
-            --nav-bg:    rgba(250,246,241,0.88);
-            --mono: 'JetBrains Mono', monospace;
-            --heading: 'Space Grotesk', sans-serif;
-            --body: 'Inter', sans-serif;
-            --hand: 'Covered By Your Grace', cursive;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-text: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-hand: 'Covered By Your Grace', cursive;
+            --t-small: 0.8125rem; --t-body: 1rem; --t-lead: 1.2rem;
+            --nav-h: 64px; --wide: 1200px; --gutter: clamp(1.25rem, 4vw, 3rem);
+
+            --warm: #FFAE6A;
+            --cool: #B8532E;
+            --accent: #E8956E;
+            --accent-glow: rgba(232, 149, 110, 0.16);
+            --bg: #120C0A;
+            --bg-rgb: 18, 12, 10;
+            --card: rgba(255, 214, 180, 0.05);
+            --card-hover: rgba(255, 214, 180, 0.08);
+            --ink: #F5EDE4;
+            --ink-2: #D4C4B0;
+            --ink-3: #A08A76;
+            --line: rgba(255, 214, 180, 0.14);
+            --line-2: rgba(255, 214, 180, 0.08);
+            --nav-bg: rgba(18, 12, 10, 0.72);
+            --btn-bg: #F5EDE4;
+            --btn-ink: #120C0A;
+        }
+        html.light {
+            --warm: #000000; --cool: #000000;
+            --accent: #000000; --accent-glow: rgba(0, 0, 0, 0.06);
+            --bg: #FFFFFF; --bg-rgb: 255, 255, 255;
+            --card: rgba(0, 0, 0, 0.03); --card-hover: rgba(0, 0, 0, 0.05);
+            --ink: #000000; --ink-2: #333333; --ink-3: #777777;
+            --line: #D9D9D9; --line-2: #EBEBEB;
+            --nav-bg: rgba(255, 255, 255, 0.92);
+            --btn-bg: #000000; --btn-ink: #FFFFFF;
         }
 
-        .dark {
-            --bg:        #160C06;
-            --bg-2:      #1F1108;
-            --bg-card:   #2A1A0D;
-            --rust:      #D97757;
-            --rust-dark: #E8916E;
-            --rust-dim:  rgba(217,119,87,0.12);
-            --text:      #F2EAE0;
-            --text-2:    #C4A48A;
-            --text-3:    #896653;
-            --border:    rgba(217,119,87,0.18);
-            --nav-bg:    rgba(22,12,6,0.92);
-        }
-
-        html { scroll-behavior: smooth; }
+        /* ==========================================================
+           BASE
+           ========================================================== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: clip; background: var(--bg); }
         body {
-            font-family: var(--body);
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            transition: background 0.5s ease, color 0.4s ease;
-            overflow-x: hidden;
+            font-family: var(--font-text); font-size: var(--t-body); line-height: 1.6;
+            color: var(--ink); background: var(--bg); min-height: 100vh;
+            -webkit-font-smoothing: antialiased; overflow-x: clip;
+            transition: background-color 0.6s ease, color 0.6s ease;
         }
+        ::selection { background: var(--accent); color: var(--btn-ink); }
+        a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
+        button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+        .skip { position: absolute; left: 1rem; top: -3rem; z-index: 300; background: var(--btn-bg); color: var(--btn-ink); padding: 0.5rem 0.8rem; border-radius: 6px; font-size: var(--t-small); }
+        .skip:focus { top: 1rem; }
 
-        /* ── Nav ── */
-        nav {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 100;
-            background: var(--nav-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-            transition: background 0.4s ease, border-color 0.4s ease;
-        }
-        .nav-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .nav-back {
-            font-family: var(--mono);
-            font-size: 0.78rem;
-            color: var(--text-2);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.2s ease;
-            letter-spacing: 0.02em;
-        }
-        .nav-back:hover { color: var(--rust); }
-        .nav-back svg { width: 14px; height: 14px; }
-        .nav-title {
-            font-family: var(--hand);
-            font-size: 1.9rem;
-            color: var(--rust);
-            letter-spacing: 0.01em;
-        }
-        .dark-toggle {
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--bg-2);
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1rem;
-            transition: background 0.3s ease, border-color 0.3s ease;
-        }
-        .dark-toggle:hover { border-color: var(--rust); }
+        /* Space: the black hole rides behind the whole page (assets/js/galaxy.js, ambient mode) */
+        #space { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; }
+        html.space-live #space { opacity: 1; }
+        html.no-webgl #space, html.light #space { display: none; }
+        .page { position: relative; z-index: 1; }
 
-        /* ── Hero ── */
-        .hero {
-            padding: 120px 2rem 60px;
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            position: relative;
-        }
+        /* ==========================================================
+           NAV
+           ========================================================== */
+        .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h); background: transparent; border-bottom: 1px solid transparent; transition: border-color 0.3s ease, background-color 0.4s ease; }
+        .nav.scrolled { background: var(--nav-bg); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-bottom-color: var(--line-2); }
+        .nav-inner { max-width: var(--wide); margin: 0 auto; height: 100%; padding: 0 var(--gutter); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; }
+        .nav-logo { font-family: var(--font-display); font-weight: 600; font-size: var(--t-small); letter-spacing: -0.01em; color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; justify-self: start; }
+        .nav-logo svg { width: 12px; height: 12px; color: var(--ink-3); transition: transform 0.25s ease, color 0.25s ease; }
+        .nav-logo:hover svg { transform: translateX(-3px); color: var(--ink); }
+        .nav-title { font-family: var(--font-hand); font-size: 1.9rem; color: var(--accent); letter-spacing: 0.01em; line-height: 1; }
+        .nav-right { display: flex; align-items: center; gap: 1.25rem; justify-self: end; }
+        .icon-btn { width: 36px; height: 36px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2); border: 1px solid var(--line); transition: border-color 0.2s, color 0.2s; }
+        .icon-btn:hover { border-color: var(--ink); color: var(--ink); }
+        .icon-btn svg { width: 16px; height: 16px; }
+        .theme-toggle .moon { display: none; }
+        html.light .theme-toggle .moon { display: block; }
+        html.light .theme-toggle .sun { display: none; }
 
-        /* Geometric Swahili decorative pattern — CSS only */
-        .geo-pattern {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            opacity: 0.55;
-        }
-        .geo-diamond {
-            width: 10px; height: 10px;
-            background: var(--rust);
-            transform: rotate(45deg);
-        }
-        .geo-diamond.sm { width: 6px; height: 6px; }
-        .geo-line {
-            width: 48px; height: 1px;
-            background: var(--rust);
-        }
-        .geo-chevrons {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-        .geo-chevron {
-            width: 20px; height: 8px;
-            border-top: 1.5px solid var(--rust);
-            border-right: 1.5px solid var(--rust);
-            transform: rotate(45deg) skewX(-10deg);
-        }
+        /* ==========================================================
+           HERO — the album, over the hole
+           ========================================================== */
+        .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; text-align: center; padding: calc(var(--nav-h) + 4vh) var(--gutter) 15vh; }
+        .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); }
+        .album-title { font-family: var(--font-hand); font-size: clamp(5.5rem, 13vw, 10.5rem); color: var(--accent); line-height: 0.85; margin: 0.6rem 0 0.4rem; font-weight: 400; text-shadow: 0 0 60px var(--accent-glow); }
+        .album-by { font-family: var(--font-display); font-size: var(--t-small); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-weight: 500; }
+        .album-desc { font-family: var(--font-hand); font-size: 1.6rem; color: var(--ink-3); margin-top: 1.4rem; }
+        .hero-hint { position: absolute; left: 50%; bottom: 2.2rem; transform: translateX(-50%); font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-3); text-decoration: none; opacity: 0.8; }
+        .hero { position: relative; }
+        .rise { opacity: 0; transform: translateY(16px); animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--d, 0s); }
+        @keyframes rise { to { opacity: 1; transform: none; } }
 
-        .album-title {
-            font-family: var(--hand);
-            font-size: clamp(5rem, 12vw, 9rem);
-            color: var(--rust);
-            line-height: 0.9;
-            margin-bottom: 0.6rem;
-        }
-        .album-label {
-            font-family: var(--mono);
-            font-size: 0.72rem;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: var(--text-3);
-            margin-bottom: 0.3rem;
-        }
-        .album-by {
-            font-family: var(--body);
-            font-size: 0.95rem;
-            color: var(--text-2);
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            font-weight: 500;
-        }
-        .album-desc {
-            font-family: var(--hand);
-            font-size: 1.4rem;
-            color: var(--text-3);
-            margin-top: 1.2rem;
-            opacity: 0.8;
-        }
+        /* ==========================================================
+           TRACKS
+           ========================================================== */
+        .tracks { max-width: var(--wide); margin: 0 auto; padding: 0 var(--gutter) 8rem; }
+        .section-head { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 3.5rem; }
+        .section-head .rule { flex: 1; height: 1px; background: var(--line); }
+        .section-head .count { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; color: var(--ink-3); }
+        .vinyl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3.5rem 2rem; justify-items: center; }
 
-        /* Divider */
-        .divider {
-            max-width: 1100px;
-            margin: 0 auto 3rem;
-            padding: 0 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .divider-line { flex: 1; height: 1px; background: var(--border); }
-        .divider-node {
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: var(--rust);
-            opacity: 0.5;
-        }
-        .divider-label {
-            font-family: var(--mono);
-            font-size: 0.7rem;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--text-3);
-        }
+        .vinyl-card { display: flex; flex-direction: column; align-items: center; gap: 1rem; cursor: pointer; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); -webkit-tap-highlight-color: transparent; outline: none; }
+        .vinyl-card:hover, .vinyl-card.flipped { transform: translateY(-6px); }
+        .vinyl-card:focus-visible .vinyl-flip::after { content: ''; position: absolute; inset: -2%; border-radius: 50%; border: 1px solid var(--accent); }
+        .vinyl-card.coming-soon { cursor: default; opacity: 0.32; pointer-events: none; }
+        .vinyl-flip { width: 200px; height: 200px; position: relative; }
+        .vinyl-flip::before { content: ''; position: absolute; inset: 2%; border-radius: 50%; background: radial-gradient(circle, var(--accent-glow), transparent 66%); opacity: 0; transition: opacity 0.5s ease; }
+        .vinyl-card:hover .vinyl-flip::before, .vinyl-card.flipped .vinyl-flip::before { opacity: 1; }
+        .vinyl-flip canvas { position: absolute; inset: -16%; width: 132%; height: 132%; display: block; opacity: 0; transition: opacity 0.5s ease; }
+        .vinyl-card.is-live .vinyl-flip canvas { opacity: 1; }
+        /* a plain record stands in until the 3D one has drawn, or if WebGL is missing */
+        .vinyl-flip .disc-still { position: absolute; inset: 0; border-radius: 50%; transition: opacity 0.5s ease;
+            background: radial-gradient(circle, #1a0d06 0 2.2%, #FFB27A 2.6% 30%, #C4633F 31% 33%, #14100d 33.5%, #0f0c0a 100%); }
+        .vinyl-card.is-live .vinyl-flip .disc-still { opacity: 0; }
+        html.light .vinyl-flip .disc-still { background: radial-gradient(circle, #ffffff 0 2.2%, #111 2.6% 33%, #222 33.5%, #0a0a0a 100%); }
 
-        /* ── Vinyl Grid ── */
-        .grid-section {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 2rem 6rem;
-        }
-        .vinyl-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 3rem 2rem;
-            justify-items: center;
-        }
-
-        /* ── Vinyl Card ── */
-        .vinyl-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-        }
-        .vinyl-card.coming-soon {
-            cursor: default;
-            opacity: 0.3;
-            filter: grayscale(1);
-            pointer-events: none;
-        }
-
-        /* Flip container */
-        .vinyl-flip {
-            width: 180px;
-            height: 180px;
-            perspective: 900px;
-        }
-        .vinyl-inner {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 50%;
-        }
-        .vinyl-card.flipped .vinyl-inner {
-            transform: rotateY(180deg);
-        }
-        .vinyl-face, .vinyl-back-face {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-        .vinyl-back-face {
-            transform: rotateY(180deg);
-        }
-
-        /* ── Vinyl disc CSS art ── */
-        .vinyl-disc {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background:
-                radial-gradient(circle, transparent 93%, rgba(255,255,255,0.04) 93.5%, rgba(0,0,0,0.3) 96%, #1a1008 97%, transparent 97.5%),
-                conic-gradient(from 200deg at 50% 50%,
-                    transparent 0deg, rgba(255,255,255,0.06) 30deg, rgba(255,255,255,0.09) 50deg,
-                    transparent 80deg, transparent 360deg),
-                radial-gradient(circle, #2D1F14 0%, #2D1F14 15.5%, transparent 16%),
-                radial-gradient(circle, rgba(217,119,87,0.3) 16.5%, transparent 17%),
-                radial-gradient(circle, transparent 20%, rgba(217,119,87,0.07) 20.2%, transparent 20.8%),
-                radial-gradient(circle, transparent 23%, rgba(255,255,255,0.03) 23.2%, transparent 23.8%),
-                radial-gradient(circle, transparent 26%, rgba(217,119,87,0.06) 26.2%, transparent 26.8%),
-                radial-gradient(circle, transparent 29%, rgba(255,255,255,0.025) 29.2%, transparent 29.8%),
-                radial-gradient(circle, transparent 32%, rgba(217,119,87,0.055) 32.2%, transparent 32.8%),
-                radial-gradient(circle, transparent 35%, rgba(255,255,255,0.03) 35.2%, transparent 35.8%),
-                radial-gradient(circle, transparent 38%, rgba(217,119,87,0.05) 38.2%, transparent 38.8%),
-                radial-gradient(circle, transparent 41%, rgba(255,255,255,0.025) 41.2%, transparent 41.8%),
-                radial-gradient(circle, transparent 44%, rgba(217,119,87,0.05) 44.2%, transparent 44.8%),
-                radial-gradient(circle, transparent 47%, rgba(255,255,255,0.02) 47.2%, transparent 47.8%),
-                radial-gradient(circle, transparent 50%, rgba(217,119,87,0.045) 50.2%, transparent 50.8%),
-                radial-gradient(circle, transparent 53%, rgba(255,255,255,0.025) 53.2%, transparent 53.8%),
-                radial-gradient(circle, transparent 56%, rgba(217,119,87,0.04) 56.2%, transparent 56.8%),
-                radial-gradient(circle, transparent 59%, rgba(255,255,255,0.02) 59.2%, transparent 59.8%),
-                radial-gradient(circle, transparent 62%, rgba(217,119,87,0.04) 62.2%, transparent 62.8%),
-                radial-gradient(circle, transparent 65%, rgba(255,255,255,0.02) 65.2%, transparent 65.8%),
-                radial-gradient(circle, transparent 68%, rgba(217,119,87,0.035) 68.2%, transparent 68.8%),
-                radial-gradient(circle, transparent 71%, rgba(255,255,255,0.02) 71.2%, transparent 71.8%),
-                radial-gradient(circle, transparent 74%, rgba(217,119,87,0.035) 74.2%, transparent 74.8%),
-                radial-gradient(circle, transparent 77%, rgba(255,255,255,0.015) 77.2%, transparent 77.8%),
-                radial-gradient(circle, transparent 80%, rgba(217,119,87,0.03) 80.2%, transparent 80.8%),
-                radial-gradient(circle, transparent 83%, rgba(255,255,255,0.015) 83.2%, transparent 83.8%),
-                radial-gradient(circle, transparent 86%, rgba(217,119,87,0.025) 86.2%, transparent 86.8%),
-                radial-gradient(circle, transparent 89%, rgba(255,255,255,0.01) 89.2%, transparent 89.8%),
-                conic-gradient(from 0deg, #1a1008, #261a10, #1a1008, #2D1F14, #1a1008, #261a10, #1a1008, #2D1F14);
-            position: relative;
-        }
-
-        /* Center label on the disc */
-        .vinyl-disc::after {
-            content: '';
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 22%; height: 22%;
-            border-radius: 50%;
-            background:
-                radial-gradient(circle, #1a1008 0%, #1a1008 10%, transparent 11%),
-                radial-gradient(circle at 35% 30%, rgba(255,255,255,0.18) 0%, transparent 45%),
-                radial-gradient(circle, #F0A882 0%, #D97757 35%, #C4633F 70%, #A8502E 100%);
-            box-shadow:
-                0 0 10px rgba(217,119,87,0.4),
-                inset 0 1px 3px rgba(255,255,255,0.15),
-                inset 0 -1px 2px rgba(0,0,0,0.2);
-        }
-
-        /* Glow on front face for active vinyls */
-        .vinyl-card:not(.coming-soon) .vinyl-face .vinyl-disc {
-            box-shadow: 0 0 0 2px rgba(217,119,87,0.15), 0 4px 24px rgba(0,0,0,0.25);
-            transition: box-shadow 0.3s ease;
-        }
-        .vinyl-card:not(.coming-soon):hover .vinyl-face .vinyl-disc {
-            box-shadow: 0 0 0 2px rgba(217,119,87,0.4), 0 8px 32px rgba(217,119,87,0.2);
-        }
-
-        /* Spin animation on back face when playing */
-        @keyframes vinylSpin {
-            from { transform: rotateY(180deg) rotate(0deg); }
-            to   { transform: rotateY(180deg) rotate(360deg); }
-        }
-        .vinyl-card.playing .vinyl-inner {
-            animation: vinylSpin 3.5s linear infinite;
-        }
-
-        /* Track info below vinyl */
-        .track-info {
-            text-align: center;
-        }
-        .track-num {
-            font-family: var(--mono);
-            font-size: 0.65rem;
-            letter-spacing: 0.14em;
-            color: var(--text-3);
-            text-transform: uppercase;
-            margin-bottom: 0.25rem;
-        }
-        .track-name {
-            font-family: var(--hand);
-            font-size: 1.35rem;
-            color: var(--text);
-            line-height: 1.2;
-            transition: color 0.3s ease;
-        }
-        .vinyl-card.playing .track-name { color: var(--rust); }
-        .track-status {
-            font-family: var(--mono);
-            font-size: 0.62rem;
-            letter-spacing: 0.1em;
-            color: var(--rust);
-            margin-top: 0.2rem;
-            height: 0.9rem;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+        .track-info { text-align: center; }
+        .track-num { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.16em; color: var(--ink-3); margin-bottom: 0.3rem; }
+        .track-name { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; color: var(--ink); line-height: 1.25; transition: color 0.3s ease; }
+        .vinyl-card.playing .track-name { color: var(--accent); }
+        .track-status { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-top: 0.3rem; height: 0.9rem; opacity: 0; transition: opacity 0.3s ease; }
         .vinyl-card.playing .track-status { opacity: 1; }
+        .coming-label { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.14em; color: var(--ink-3); text-transform: uppercase; margin-top: 0.3rem; }
 
-        /* Back face title overlay */
-        .vinyl-back-face {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .vinyl-back-face .vinyl-disc {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-        }
-        .back-title {
-            position: absolute;
-            z-index: 2;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-3deg);
-            font-family: var(--hand);
-            font-size: 0.6rem;
-            color: #2D1F14;
-            text-align: center;
-            white-space: nowrap;
-            pointer-events: none;
-            background: linear-gradient(145deg, #F5E6D8, #EDD8C6);
-            padding: 0.15rem 0.45rem;
-            border-radius: 2px;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.25);
-            line-height: 1.2;
-        }
-
-        /* Coming soon label */
-        .coming-label {
-            font-family: var(--mono);
-            font-size: 0.62rem;
-            letter-spacing: 0.12em;
-            color: var(--text-3);
-            text-transform: uppercase;
-            margin-top: 0.1rem;
-        }
-
-        /* ── Footer ── */
-        footer {
-            border-top: 1px solid var(--border);
-            padding: 2rem;
-            text-align: center;
-        }
-        body.player-visible footer { padding-bottom: 6rem; }
-        .footer-text {
-            font-family: var(--mono);
-            font-size: 0.7rem;
-            letter-spacing: 0.1em;
-            color: var(--text-3);
-            text-transform: uppercase;
-        }
-        .footer-text a {
-            color: var(--rust);
-            text-decoration: none;
-        }
+        /* ==========================================================
+           FOOTER
+           ========================================================== */
+        footer { border-top: 1px solid var(--line-2); padding: 2rem var(--gutter); text-align: center; background: rgba(var(--bg-rgb), 0.4); }
+        body.player-visible footer { padding-bottom: 7rem; }
+        .footer-text { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; color: var(--ink-3); text-transform: uppercase; }
+        .footer-text a { color: var(--accent); text-decoration: none; }
         .footer-text a:hover { text-decoration: underline; }
 
-        /* ── Player Bar ── */
-        .player-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            z-index: 200;
-            background: rgba(239,231,220,0.92);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-top: 1px solid var(--border);
-            box-shadow: 0 -4px 24px rgba(217,119,87,0.08), 0 -1px 6px rgba(0,0,0,0.04);
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-        }
-        .dark .player-bar {
-            background: rgba(42,26,13,0.92);
-            box-shadow: 0 -4px 24px rgba(0,0,0,0.3), 0 -1px 6px rgba(0,0,0,0.15);
-        }
-        body.player-visible .player-bar {
-            transform: translateY(0);
-        }
-        .player-progress-wrap {
-            position: absolute;
-            top: -3px; left: 0; right: 0;
-            height: 8px;
-            cursor: pointer;
-            padding: 0;
-        }
+        /* ==========================================================
+           PLAYER BAR
+           ========================================================== */
+        .player-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: rgba(var(--bg-rgb), 0.74); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: 1px solid var(--line); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease, border-color 0.4s ease; }
+        body.player-visible .player-bar { transform: translateY(0); }
+        .player-progress-wrap { position: absolute; top: -3px; left: 0; right: 0; height: 8px; cursor: pointer; }
         .player-progress-wrap:hover { top: -5px; height: 12px; }
-        .player-progress-bg {
-            position: absolute;
-            top: 3px; left: 0; right: 0;
-            height: 3px;
-            background: var(--rust-dim);
-            border-radius: 2px;
-        }
-        .player-progress-wrap:hover .player-progress-bg { height: 5px; top: 3px; }
-        .player-progress-fill {
-            height: 100%;
-            background: var(--rust);
-            border-radius: 2px;
-            width: 0%;
-            transition: width 0.15s linear;
-        }
-        .player-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0.75rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .player-track-info {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            align-items: baseline;
-            gap: 0.5rem;
-        }
-        .player-track-num {
-            font-family: var(--mono);
-            font-size: 0.65rem;
-            letter-spacing: 0.1em;
-            color: var(--text-3);
-            flex-shrink: 0;
-        }
-        .player-track-name {
-            font-family: var(--hand);
-            font-size: 1.3rem;
-            color: var(--text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: color 0.3s ease;
-        }
-        .player-controls {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-shrink: 0;
-        }
-        .player-btn {
-            width: 38px; height: 38px;
-            border: none;
-            background: transparent;
-            color: var(--text-2);
-            cursor: pointer;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.85rem;
-            transition: color 0.2s ease, background 0.2s ease;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .player-btn:hover { color: var(--rust); background: var(--rust-dim); }
-        .player-btn.active { color: var(--rust); }
-        .player-btn-play {
-            width: 46px; height: 46px;
-            font-size: 1rem;
-            background: var(--rust-dim);
-            color: var(--rust);
-            border: 1.5px solid rgba(217,119,87,0.25);
-        }
-        .player-btn-play:hover { background: var(--rust); color: #fff; border-color: var(--rust); }
-        .player-time {
-            font-family: var(--mono);
-            font-size: 0.65rem;
-            color: var(--text-3);
-            letter-spacing: 0.04em;
-            flex-shrink: 0;
-            min-width: 5.5ch;
-            text-align: right;
-        }
+        .player-progress-bg { position: absolute; top: 3px; left: 0; right: 0; height: 2px; background: var(--line); }
+        .player-progress-wrap:hover .player-progress-bg { height: 4px; }
+        .player-progress-fill { height: 100%; background: linear-gradient(90deg, var(--warm), var(--cool)); width: 0%; transition: width 0.15s linear; }
+        .player-inner { max-width: var(--wide); margin: 0 auto; padding: 0.8rem var(--gutter); display: flex; align-items: center; gap: 1rem; }
+        .player-track-info { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 0.6rem; }
+        .player-track-num { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.12em; color: var(--ink-3); flex-shrink: 0; }
+        .player-track-name { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .player-controls { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+        .player-btn { position: relative; width: 38px; height: 38px; color: var(--ink-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: color 0.2s ease, background-color 0.2s ease; -webkit-tap-highlight-color: transparent; }
+        .player-btn:hover { color: var(--accent); background: var(--accent-glow); }
+        .player-btn.active { color: var(--accent); }
+        .player-btn-play { width: 46px; height: 46px; background: var(--accent-glow); color: var(--accent); border: 1px solid var(--line); }
+        .player-btn-play:hover { background: var(--accent); color: var(--btn-ink); border-color: var(--accent); }
+        .player-time { font-family: var(--font-mono); font-size: 0.66rem; color: var(--ink-3); letter-spacing: 0.04em; flex-shrink: 0; min-width: 5.5ch; text-align: right; }
         .repeat-icon { width: 16px; height: 16px; }
-        .repeat-one-label {
-            display: none;
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: var(--mono);
-            font-size: 0.5rem;
-            font-weight: 600;
-            color: var(--rust);
-            pointer-events: none;
-        }
+        .repeat-one-label { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: var(--font-mono); font-size: 0.5rem; font-weight: 600; color: var(--accent); pointer-events: none; }
         .player-btn.repeat-one .repeat-one-label { display: block; }
-        .player-repeat-dot {
-            display: none;
-            width: 3px; height: 3px;
-            border-radius: 50%;
-            background: var(--rust);
-            position: absolute;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
+        .player-repeat-dot { display: none; width: 3px; height: 3px; border-radius: 50%; background: var(--accent); position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); }
         .player-btn.active .player-repeat-dot { display: block; }
-        .player-btn { position: relative; }
+        .player-expanded { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease; padding: 0 var(--gutter); }
+        .player-bar.expanded .player-expanded { max-height: 100px; padding: 0 var(--gutter) 0.6rem; }
+        .player-expanded-inner { max-width: var(--wide); margin: 0 auto; display: flex; align-items: center; gap: 0.75rem; }
+        .player-expanded-progress { flex: 1; height: 4px; background: var(--line); border-radius: 2px; cursor: pointer; position: relative; }
+        .player-expanded-fill { height: 100%; background: linear-gradient(90deg, var(--warm), var(--cool)); border-radius: 2px; width: 0%; transition: width 0.15s linear; }
+        .player-expanded-time { font-family: var(--font-mono); font-size: 0.66rem; color: var(--ink-3); letter-spacing: 0.04em; white-space: nowrap; }
 
-        /* ── Mobile expanded player ── */
-        .player-expanded {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), padding 0.35s ease;
-            padding: 0 2rem;
-        }
-        .player-bar.expanded .player-expanded {
-            max-height: 100px;
-            padding: 0 2rem 0.5rem;
-        }
-        .player-expanded-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .player-expanded-progress {
-            flex: 1;
-            height: 6px;
-            background: var(--rust-dim);
-            border-radius: 3px;
-            cursor: pointer;
-            position: relative;
-        }
-        .player-expanded-fill {
-            height: 100%;
-            background: var(--rust);
-            border-radius: 3px;
-            width: 0%;
-            transition: width 0.15s linear;
-        }
-        .player-expanded-time {
-            font-family: var(--mono);
-            font-size: 0.65rem;
-            color: var(--text-3);
-            letter-spacing: 0.04em;
-            white-space: nowrap;
-        }
-
-        /* ── Responsive ── */
-        @media (max-width: 900px) {
-            .vinyl-grid { grid-template-columns: repeat(3, 1fr); gap: 2.5rem 1.5rem; }
-        }
-        @media (max-width: 620px) {
-            .vinyl-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem 1rem; }
-            .vinyl-flip { width: 140px; height: 140px; }
-            .album-title { font-size: clamp(4rem, 18vw, 7rem); }
+        /* ==========================================================
+           RESPONSIVE · MOTION · PRINT
+           ========================================================== */
+        @media (max-width: 960px) { .vinyl-grid { grid-template-columns: repeat(3, 1fr); gap: 3rem 1.5rem; } }
+        @media (max-width: 640px) {
+            .nav-inner { grid-template-columns: 1fr auto auto; }
+            .nav-logo span { display: none; }
+            .vinyl-grid { grid-template-columns: repeat(2, 1fr); gap: 2.4rem 1rem; }
+            .vinyl-flip { width: 150px; height: 150px; }
+            .album-title { font-size: clamp(5rem, 24vw, 8rem); }
             .player-inner { padding: 0.75rem 1.2rem; gap: 0.75rem; }
-            .player-track-name { font-size: 1.15rem; }
-            .player-btn { width: 40px; height: 40px; font-size: 0.9rem; }
-            .player-btn-play { width: 48px; height: 48px; font-size: 1rem; }
             .player-time { display: none; }
-            .player-progress-wrap { top: -4px; height: 10px; }
-            .player-progress-bg { height: 3px; }
-            .player-expanded { padding: 0 1.2rem; }
-            .player-bar.expanded .player-expanded { padding: 0 1.2rem 0.6rem; }
         }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .rise { animation: none; opacity: 1; transform: none; }
+            .vinyl-card, .vinyl-card:hover { transition: none; transform: none; }
+        }
+        @media print { #space, .nav, .player-bar { display: none !important; } }
     </style>
 </head>
-<body>
+<body class="dark claude-mode">
+    <a class="skip" href="#tracks">Skip to the tracks</a>
+    <canvas id="space" data-ambient aria-hidden="true"></canvas>
 
-    <!-- Nav -->
-    <nav>
+    <nav class="nav" id="navbar" aria-label="Primary">
         <div class="nav-inner">
-            <a href="index.html" class="nav-back">
-                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 2L4 7l5 5"/>
-                </svg>
-                fernandogarciag.com
+            <a class="nav-logo" href="index.html" aria-label="Back to fernandogarciag.com">
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2L4 7l5 5"/></svg>
+                <span>fernandogarciag</span>
             </a>
-            <span class="nav-title">Roho</span>
-            <button class="dark-toggle" id="darkToggle" aria-label="Toggle dark mode">🌙</button>
+            <span class="nav-title" aria-hidden="true">Roho</span>
+            <div class="nav-right">
+                <button class="icon-btn theme-toggle" id="darkToggle" aria-label="Toggle dark mode" aria-pressed="true">
+                    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                </button>
+            </div>
         </div>
     </nav>
 
-    <!-- Hero -->
-    <section class="hero">
-        <div class="geo-pattern">
-            <div class="geo-diamond sm"></div>
-            <div class="geo-line"></div>
-            <div class="geo-chevrons">
-                <div class="geo-chevron"></div>
-                <div class="geo-chevron"></div>
+    <main class="page">
+        <header class="hero" id="top">
+            <p class="eyebrow rise">// an album by</p>
+            <h1 class="album-title rise" style="--d: 0.1s">Roho</h1>
+            <p class="album-by rise" style="--d: 0.2s">Fernando García</p>
+            <p class="album-desc rise" style="--d: 0.3s">soul, in sound</p>
+            <a class="hero-hint rise" style="--d: 0.6s" href="#tracks">tap a record to play</a>
+        </header>
+
+        <section class="tracks" id="tracks" aria-label="Tracks">
+            <div class="section-head">
+                <span class="eyebrow">tracks</span>
+                <span class="rule" aria-hidden="true"></span>
+                <span class="count">05 · 02 on the way</span>
             </div>
-            <div class="geo-diamond"></div>
-            <div class="geo-chevrons">
-                <div class="geo-chevron"></div>
-                <div class="geo-chevron"></div>
-            </div>
-            <div class="geo-line"></div>
-            <div class="geo-diamond sm"></div>
-        </div>
-        <h1 class="album-title">Roho</h1>
-        <p class="album-label">// an album by</p>
-        <p class="album-by">Fernando García</p>
-        <p class="album-desc">soul, in sound</p>
-    </section>
-
-    <!-- Divider -->
-    <div class="divider">
-        <div class="divider-line"></div>
-        <div class="divider-node"></div>
-        <span class="divider-label">tracks</span>
-        <div class="divider-node"></div>
-        <div class="divider-line"></div>
-    </div>
-
-    <!-- Grid -->
-    <section class="grid-section">
-        <div class="vinyl-grid" id="vinylGrid">
-
-            <!-- Track 01 — Hatua Kwa Hatua -->
-            <div class="vinyl-card" data-src="Hatua Kwa Hatua (Remastered).mp3" data-track="01">
-                <div class="vinyl-flip">
-                    <div class="vinyl-inner">
-                        <div class="vinyl-face">
-                            <div class="vinyl-disc"></div>
-                        </div>
-                        <div class="vinyl-back-face">
-                            <div class="vinyl-disc"></div>
-                            <span class="back-title">Hatua Kwa Hatua</span>
-                        </div>
+            <div class="vinyl-grid" id="vinylGrid">
+                <div class="vinyl-card" data-src="Hatua Kwa Hatua (Remastered).mp3" data-track="01" data-title="Hatua Kwa Hatua" role="button" tabindex="0" aria-label="Play Hatua Kwa Hatua">
+                    <div class="vinyl-flip"><span class="disc-still" aria-hidden="true"></span><canvas class="vinyl-3d" aria-hidden="true"></canvas></div>
+                    <div class="track-info">
+                        <div class="track-num">01</div>
+                        <div class="track-name">Hatua Kwa Hatua</div>
+                        <div class="track-status">▶ playing</div>
                     </div>
                 </div>
-                <div class="track-info">
-                    <div class="track-num">01</div>
-                    <div class="track-name">Hatua Kwa Hatua</div>
-                    <div class="track-status">▶ playing</div>
-                </div>
-            </div>
 
-            <!-- Track 02 — Kuwa Hapa Sa -->
-            <div class="vinyl-card" data-src="Kuwa Hapa Sa.mp3" data-track="02">
-                <div class="vinyl-flip">
-                    <div class="vinyl-inner">
-                        <div class="vinyl-face">
-                            <div class="vinyl-disc"></div>
-                        </div>
-                        <div class="vinyl-back-face">
-                            <div class="vinyl-disc"></div>
-                            <span class="back-title">Kuwa Hapa Sa</span>
-                        </div>
+                <div class="vinyl-card" data-src="Kuwa Hapa Sa.mp3" data-track="02" data-title="Kuwa Hapa Sa" role="button" tabindex="0" aria-label="Play Kuwa Hapa Sa">
+                    <div class="vinyl-flip"><span class="disc-still" aria-hidden="true"></span><canvas class="vinyl-3d" aria-hidden="true"></canvas></div>
+                    <div class="track-info">
+                        <div class="track-num">02</div>
+                        <div class="track-name">Kuwa Hapa Sa</div>
+                        <div class="track-status">▶ playing</div>
                     </div>
                 </div>
-                <div class="track-info">
-                    <div class="track-num">02</div>
-                    <div class="track-name">Kuwa Hapa Sa</div>
-                    <div class="track-status">▶ playing</div>
-                </div>
-            </div>
 
-            <!-- Track 03 — Tiririka -->
-            <div class="vinyl-card" data-src="Tiririka.mp3" data-track="03">
-                <div class="vinyl-flip">
-                    <div class="vinyl-inner">
-                        <div class="vinyl-face">
-                            <div class="vinyl-disc"></div>
-                        </div>
-                        <div class="vinyl-back-face">
-                            <div class="vinyl-disc"></div>
-                            <span class="back-title">Tiririka</span>
-                        </div>
+                <div class="vinyl-card" data-src="Tiririka.mp3" data-track="03" data-title="Tiririka" role="button" tabindex="0" aria-label="Play Tiririka">
+                    <div class="vinyl-flip"><span class="disc-still" aria-hidden="true"></span><canvas class="vinyl-3d" aria-hidden="true"></canvas></div>
+                    <div class="track-info">
+                        <div class="track-num">03</div>
+                        <div class="track-name">Tiririka</div>
+                        <div class="track-status">▶ playing</div>
                     </div>
                 </div>
-                <div class="track-info">
-                    <div class="track-num">03</div>
-                    <div class="track-name">Tiririka</div>
-                    <div class="track-status">▶ playing</div>
-                </div>
-            </div>
 
-            <!-- Track 04 — Nashukuru -->
-            <div class="vinyl-card" data-src="Nashukuru.mp3" data-track="04">
-                <div class="vinyl-flip">
-                    <div class="vinyl-inner">
-                        <div class="vinyl-face">
-                            <div class="vinyl-disc"></div>
-                        </div>
-                        <div class="vinyl-back-face">
-                            <div class="vinyl-disc"></div>
-                            <span class="back-title">Nashukuru</span>
-                        </div>
+                <div class="vinyl-card" data-src="Nashukuru.mp3" data-track="04" data-title="Nashukuru" role="button" tabindex="0" aria-label="Play Nashukuru">
+                    <div class="vinyl-flip"><span class="disc-still" aria-hidden="true"></span><canvas class="vinyl-3d" aria-hidden="true"></canvas></div>
+                    <div class="track-info">
+                        <div class="track-num">04</div>
+                        <div class="track-name">Nashukuru</div>
+                        <div class="track-status">▶ playing</div>
                     </div>
                 </div>
-                <div class="track-info">
-                    <div class="track-num">04</div>
-                    <div class="track-name">Nashukuru</div>
-                    <div class="track-status">▶ playing</div>
-                </div>
-            </div>
 
-            <!-- Track 05 — Kuwa Hapa Sa V2 -->
-            <div class="vinyl-card" data-src="Kuwa Hapa Sa V2.mp3" data-track="05">
-                <div class="vinyl-flip">
-                    <div class="vinyl-inner">
-                        <div class="vinyl-face">
-                            <div class="vinyl-disc"></div>
-                        </div>
-                        <div class="vinyl-back-face">
-                            <div class="vinyl-disc"></div>
-                            <span class="back-title">Kuwa Hapa Sa V2</span>
-                        </div>
+                <div class="vinyl-card" data-src="Kuwa Hapa Sa V2.mp3" data-track="05" data-title="Kuwa Hapa Sa V2" role="button" tabindex="0" aria-label="Play Kuwa Hapa Sa V2">
+                    <div class="vinyl-flip"><span class="disc-still" aria-hidden="true"></span><canvas class="vinyl-3d" aria-hidden="true"></canvas></div>
+                    <div class="track-info">
+                        <div class="track-num">05</div>
+                        <div class="track-name">Kuwa Hapa Sa V2</div>
+                        <div class="track-status">▶ playing</div>
                     </div>
                 </div>
-                <div class="track-info">
-                    <div class="track-num">05</div>
-                    <div class="track-name">Kuwa Hapa Sa V2</div>
-                    <div class="track-status">▶ playing</div>
+
+                <div class="vinyl-card coming-soon" data-track="06" aria-hidden="true">
+                    <div class="vinyl-flip"><span class="disc-still" aria-hidden="true"></span><canvas class="vinyl-3d" aria-hidden="true"></canvas></div>
+                    <div class="track-info">
+                        <div class="track-num">06</div>
+                        <div class="track-name">—</div>
+                        <div class="coming-label">coming soon</div>
+                    </div>
+                </div>
+
+                <div class="vinyl-card coming-soon" data-track="07" aria-hidden="true">
+                    <div class="vinyl-flip"><span class="disc-still" aria-hidden="true"></span><canvas class="vinyl-3d" aria-hidden="true"></canvas></div>
+                    <div class="track-info">
+                        <div class="track-num">07</div>
+                        <div class="track-name">—</div>
+                        <div class="coming-label">coming soon</div>
+                    </div>
                 </div>
             </div>
-            <div class="vinyl-card coming-soon">
-                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
-                <div class="track-info"><div class="track-num">06</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
-            </div>
-            <div class="vinyl-card coming-soon">
-                <div class="vinyl-flip"><div class="vinyl-inner"><div class="vinyl-face"><div class="vinyl-disc"></div></div></div></div>
-                <div class="track-info"><div class="track-num">07</div><div class="track-name">—</div><div class="coming-label">coming soon</div></div>
-            </div>
+        </section>
 
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <p class="footer-text">
-            Roho · Fernando García ·
-            <a href="index.html">fernandogarciag.com</a>
-        </p>
-    </footer>
+        <footer>
+            <p class="footer-text">
+                Roho · Fernando García ·
+                <a href="index.html">fernandogarciag.com</a>
+            </p>
+        </footer>
+    </main>
 
     <!-- Player Bar -->
     <div class="player-bar" id="playerBar">
@@ -833,22 +342,38 @@
         </div>
     </div>
 
-    <!-- Hidden audio -->
     <audio id="trackAudio" preload="none"></audio>
 
     <script>
     (function () {
 
-        /* ── Dark mode ── */
+        /* ── Theme: always dark on load; the toggle changes this visit only and, like home, the light
+              side arrives once the hole has blown apart ── */
+        const h = document.documentElement;
         const body = document.body;
         const toggle = document.getElementById('darkToggle');
-        // Dark is always the default; the toggle only changes this visit
-        body.classList.add('dark');
-        toggle.textContent = '☀️';
-        toggle.addEventListener('click', () => {
-            const isDark = body.classList.toggle('dark');
-            toggle.textContent = isDark ? '☀️' : '🌙';
-        });
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        function applyTheme(dark) {
+            [h, body].forEach(el => { el.classList.toggle('dark', dark); el.classList.toggle('claude-mode', dark); el.classList.toggle('light', !dark); });
+            toggle.setAttribute('aria-pressed', String(dark));
+        }
+        let switching = false;
+        function setTheme(dark) {
+            if (dark) { applyTheme(true); window.dispatchEvent(new CustomEvent('space:implode')); return; }
+            if (reduce || !h.classList.contains('space-live') || switching) { applyTheme(false); return; }
+            switching = true; let done = false;
+            const finish = () => { if (done) return; done = true; switching = false; applyTheme(false); };
+            window.addEventListener('space:exploded', finish, { once: true });
+            setTimeout(finish, 1800);
+            window.dispatchEvent(new CustomEvent('space:explode'));
+        }
+        applyTheme(true);
+        toggle.addEventListener('click', () => setTheme(!h.classList.contains('dark')));
+
+        /* ── Nav ── */
+        const nav = document.getElementById('navbar');
+        const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 24);
+        window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
 
         /* ── Track list ── */
         const tracks = Array.from(document.querySelectorAll('.vinyl-card:not(.coming-soon)'));
@@ -1272,7 +797,31 @@
             btnRepeat.classList.toggle('active', repeatMode !== 0);
             btnRepeat.classList.toggle('repeat-one', repeatMode === 1);
         });
+    })();
+    </script>
 
+    <script>
+    /* ── The records: one 3D record per track (assets/js/vinyl.js). The player marks a card
+          `playing`; the record follows. ── */
+    (function () {
+        function wire() {
+            var V = window.Vinyl;
+            if (!V || !V.supported) { document.documentElement.classList.add('no-vinyl'); return; }
+            Array.prototype.forEach.call(document.querySelectorAll('.vinyl-card'), function (card) {
+                var c = card.querySelector('canvas.vinyl-3d'); if (!c) return;
+                var soon = card.classList.contains('coming-soon');
+                var v = V.create(c, {
+                    album: 'Roho', title: soon ? '' : card.dataset.title, artist: soon ? '' : 'Fernando García',
+                    num: card.dataset.track, sub: soon ? 'coming soon' : undefined, hoverEl: soon ? null : card,
+                    onReady: function () { card.classList.add('is-live'); }
+                });
+                card._vinyl = v;
+                new MutationObserver(function () { if (card.classList.contains('playing')) v.play(); else v.stop(); })
+                    .observe(card, { attributes: true, attributeFilter: ['class'] });
+                if (!soon) card.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
     })();
     </script>
 
@@ -1291,6 +840,5 @@
         console.log('%c© Fernando García González — fernandogarciag.com', 'color: #0176D3; font-size: 12px;');
     })();
     </script>
-
 </body>
 </html>

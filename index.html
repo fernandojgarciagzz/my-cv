@@ -246,43 +246,18 @@
         .photo-hint { position: absolute; bottom: 8%; right: 8%; z-index: 5; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: var(--t-small); color: var(--accent); background: var(--accent-glow); opacity: 0; pointer-events: none; transition: opacity 0.4s; }
         .photo-wrap:hover .photo-hint { opacity: 1; }
         .vinyl-active .photo-hint { display: none; }
-        .photo-wrap::before {
-            content: ''; position: absolute; inset: 0; border-radius: 50%; z-index: 2;
-            pointer-events: none; backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: rotateY(180deg);
-            background:
-                radial-gradient(circle, transparent 93%, rgba(255,255,255,0.05) 93.5%, rgba(0,0,0,0.35) 96%, #1a1008 97%, transparent 97.5%),
-                conic-gradient(from 200deg at 50% 50%, transparent 0deg, rgba(255,255,255,0.07) 30deg, rgba(255,255,255,0.1) 50deg, transparent 80deg, transparent 360deg),
-                radial-gradient(circle, #2D1F14 0%, #2D1F14 15.5%, transparent 16%),
-                radial-gradient(circle, rgba(217,119,87,0.3) 16.5%, transparent 17%),
-                radial-gradient(circle, transparent 20%, rgba(217,119,87,0.07) 20.2%, transparent 20.8%),
-                radial-gradient(circle, transparent 25%, rgba(255,255,255,0.035) 25.2%, transparent 25.8%),
-                radial-gradient(circle, transparent 30%, rgba(217,119,87,0.06) 30.2%, transparent 30.8%),
-                radial-gradient(circle, transparent 35%, rgba(255,255,255,0.03) 35.2%, transparent 35.8%),
-                radial-gradient(circle, transparent 40%, rgba(217,119,87,0.05) 40.2%, transparent 40.8%),
-                radial-gradient(circle, transparent 45%, rgba(255,255,255,0.03) 45.2%, transparent 45.8%),
-                radial-gradient(circle, transparent 50%, rgba(217,119,87,0.045) 50.2%, transparent 50.8%),
-                radial-gradient(circle, transparent 55%, rgba(255,255,255,0.025) 55.2%, transparent 55.8%),
-                radial-gradient(circle, transparent 60%, rgba(217,119,87,0.04) 60.2%, transparent 60.8%),
-                radial-gradient(circle, transparent 65%, rgba(255,255,255,0.025) 65.2%, transparent 65.8%),
-                radial-gradient(circle, transparent 70%, rgba(217,119,87,0.035) 70.2%, transparent 70.8%),
-                radial-gradient(circle, transparent 75%, rgba(255,255,255,0.02) 75.2%, transparent 75.8%),
-                radial-gradient(circle, transparent 80%, rgba(217,119,87,0.03) 80.2%, transparent 80.8%),
-                radial-gradient(circle, transparent 85%, rgba(255,255,255,0.02) 85.2%, transparent 85.8%),
-                radial-gradient(circle, transparent 90%, rgba(255,255,255,0.015) 90.2%, transparent 90.8%),
-                conic-gradient(from 0deg, #1a1008, #261a10, #1a1008, #2D1F14, #1a1008, #261a10, #1a1008, #2D1F14);
+        /* The back of the photo is a real record: a 3D canvas drawn by assets/js/vinyl.js.
+           It is a little larger than the photo so the tilted disc can break the circle. */
+        .photo-back { position: absolute; inset: -16%; z-index: 2; transform: rotateY(180deg); backface-visibility: hidden; -webkit-backface-visibility: hidden; pointer-events: none; }
+        .photo-back canvas { width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.5s ease; }
+        .photo-back.is-live canvas { opacity: 1; }
+        .photo-back::before {                                        /* a plain record stands in until the 3D one has drawn */
+            content: ''; position: absolute; inset: 12.2%; border-radius: 50%; transition: opacity 0.5s ease;
+            background: radial-gradient(circle, #1a0d06 0 2.2%, #FFB27A 2.6% 30%, #C4633F 31% 33%, #14100d 33.5%, #0f0c0a 100%);
         }
-        .photo-wrap::after {
-            content: ''; position: absolute; top: 50%; left: 50%; z-index: 3; width: 22%; height: 22%; border-radius: 50%;
-            transform: translate(-50%, -50%) rotateY(180deg); pointer-events: none; backface-visibility: hidden; -webkit-backface-visibility: hidden;
-            background:
-                radial-gradient(circle, #1a1008 0%, #1a1008 10%, transparent 11%),
-                radial-gradient(circle at 35% 30%, rgba(255,255,255,0.18) 0%, transparent 45%),
-                radial-gradient(circle, #F0A882 0%, #D97757 35%, #C4633F 70%, #A8502E 100%);
-            box-shadow: 0 0 14px rgba(217,119,87,0.45), inset 0 1px 3px rgba(255,255,255,0.15), inset 0 -1px 2px rgba(0,0,0,0.2);
-        }
-        .vinyl-active .photo-wrap { transform: rotateY(180deg); border-color: #D97757; box-shadow: 0 0 30px rgba(217,119,87,0.3), 0 0 80px rgba(217,119,87,0.1); }
-        .vinyl-spinning .photo-wrap { animation: vinylSpin 3.5s linear infinite; }
-        @keyframes vinylSpin { from { transform: rotateY(180deg) rotate(0deg); } to { transform: rotateY(180deg) rotate(360deg); } }
+        .photo-back.is-live::before { opacity: 0; }
+        .vinyl-active .photo-wrap { transform: rotateY(180deg); border-color: transparent; box-shadow: none; }
+        .vinyl-active .photo::before { background: radial-gradient(circle, var(--accent-glow), transparent 62%); }
         @keyframes idleNudge { 0%, 90%, 100% { transform: rotate(0deg); } 93% { transform: rotate(2deg); } 96% { transform: rotate(-2deg); } }
         .song-note {
             position: absolute; top: 50%; left: calc(88% + 1rem); z-index: 10; transform: translateY(-50%) translateX(8px);
@@ -789,6 +764,7 @@
             <div class="photo reveal-media" id="photoContainer" style="--d: 0.2s">
                 <div class="photo-wrap" id="vinylTrigger" role="button" tabindex="0" aria-label="Fernando García. Click to flip.">
                     <div class="photo-face"><img src="photo.png" alt="Fernando García" width="512" height="512" fetchpriority="high"></div>
+                    <div class="photo-back" id="photoBack" aria-hidden="true"><canvas id="vinylCanvas"></canvas></div>
                     <span class="photo-hint" aria-hidden="true">♫</span>
                 </div>
                 <div class="song-note" id="songAnnotation" aria-hidden="true">
@@ -1428,7 +1404,7 @@
         var extrasP = null;
         function extras() {
             if (extrasP) return extrasP;
-            extrasP = new Promise(function (res, rej) { var s = d.createElement('script'); s.src = 'assets/js/extras.js?v=3'; s.onload = res; s.onerror = rej; d.body.appendChild(s); });
+            extrasP = new Promise(function (res, rej) { var s = d.createElement('script'); s.src = 'assets/js/extras.js?v=4'; s.onload = res; s.onerror = rej; d.body.appendChild(s); });
             return extrasP;
         }
         var photo = d.getElementById('vinylTrigger');

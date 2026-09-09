@@ -29,6 +29,24 @@
         var FADE = 600, VOL = 0.6, playing = false, spinTimer = null;
         audio.volume = VOL;
 
+        // the record itself: a 3D one (assets/js/vinyl.js) drawn into the back of the photo
+        var back = document.getElementById('photoBack'), vcanvas = document.getElementById('vinylCanvas'), view = null;
+        function whenThree(cb) { var n = 0; (function poll() { if (window.THREE) cb(); else if (++n < 80) setTimeout(poll, 50); })(); }
+        function mountVinyl() {
+            if (view || !vcanvas) return;
+            whenThree(function () {
+                var go = function () {
+                    if (view || !window.Vinyl) return;
+                    view = window.Vinyl.create(vcanvas, { album: 'Roho', title: 'Hatua Kwa Hatua', artist: 'Fernando García', num: '01', hoverEl: container,
+                        onReady: function () { if (back) back.classList.add('is-live'); } });
+                    if (playing && container.classList.contains('vinyl-spinning')) view.play();
+                };
+                if (window.Vinyl) { go(); return; }
+                var s = document.createElement('script'); s.src = 'assets/js/vinyl.js?v=1'; s.onload = go; document.body.appendChild(s);
+            });
+        }
+        mountVinyl();
+
         function fadeIn() {
             audio.volume = 0;
             audio.play().then(function () {
@@ -59,13 +77,14 @@
             container.classList.add('vinyl-active');
             claude(true);
             spinTimer = setTimeout(function () {
-                if (playing) { container.classList.add('vinyl-spinning'); fadeIn(); }
+                if (playing) { container.classList.add('vinyl-spinning'); if (view) view.play(); fadeIn(); }
             }, 800);
         }
         function deactivate() {
             playing = false;
             clearTimeout(spinTimer);
             container.classList.remove('vinyl-spinning');
+            if (view) view.stop();
             fadeOut(function () {
                 audio.currentTime = 0;
                 container.classList.remove('vinyl-active');
@@ -79,6 +98,7 @@
         audio.addEventListener('ended', function () {
             clearTimeout(spinTimer);
             container.classList.remove('vinyl-spinning');
+            if (view) view.stop();
             container.classList.remove('vinyl-active');
             claude(false);
             playing = false;

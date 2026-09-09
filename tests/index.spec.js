@@ -146,6 +146,14 @@ test.describe('Index — structure', () => {
         await page.waitForTimeout(1200);
         await expect(page.locator('html')).toHaveClass(/claude-mode/);
         await expect(page.locator('#photoContainer')).toHaveClass(/vinyl-active/);
+        // the back of the photo is a real 3D record, drawn into its canvas
+        await expect(page.locator('#photoBack')).toHaveClass(/is-live/, { timeout: 6000 });
+        const painted = await page.locator('#vinylCanvas').evaluate(c => {
+            const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+            let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 0) n++;
+            return n / (d.length / 4);
+        });
+        expect(painted).toBeGreaterThan(0.3);
         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
         await page.waitForTimeout(2200);
         await expect(page.locator('html')).not.toHaveClass(/claude-mode/);
