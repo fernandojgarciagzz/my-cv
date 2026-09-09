@@ -471,9 +471,11 @@
         camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
         bhView.set(0, 0, 0).applyMatrix4(camera.matrixWorldInverse);
         sMat.uniforms.uBH.value.copy(bhView);
+        sMat.uniforms.uRs.value = RS * (1 - explode);                 // the hole's pull dies with the explosion
         for (var i = 0; i < gMats.length; i++) {
             var u = gMats[i].uniforms;
             u.uBH.value.copy(bhView);
+            u.uRs.value = RS * (1 - explode);
             u.uTime.value = gMat.uniforms.uTime.value;
             u.uOpacity.value = gMat.uniforms.uOpacity.value;
             u.uExplode.value = gMat.uniforms.uExplode.value;
@@ -501,7 +503,7 @@
         var fade = p < 0.85 ? 1 : Math.max(0, 1 - (p - 0.85) / 1.05);          // fully gone by p ≈ 1.9, before the morph section
         galaxy.visible = fade > 0.002 && explode < 1;
         gMat.uniforms.uOpacity.value = cur.gOp * fade;
-        if (BH) { galaxy2.visible = galaxy.visible; shadowDisc.visible = galaxy.visible; shadowDisc.material.opacity = fade; shadowDisc.lookAt(camera.position); }
+        if (BH) { galaxy2.visible = galaxy.visible; shadowDisc.visible = galaxy.visible && explode < 0.999; shadowDisc.material.opacity = fade * (1 - explode); shadowDisc.scale.setScalar(Math.max(0.001, 1 - explode)); shadowDisc.lookAt(camera.position); }
         gMat.uniforms.uExplode.value = explode;
         sMat.uniforms.uOpacity.value = cur.sOp * (1 - explode);
         var dustIn = Math.max(0, Math.min(1, (p - 0.75) / 0.6));   // dust only once the galaxy has receded
