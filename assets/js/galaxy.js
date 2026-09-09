@@ -67,10 +67,10 @@
     var FORM = 'blackhole';
     var COUNT = isMobile ? 22000 : 60000;
     var RADIUS = 4.6, BRANCHES = 3, SPIN = 1.15, RANDOM = 0.32, RPOW = 2.6;
-    var RS = 0.5, SHADOW = 1.3, DISC_IN = 1.55;                                   // Schwarzschild radius, visual shadow, inner disc edge
+    var RS = 0.5, SHADOW = 1.3, DISC_IN = 1.44, PLUNGE = 1.2;                    // the disc hugs the shadow; the last stretch plunges in                    // Schwarzschild radius, shadow (= far-disc Einstein radius), inner disc edge, plunge floor
     var gPos = new Float32Array(COUNT * 3), gRnd = new Float32Array(COUNT * 3), gScl = new Float32Array(COUNT), gKind = new Float32Array(COUNT);
     if (FORM === 'blackhole') {
-        var nDisc = Math.floor(COUNT * 0.80), nStream = Math.floor(COUNT * 0.08), nJet = COUNT - nDisc - nStream;
+        var nDisc = Math.floor(COUNT * 0.72), nStream = Math.floor(COUNT * 0.07), nCorona = Math.floor(COUNT * 0.10), nJet = COUNT - nDisc - nStream - nCorona;
         for (var i = 0; i < nDisc; i++) {                                         // kind 0: the disc
             var i3 = i * 3, u = Math.random();
             var r = DISC_IN + (RADIUS - DISC_IN) * Math.pow(u, 1.9);
@@ -101,6 +101,24 @@
             gScl[n] = 0.35 + Math.random() * 0.8;
             gKind[n] = 2;
         }
+        for (var c = 0; c < nCorona; c++) {                                       // kind 3: corona on inclined orbits around the hole
+            var ci = nDisc + nStream + nJet + c, c3 = ci * 3;
+            var nx = Math.random() * 2 - 1, ny = Math.random() * 2 - 1, nz = Math.random() * 2 - 1;
+            var nl = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1; nx /= nl; ny /= nl; nz /= nl;
+            var cr = 1.7 + Math.pow(Math.random(), 1.6) * 2.2;
+            // a random point on the circle of radius cr in the plane perpendicular to the orbit normal
+            var ax = Math.abs(nx) < 0.9 ? 1 : 0, ay = ax ? 0 : 1;
+            var ux = ay * nz - 0 * ny, uy = 0 * nx - ax * nz, uz = ax * ny - ay * nx;         // (ax,ay,0) x n
+            var ul = Math.sqrt(ux * ux + uy * uy + uz * uz) || 1; ux /= ul; uy /= ul; uz /= ul;
+            var vx = ny * uz - nz * uy, vy = nz * ux - nx * uz, vz = nx * uy - ny * ux;      // n x u
+            var ca = Math.random() * Math.PI * 2;
+            gPos[c3] = (Math.cos(ca) * ux + Math.sin(ca) * vx) * cr;
+            gPos[c3 + 1] = (Math.cos(ca) * uy + Math.sin(ca) * vy) * cr;
+            gPos[c3 + 2] = (Math.cos(ca) * uz + Math.sin(ca) * vz) * cr;
+            gRnd[c3] = nx; gRnd[c3 + 1] = ny; gRnd[c3 + 2] = nz;                            // the orbit normal rides in aRandom
+            gScl[ci] = 0.3 + Math.random() * 0.6;
+            gKind[ci] = 3;
+        }
     } else {
         for (var g = 0; g < COUNT; g++) {
             var g3 = g * 3;
@@ -129,35 +147,45 @@
         return new THREE.ShaderMaterial({
             transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
             uniforms: {
-                uTime: { value: 0 }, uSize: { value: isMobile ? 22 : 27 }, uPixelRatio: { value: DPR },
+                uTime: { value: 0 }, uSize: { value: isMobile ? 20 : 24 }, uPixelRatio: { value: DPR },
                 uSpin: { value: BH ? 0.26 : 0.09 }, uSpinPow: { value: BH ? 1.5 : 1.0 },
                 uOpacity: { value: 1 }, uRadius: { value: RADIUS }, uInner: { value: DISC_IN },
                 uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
                 uExplode: { value: 0 },
                 uBH: { value: new THREE.Vector3(0, 0, -8) }, uRs: { value: BH ? RS : 0 }, uShadow: { value: SHADOW },
-                uSecondary: { value: secondary ? 1 : 0 }, uFlow: { value: BH ? 0.028 : 0 }, uDoppler: { value: BH ? 1 : 0 }
+                uSecondary: { value: secondary ? 1 : 0 }, uFlow: { value: BH ? 0.032 : 0 }, uDoppler: { value: BH ? 1 : 0 }, uPlunge: { value: PLUNGE }
             },
             vertexShader: [
                 'uniform float uTime; uniform float uSize; uniform float uPixelRatio; uniform float uRadius; uniform float uInner; uniform float uSpin; uniform float uSpinPow;',
                 'uniform vec3 uInside; uniform vec3 uOutside; uniform float uExplode;',
-                'uniform vec3 uBH; uniform float uRs; uniform float uShadow; uniform float uSecondary; uniform float uFlow; uniform float uDoppler;',
+                'uniform vec3 uBH; uniform float uRs; uniform float uShadow; uniform float uSecondary; uniform float uFlow; uniform float uDoppler; uniform float uPlunge;',
                 'attribute vec3 aRandom; attribute float aScale; attribute float aKind;',
                 'varying vec3 vColor; varying float vAlpha;',
                 'void main() {',
                 '  vec3 p = position; float ang = atan(p.x, p.z); float r0 = length(p.xz);',
-                '  vec3 q; vec3 tdir = vec3(0.0); float fade = 1.0; float tcol = 0.0;',
+                '  vec3 q; vec3 tdir = vec3(0.0); float fade = 1.0; float tcol = 0.0; float plungeK = 0.0;',
                 '  if (aKind < 0.5) {',
-                '    float span = uRadius - uInner + fract(aScale * 7.31 + aRandom.z * 53.0) * 3.2;',   // wrap radius spread 4.6–7.8: no hard outer rim
-                '    float r = uInner + mod(r0 - uInner + span - uTime * uFlow, span);',
-                '    ang += uTime * uSpin / pow(max(r, 0.6), uSpinPow);',
-                '    q = vec3(sin(ang) * r, 0.0, cos(ang) * r) + aRandom;',
+                // disc: slow accretion inflow; below the inner edge matter plunges into the hole (tighter spiral,
+                // fading) before it is reborn at a soft outer edge. Wrap radius is spread so there is no hard rim.
+                '    float span = uRadius - uPlunge + fract(aScale * 7.31 + aRandom.z * 53.0) * 3.2;',
+                '    float r = uPlunge + mod(r0 - uPlunge + span - uTime * uFlow, span);',
+                '    float plunge = 1.0 - smoothstep(uPlunge, uInner, r);',
+                '    ang += uTime * uSpin / pow(max(r, 0.6), uSpinPow) + plunge * plunge * 3.0;',
+                '    q = vec3(sin(ang) * r, 0.0, cos(ang) * r) + aRandom * (1.0 - plunge * 0.7);',
                 '    tdir = vec3(cos(ang), 0.0, -sin(ang));',
                 '    tcol = clamp((r - uInner) / (uRadius - uInner), 0.0, 1.0);',
+                '    fade = 1.0 - plunge * 0.55; plungeK = plunge;',
                 '  } else if (aKind < 1.5) {',
                 '    ang += uTime * uSpin / pow(max(r0, 0.6), uSpinPow);',
                 '    q = vec3(sin(ang) * r0, p.y, cos(ang) * r0) + aRandom;',
                 '    tdir = vec3(cos(ang), 0.0, -sin(ang));',
                 '    tcol = clamp((r0 - uInner) / (uRadius - uInner), 0.0, 1.0);',
+                '  } else if (aKind > 2.5) {',
+                // corona: orbits on inclined planes around the hole (Rodrigues rotation about the orbit normal)
+                '    vec3 nrm = normalize(aRandom); float cr = length(p);',
+                '    float ca = uTime * 0.32 / pow(max(cr, 0.8), 1.5);',
+                '    q = p * cos(ca) + cross(nrm, p) * sin(ca) + nrm * dot(nrm, p) * (1.0 - cos(ca));',
+                '    fade = 0.7; tcol = 0.7;',
                 '  } else {',
                 '    float h0 = abs(p.y); float dn = sign(p.y);',
                 '    float h = 0.4 + mod(h0 - 0.4 + uTime * 0.9 * (0.7 + aScale * 0.4), 5.6);',
@@ -171,7 +199,7 @@
                 '  vec3 pv = (modelViewMatrix * vec4(q, 1.0)).xyz;',
                 '  float dop = 0.0;',
                 '  if (aKind < 1.5) { vec3 tv = normalize((modelViewMatrix * vec4(tdir, 0.0)).xyz); dop = dot(tv, -normalize(pv)) * uDoppler; }',
-                '  float bright = 1.0 + 0.55 * dop;',
+                '  float bright = 1.0 + 0.4 * dop;',
                 '  float Ds = length(pv); float Dl = length(uBH);',
                 '  vec3 axis = uBH / Dl; vec3 dir = pv / Ds;',
                 '  float cb = clamp(dot(dir, axis), -1.0, 1.0); float beta = acos(cb);',
@@ -181,17 +209,27 @@
                 '  float theta = uSecondary > 0.5 ? 0.5 * (beta - root) : 0.5 * (beta + root);',
                 '  vec3 perp = dir - axis * cb; float pl = length(perp);',
                 '  vec3 pn = pl > 1e-4 ? perp / pl : normalize(cross(axis, vec3(0.0, 1.0, 0.0)));',
+                '  float shadowAng = atan(uShadow, Dl);',
+                '  float behind = Ds > Dl * cb ? 1.0 : 0.0;',
+                '  float inShadow = abs(theta) < shadowAng ? 1.0 : 0.0;',
+                // light from behind that would land inside the shadow piles up at its edge instead (the photon
+                // ring), fading the deeper it came from; light from in front simply crosses the disc
+                '  float visible = 1.0;',
+                '  if (behind > 0.5 && inShadow > 0.5) {',
+                '    float ath = abs(theta); float sgn = theta < 0.0 ? -1.0 : 1.0;',
+                '    fade *= 0.25 + 0.75 * smoothstep(0.0, shadowAng, ath);',
+                '    theta = sgn * (shadowAng * 1.02 + (shadowAng - ath) * 0.3);',
+                '  }',
+                '  if (inShadow > 0.5 && behind < 0.5) { if (aKind > 1.5 && aKind < 2.5) fade *= 0.15; if (aKind < 0.5) fade *= (1.0 - plungeK); }',
+                '  if (uSecondary > 0.5 && tE2 <= 0.0) visible = 0.0;',
                 '  vec3 nd = axis * cos(theta) + pn * sin(theta);',
                 '  pv = nd * Ds;',
-                '  float shadowAng = atan(uShadow, Dl);',
-                '  float visible = (Dls > 0.0 && abs(theta) < shadowAng) ? 0.0 : 1.0;',
-                '  if (uSecondary > 0.5 && tE2 <= 0.0) visible = 0.0;',
                 '  gl_Position = projectionMatrix * vec4(pv, 1.0);',
-                '  float sizeK = aKind < 0.5 ? (1.25 - 0.75 * tcol) : 1.0;',                       // hot and bold inside, faint far out
+                '  float sizeK = aKind < 0.5 ? (1.0 - 0.5 * tcol) : 1.0;',                        // hot inside, faint far out
                 '  gl_PointSize = uSize * aScale * uPixelRatio * bright * sizeK * (1.0 / max(-pv.z, 0.1));',
-                '  vec3 base = aKind > 1.5 ? mix(uOutside, vec3(1.0), 0.55) : mix(uInside, uOutside, tcol);',
-                '  vColor = mix(base, dop > 0.0 ? vec3(1.0) : uOutside, abs(dop) * 0.35);',
-                '  vAlpha = visible * fade * (uSecondary > 0.5 ? 0.5 : 1.0);',
+                '  vec3 base = (aKind > 1.5 && aKind < 2.5) ? mix(uOutside, vec3(1.0), 0.55) : mix(uInside, uOutside, tcol);',
+                '  vColor = mix(base, dop > 0.0 ? vec3(1.0) : uOutside, abs(dop) * 0.3);',
+                '  vAlpha = visible * fade * (uSecondary > 0.5 ? 0.8 : 1.0);',
                 '}'
             ].join('\n'),
             fragmentShader: [
@@ -212,16 +250,21 @@
     gGroup.rotation.z = 0.14;
     scene.add(gGroup);
 
-    /* ── Shadow sphere + secondary image (black hole only) ────────────── */
-    var horizon = null, galaxy2 = null;
+    /* ── Secondary image (black hole only). The shadow is not an object: it is the
+       light that never arrives, handled by the capture rule in every shader. ── */
+    var galaxy2 = null, shadowDisc = null;
     if (BH) {
-        horizon = new THREE.Mesh(new THREE.SphereGeometry(SHADOW, 48, 32), new THREE.MeshBasicMaterial({ color: 0x000000 }));
-        horizon.renderOrder = -1;
-        gGroup.add(horizon);
-        galaxy.renderOrder = 1;
         galaxy2 = new THREE.Points(gGeo, gMat2);
         galaxy2.renderOrder = 1;
         gGroup.add(galaxy2);
+        // The shadow itself: a flat black disc that always faces the camera. No shading, no rim, no volume,
+        // only a perfect circle of absence; it writes depth so anything behind it is gone and the near
+        // side of the disc still crosses in front of it.
+        shadowDisc = new THREE.Mesh(new THREE.CircleGeometry(SHADOW, 96), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+        shadowDisc.renderOrder = -1;
+        scene.add(shadowDisc);
+        var glowEl = document.querySelector('.space-glow');
+        if (glowEl) glowEl.style.display = 'none';                          // nothing may glow inside the shadow
     }
 
     /* ── Star field ─────────────────────────────────────────────────── */
@@ -241,21 +284,35 @@
     sGeo.setAttribute('aSeed', new THREE.BufferAttribute(sSeed, 1));
     var sMat = new THREE.ShaderMaterial({
         transparent: true, depthWrite: false, blending: THREE.NormalBlending,
-        uniforms: { uTime: { value: 0 }, uPixelRatio: { value: DPR }, uOpacity: { value: 0.85 }, uColor: { value: new THREE.Color('#D8E3F3') }, uTwinkle: { value: reduce ? 0 : 1 } },
+        uniforms: { uTime: { value: 0 }, uPixelRatio: { value: DPR }, uOpacity: { value: 0.85 }, uColor: { value: new THREE.Color('#D8E3F3') }, uTwinkle: { value: reduce ? 0 : 1 },
+                    uBH: { value: new THREE.Vector3(0, 0, -8) }, uRs: { value: BH ? RS : 0 }, uShadow: { value: SHADOW } },
         vertexShader: [
-            'uniform float uPixelRatio; attribute float aScale; attribute float aSeed; varying float vSeed;',
+            'uniform float uPixelRatio; uniform vec3 uBH; uniform float uRs; uniform float uShadow;',
+            'attribute float aScale; attribute float aSeed; varying float vSeed; varying float vVis;',
             'void main() {',
-            '  vec4 mv = modelViewMatrix * vec4(position, 1.0);',
-            '  gl_Position = projectionMatrix * mv;',
-            '  gl_PointSize = max(0.0, aScale * 2.4 * uPixelRatio * (40.0 / -mv.z));',
+            '  vec3 pv = (modelViewMatrix * vec4(position, 1.0)).xyz;',
+            // the background is lensed by the hole too, and captured inside the shadow
+            '  float Ds = length(pv); float Dl = length(uBH);',
+            '  vec3 axis = uBH / Dl; vec3 dir = pv / Ds;',
+            '  float cb = clamp(dot(dir, axis), -1.0, 1.0); float beta = acos(cb);',
+            '  float Dls = Ds - Dl;',
+            '  float tE2 = max(0.0, 2.0 * uRs * Dls / (Dl * Ds));',
+            '  float theta = 0.5 * (beta + sqrt(beta * beta + 4.0 * tE2));',
+            '  vec3 perp = dir - axis * cb; float pl = length(perp);',
+            '  vec3 pn = pl > 1e-4 ? perp / pl : normalize(cross(axis, vec3(0.0, 1.0, 0.0)));',
+            '  float sh = atan(uShadow, Dl); vVis = 1.0;',
+            '  if (Dls > 0.0 && theta < sh) vVis = 0.0;',                                              // stars behind the hole are simply gone
+            '  pv = (axis * cos(theta) + pn * sin(theta)) * Ds;',
+            '  gl_Position = projectionMatrix * vec4(pv, 1.0);',
+            '  gl_PointSize = max(0.0, aScale * 2.4 * uPixelRatio * (40.0 / -pv.z));',
             '  vSeed = aSeed;',
             '}'
         ].join('\n'),
         fragmentShader: [
-            'uniform float uTime; uniform float uOpacity; uniform vec3 uColor; uniform float uTwinkle; varying float vSeed;',
+            'uniform float uTime; uniform float uOpacity; uniform vec3 uColor; uniform float uTwinkle; varying float vSeed; varying float vVis;',
             'void main() {', SOFT_DISC, ' a *= a;',
             '  float tw = mix(0.85, 0.55 + 0.45 * sin(uTime * (0.5 + vSeed * 1.5) + vSeed * 50.0), uTwinkle);',
-            '  gl_FragColor = vec4(uColor, a * tw * uOpacity);',
+            '  gl_FragColor = vec4(uColor, a * tw * uOpacity * vVis);',
             '}'
         ].join('\n')
     });
@@ -408,6 +465,7 @@
         camera.updateMatrixWorld();
         camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
         bhView.set(0, 0, 0).applyMatrix4(camera.matrixWorldInverse);
+        sMat.uniforms.uBH.value.copy(bhView);
         for (var i = 0; i < gMats.length; i++) {
             var u = gMats[i].uniforms;
             u.uBH.value.copy(bhView);
@@ -429,7 +487,7 @@
 
         // Camera: opens a little further out (cleaner start), pulls back through the hero,
         // then keeps looking lower so the galaxy drifts up and out while the stars and dust remain.
-        camera.position.set(0, (FORM === 'blackhole' ? 2.0 : 3.5) + zoom * 2.6, 7.6 + zoom * 5.6);
+        camera.position.set(0, (FORM === 'blackhole' ? 2.45 : 3.5) + zoom * 2.6, 7.6 + zoom * 5.6);
         camera.lookAt(0, -(zoom + after * 0.9) * 1.15, 0);
         gGroup.rotation.y = t * 0.018 + zoom * 1.1 + drag.ry + tiltY;
         gGroup.rotation.x = clamp(drag.rx + tiltX, -0.9, 0.9);
@@ -438,7 +496,7 @@
         var fade = p < 0.85 ? 1 : (p < 2.3 ? Math.max(0.3, 1 - (p - 0.85) * 1.3) : Math.max(0, 0.3 * (1 - (p - 2.3) / 0.7)));
         galaxy.visible = fade > 0.002 && explode < 1;
         gMat.uniforms.uOpacity.value = cur.gOp * fade;
-        if (BH) { horizon.visible = fade > 0.002 && explode < 1; galaxy2.visible = galaxy.visible; }
+        if (BH) { galaxy2.visible = galaxy.visible; shadowDisc.visible = galaxy.visible; shadowDisc.lookAt(camera.position); }
         gMat.uniforms.uExplode.value = explode;
         sMat.uniforms.uOpacity.value = cur.sOp * (1 - explode);
         var dustIn = Math.max(0, Math.min(1, (p - 0.75) / 0.6));   // dust only once the galaxy has receded
