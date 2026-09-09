@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="assets/js/galaxy.js?v=6" defer></script>
     <style>
         body {
             -webkit-user-select: none;
@@ -138,10 +140,16 @@
             stroke-linecap: round;
         }
 
-        /* ── Game canvas — fills remaining space ── */
+        /* ── The black hole from the home page, dimmed, behind the whole game ── */
+        #space { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.4s ease; }
+        html.space-live #space { opacity: 0.44; }
+        html.no-webgl #space { display: none; }
+
+        /* ── Game canvas — fills remaining space, transparent so the hole shows through ── */
         .game-area {
             flex: 1;
             position: relative;
+            z-index: 1;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             overflow: hidden;
@@ -187,10 +195,15 @@
             color: var(--text-3);
             text-transform: uppercase;
             transition: background 0.4s ease, border-color 0.4s ease;
+            gap: 1rem;
         }
+        .score-bar span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #gameScore { flex-shrink: 0; }
     </style>
 </head>
 <body>
+
+    <canvas id="space" data-ambient data-count="26000" aria-hidden="true"></canvas>
 
     <nav>
         <div class="nav-inner">
@@ -224,20 +237,26 @@
     </div>
 
     <div class="score-bar">
-        <span id="gameScoreBar">press space or tap to start</span>
+        <span id="gameScoreBar">hold space to fly · avoid the rocks</span>
+        <span id="gameScore"></span>
     </div>
 
     <!-- Dark mode toggle -->
     <script>
     (function(){
         const btn = document.getElementById('darkToggle');
-        // Dark is always the default; the toggle only changes this visit
-        document.body.classList.add('dark'); btn.innerHTML = '&#x2600;';
-        btn.addEventListener('click', () => {
-            document.body.classList.toggle('dark');
-            const isDark = document.body.classList.contains('dark');
-            btn.innerHTML = isDark ? '&#x2600;' : '&#x1F319;';
-        });
+        const root = document.documentElement;
+        // Dark is always the default; the toggle only changes this visit. The black hole reads these
+        // classes off <html>, so it turns with the page: warm on black, ink and rust on white.
+        function apply(dark) {
+            document.body.classList.toggle('dark', dark);
+            root.classList.toggle('dark', dark);
+            root.classList.toggle('light', !dark);
+            root.classList.add('claude-mode');
+            btn.innerHTML = dark ? '&#x2600;' : '&#x1F319;';
+        }
+        apply(true);
+        btn.addEventListener('click', () => apply(!document.body.classList.contains('dark')));
     })();
     </script>
 
@@ -255,756 +274,462 @@
     })();
     </script>
 
-    <!-- AI Agent Runner Game -->
+    <!-- Orbit — fly the rocket past the rocks; the black hole watches -->
     <script>
-    (function() {
-        const wrap   = document.getElementById('gameArea');
-        const canvas = document.getElementById('gameCanvas');
-        const ctx    = canvas.getContext('2d');
-        const bar    = document.getElementById('gameScoreBar');
-        const muteBtn = document.getElementById('muteBtn');
-        const soundOn = document.getElementById('soundOn');
-        const soundOff = document.getElementById('soundOff');
+    (function () {
+        'use strict';
+        var wrap = document.getElementById('gameArea');
+        var canvas = document.getElementById('gameCanvas');
+        var ctx = canvas.getContext('2d');
+        var bar = document.getElementById('gameScoreBar');
+        var scoreEl = document.getElementById('gameScore');
+        var muteBtn = document.getElementById('muteBtn');
+        var soundOn = document.getElementById('soundOn');
+        var soundOff = document.getElementById('soundOff');
 
-        /* ── Theme colors — always warm/orange ── */
-        function getColors() {
-            const dark = document.body.classList.contains('dark');
-            return {
-                bg:      dark ? '#160C06' : '#FAF6F1',
-                fg:      '#D97757',
-                fgLight: '#F0A882',
-                fgAlpha: 'rgba(217,119,87,0.12)',
-                ground:  dark ? '#F2EAE0' : '#2D1A0E',
-                muted:   dark ? '#C4A48A' : '#A8866E',
-                dim:     dark ? '#2A1A0D' : '#EFE7DC',
-                text:    dark ? '#F2EAE0' : '#2D1A0E',
-                card:    dark ? '#2A1A0D' : '#FFFFFF',
-            };
-        }
-
-        /* ── Canvas sizing — fills game area ── */
+        /* ── Canvas ─────────────────────────────────────────────────── */
+        var DPR = 1, W = 0, H = 0;
         function resize() {
-            const rect = wrap.getBoundingClientRect();
-            canvas.width  = rect.width * devicePixelRatio;
-            canvas.height = rect.height * devicePixelRatio;
-            ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+            var r = wrap.getBoundingClientRect();
+            DPR = Math.min(window.devicePixelRatio || 1, 2);
+            W = r.width; H = r.height;
+            canvas.width = Math.max(1, Math.round(W * DPR));
+            canvas.height = Math.max(1, Math.round(H * DPR));
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+            buildTerrain();
         }
-        resize();
         window.addEventListener('resize', resize);
 
-        const W = () => wrap.clientWidth;
-        const H = () => wrap.clientHeight;
-        const GROUND_PCT = 0.80;
-
-        /* ── Pixel sprite helper ── */
-        function drawSprite(sprite, x, y, s, color) {
-            ctx.fillStyle = color;
-            for (let r = 0; r < sprite.length; r++)
-                for (let c = 0; c < sprite[r].length; c++)
-                    if (sprite[r][c] === 1)
-                        ctx.fillRect(x + c * s, y + r * s, s, s);
+        function css(name, fallback) {
+            var v = getComputedStyle(document.body).getPropertyValue(name).trim();
+            return v || fallback;
         }
+        var TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+        var GO = TOUCH ? 'tap to fly again' : 'press space to fly again';
+        function rand(a, b) { return a + Math.random() * (b - a); }
+        function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 
-        /* ── Sprites ── */
-        const SPR = {
-            stand: [
-                [0,0,0,0,1,1,0,0,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,1,0,1,1,0,1,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,1,1,1,1,1,1,1,1,0],
-                [0,1,1,1,1,1,1,1,1,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,0,0,1,0,0,1,0,0,0],
-                [0,0,1,1,0,0,1,1,0,0],
-                [0,0,1,1,0,0,1,1,0,0],
-            ],
-            run2: [
-                [0,0,0,0,1,1,0,0,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,1,0,1,1,0,1,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,1,1,1,1,1,1,1,1,0],
-                [0,1,1,1,1,1,1,1,1,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,0,1,1,0,0,0,1,0,0],
-                [0,1,1,0,0,0,0,1,1,0],
-                [0,1,0,0,0,0,0,0,1,0],
-            ],
-            crouch: [
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,1,0,1,1,0,1,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,1,1,1,1,1,1,1,1,0],
-                [0,1,1,1,1,1,1,1,1,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,1,1,0,0,0,0,1,1,0],
-                [0,1,0,0,0,0,0,0,1,0],
-            ],
-            jump: [
-                [0,0,0,0,1,1,0,0,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,1,0,1,1,0,1,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,1,1,1,1,1,1,1,1,0],
-                [0,1,1,1,1,1,1,1,1,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,0,0,1,0,0,1,0,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,0,0,0,0,0,0,0,0,0],
-            ],
-            grill: [
-                [0,1,0,1,0,1,0,1,0,1,0,0],
-                [1,1,1,1,1,1,1,1,1,1,1,0],
-                [1,0,1,0,1,0,1,0,1,0,1,0],
-                [1,1,1,1,1,1,1,1,1,1,1,0],
-                [0,1,1,1,1,1,1,1,1,1,0,0],
-                [0,0,1,0,0,0,0,0,1,0,0,0],
-                [0,0,1,0,0,0,0,0,1,0,0,0],
-                [0,0,1,0,0,0,0,0,1,0,0,0],
-                [0,1,1,1,0,0,0,1,1,1,0,0],
-                [0,1,0,1,0,0,0,1,0,1,0,0],
-            ],
-            ball: [
-                [0,0,1,1,1,1,0,0],
-                [0,1,1,0,0,1,1,0],
-                [1,1,0,1,1,0,1,1],
-                [1,0,1,1,1,1,0,1],
-                [1,0,1,1,1,1,0,1],
-                [1,1,0,1,1,0,1,1],
-                [0,1,1,0,0,1,1,0],
-                [0,0,1,1,1,1,0,0],
-            ],
-            tent: [
-                [0,0,0,0,1,1,0,0,0,0],
-                [0,0,0,1,1,1,1,0,0,0],
-                [0,0,1,1,1,1,1,1,0,0],
-                [0,1,1,1,0,0,1,1,1,0],
-                [1,1,1,0,0,0,0,1,1,1],
-                [1,1,0,0,1,1,0,0,1,1],
-                [1,0,0,0,1,1,0,0,0,1],
-                [1,0,0,0,1,1,0,0,0,1],
-            ],
-            laptop: [
-                [0,1,1,1,1,1,1,1,1,0],
-                [0,1,0,1,0,1,0,0,1,0],
-                [0,1,0,0,1,0,1,0,1,0],
-                [0,1,0,1,0,0,0,1,1,0],
-                [0,1,1,1,1,1,1,1,1,0],
-                [1,1,1,1,1,1,1,1,1,1],
-                [0,1,1,1,1,1,1,1,1,0],
-            ],
-            book: [
-                [0,1,0,0,0,0,0,0,0,0,1,0],
-                [1,1,1,1,1,1,1,1,1,1,1,1],
-                [0,1,1,0,1,0,1,0,1,1,1,0],
-                [0,1,1,0,0,1,0,1,0,1,1,0],
-                [0,1,1,1,1,1,1,1,1,1,1,0],
-                [0,0,1,1,1,1,1,1,1,1,0,0],
-            ],
-            bug: [
-                [1,0,0,0,0,0,0,1],
-                [0,1,0,1,1,0,1,0],
-                [0,0,1,1,1,1,0,0],
-                [1,0,1,1,1,1,0,1],
-                [0,0,1,1,1,1,0,0],
-                [0,1,0,0,0,0,1,0],
-            ],
-            dash: [
-                [1,1,1,1,1,1,1,1,1,1],
-                [1,0,0,0,0,0,0,0,0,1],
-                [1,0,1,0,1,0,0,1,0,1],
-                [1,0,1,0,1,0,1,1,0,1],
-                [1,0,1,0,1,0,1,1,0,1],
-                [1,0,1,1,1,0,1,1,0,1],
-                [1,0,0,0,0,0,0,0,0,1],
-                [1,1,1,1,1,1,1,1,1,1],
-            ],
-            padel: [
-                [0,0,1,1,0,0],
-                [0,1,0,0,1,0],
-                [1,0,1,0,0,1],
-                [1,0,0,1,0,1],
-                [0,1,0,0,1,0],
-                [0,0,1,1,0,0],
-            ],
-        };
-
-        /* ── Obstacle templates ── */
-        const OBS_TEMPLATES = [
-            { name: 'grill',   spr: 'grill',  type: 'ground', scale: 3.5 },
-            { name: 'ball',    spr: 'ball',   type: 'ground', scale: 3   },
-            { name: 'tent',    spr: 'tent',   type: 'ground', scale: 3.5 },
-            { name: 'laptop',  spr: 'laptop', type: 'ground', scale: 3   },
-            { name: 'dash',    spr: 'dash',   type: 'ground', scale: 3   },
-            { name: 'padel',   spr: 'padel',  type: 'ground', scale: 3   },
-            { name: 'book',    spr: 'book',   type: 'air',    scale: 3   },
-            { name: 'bug',     spr: 'bug',    type: 'air',    scale: 3   },
-        ];
-
-        /* ── Game state ── */
-        const PX = 3;
-        let state = 'idle'; // idle | running | over
-        let score = 0, hiScore = parseInt(localStorage.getItem('agentRunnerHi')) || 0;
-        let speed = 3.5, frame = 0;
-        let obstacles = [], particles = [], starObj = null;
-
-        let charX, charY, charVY, charW, charH, jumping, crouching, invincible, invTimer;
-        const GRAVITY = 0.55, JUMP_V = -10.5;
-
-        function groundY() { return H() * GROUND_PCT; }
-
-        function resetChar() {
-            charX = W() * 0.12;
-            crouching = false;
-            jumping = false;
-            charW = SPR.stand[0].length * PX;
-            charH = SPR.stand.length * PX;
-            charY = groundY() - charH;
-            charVY = 0;
-            invincible = false;
-            invTimer = 0;
-        }
-
-        /* ── Audio — album playlist that persists across games ── */
-        let muted = false;
-        const ALBUM = ['Nashukuru.mp3', 'Kuwa Hapa Sa.mp3', 'Kuwa Hapa Sa V2.mp3', 'Tiririka.mp3'];
-        let trackIdx = 0;
-        let musicStarted = false;
-
-        const bgMusic = new Audio(ALBUM[0]);
-        bgMusic.volume = 0.5;
-
-        // When a track ends, play the next one
-        bgMusic.addEventListener('ended', () => {
+        /* ── Sound: a thrust that breathes, a chime, a crash ─────────── */
+        var muted = false, actx = null, thrustGain = null;
+        var ALBUM = ['Nashukuru.mp3', 'Kuwa Hapa Sa.mp3', 'Kuwa Hapa Sa V2.mp3', 'Tiririka.mp3'];
+        var trackIdx = 0, musicStarted = false;
+        var bgMusic = new Audio(ALBUM[0]);
+        bgMusic.volume = 0.42;
+        bgMusic.addEventListener('ended', function () {
             trackIdx = (trackIdx + 1) % ALBUM.length;
             bgMusic.src = ALBUM[trackIdx];
-            bgMusic.volume = 0.5;
-            if (!muted) bgMusic.play().catch(() => {});
+            if (!muted && state === 'running') bgMusic.play().catch(function () {});
         });
-
-        // Star power track (plays over bg during invincibility)
-        const starTrack = new Audio('Kuwa Hapa Sa.mp3');
-        starTrack.volume = 0.5;
-        // Prevent starTrack from doing anything when it ends — it's only for star power
-        starTrack.addEventListener('ended', () => { starTrack.pause(); starTrack.currentTime = 80; });
-        let savedBgTime = 0;
-        let savedBgSrc = '';
-
-        let audioCtx = null;
-        function sfx(freq, dur, type, vol) {
+        function audio() {
+            if (actx) return actx;
+            try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+            var n = actx.sampleRate * 2, buf = actx.createBuffer(1, n, actx.sampleRate), d = buf.getChannelData(0);
+            for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+            var src = actx.createBufferSource(); src.buffer = buf; src.loop = true;
+            var lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 380;
+            thrustGain = actx.createGain(); thrustGain.gain.value = 0;
+            src.connect(lp); lp.connect(thrustGain); thrustGain.connect(actx.destination);
+            src.start();
+            return actx;
+        }
+        function thrustSound(on) {
+            var a = audio(); if (!a || !thrustGain) return;
+            thrustGain.gain.setTargetAtTime(muted || !on ? 0 : 0.075, a.currentTime, 0.05);
+        }
+        function blip(f0, f1, dur, type, vol) {
             if (muted) return;
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type || 'square';
-            osc.frequency.value = freq;
-            gain.gain.setValueAtTime(vol || 0.08, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + dur);
+            var a = audio(); if (!a) return;
+            var o = a.createOscillator(), g = a.createGain();
+            o.type = type || 'square';
+            o.frequency.setValueAtTime(f0, a.currentTime);
+            o.frequency.exponentialRampToValueAtTime(Math.max(1, f1), a.currentTime + dur);
+            g.gain.setValueAtTime(vol || 0.07, a.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + dur);
+            o.connect(g); g.connect(a.destination);
+            o.start(); o.stop(a.currentTime + dur);
         }
-
-        let starUnlocked = false;
-        function startMusic() {
+        function boom() {
             if (muted) return;
-            if (!musicStarted) {
-                // First time — start from beginning
-                bgMusic.currentTime = 0;
-                bgMusic.play().catch(() => {});
-                // Unlock starTrack for mobile — load only, don't play
-                starTrack.load();
-                musicStarted = true;
-            } else if (bgMusic.paused) {
-                // Resume where it left off
-                bgMusic.play().catch(() => {});
-            }
+            var a = audio(); if (!a) return;
+            var n = Math.floor(a.sampleRate * 0.6), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+            for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.2);
+            var src = a.createBufferSource(); src.buffer = buf;
+            var lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+            var g = a.createGain(); g.gain.value = 0.5;
+            src.connect(lp); lp.connect(g); g.connect(a.destination);
+            src.start();
         }
-        function pauseMusic() {
-            // Just pause — don't reset position
-            bgMusic.pause();
-            starTrack.pause();
-        }
-
-        function activateStar() {
-            invincible = true;
-            invTimer = 600;
-            sfx(880, 0.15, 'sine', 0.12);
-            sfx(1320, 0.2, 'sine', 0.1);
-            // Crossfade: save bg position, switch to star track
-            savedBgTime = bgMusic.currentTime;
-            savedBgSrc = bgMusic.src;
-            bgMusic.pause();
-            if (!muted) {
-                starTrack.pause();
-                starTrack.currentTime = 80;
-                starTrack.volume = 0;
-                const playPromise = starTrack.play();
-                if (playPromise) {
-                    playPromise.then(() => {
-                        let s = 0; const n = 15;
-                        const iv = setInterval(() => { s++; starTrack.volume = Math.min(0.5, (s/n)*0.5); if (s>=n) clearInterval(iv); }, 30);
-                    }).catch(() => {});
-                }
-            }
-        }
-
-        function deactivateStar() {
-            invincible = false;
-            let s = 0; const n = 20;
-            const iv = setInterval(() => {
-                s++;
-                starTrack.volume = Math.max(0, 0.5 * (1 - s/n));
-                if (s >= n) {
-                    clearInterval(iv);
-                    starTrack.pause();
-                    if (!muted) {
-                        bgMusic.currentTime = savedBgTime;
-                        bgMusic.volume = 0;
-                        bgMusic.play().catch(() => {});
-                        let s2 = 0;
-                        const iv2 = setInterval(() => { s2++; bgMusic.volume = Math.min(0.5, (s2/15)*0.5); if (s2>=15) clearInterval(iv2); }, 30);
-                    }
-                }
-            }, 50);
-        }
-
         function updateMuteUI() {
             soundOn.style.display = muted ? 'none' : 'block';
             soundOff.style.display = muted ? 'block' : 'none';
             muteBtn.classList.toggle('active', !muted);
         }
         updateMuteUI();
-
-        muteBtn.addEventListener('click', e => {
+        muteBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             muted = !muted;
             updateMuteUI();
-            if (muted) { bgMusic.pause(); starTrack.pause(); }
-            else if (state === 'running') { bgMusic.play().catch(() => {}); }
+            if (muted) { bgMusic.pause(); thrustSound(false); }
+            else if (state === 'running') bgMusic.play().catch(function () {});
         });
+        function startMusic() {
+            if (muted) return;
+            if (!musicStarted) { bgMusic.currentTime = 0; musicStarted = true; }
+            bgMusic.play().catch(function () {});
+        }
 
-        /* ── Obstacle spawning ── */
-        let spawnTimer = 0, minSpawn = 90;
+        /* ── World ──────────────────────────────────────────────────── */
+        var state = 'idle';
+        var score = 0, best = parseInt(localStorage.getItem('orbitHi'), 10) || 0;
+        var elapsed = 0, shake = 0, thrusting = false, sinceStart = 0, deadFor = 0, scoreBonus = 0;
+        var ship = { x: 0, y: 0, vy: 0, len: 0 };
+        var rocks = [], cores = [], bits = [], back = [], front = [];
+        var spawnIn = 0, coreIn = 0;
 
-        function spawnObstacle() {
-            const t = OBS_TEMPLATES[Math.floor(Math.random() * OBS_TEMPLATES.length)];
-            const spr = SPR[t.spr];
-            const sc = t.scale;
-            const w = spr[0].length * sc;
-            const h = spr.length * sc;
-            const gy = groundY();
-            let y;
-            if (t.type === 'ground') {
-                y = gy - h;
-            } else {
-                // Air obstacles overlap standing body but clear crouching body
-                // Standing height = 14*3 = 42px, crouching = 9*3 = 27px
-                // Place so bottom edge is above crouch height but overlaps standing torso
-                const standH = SPR.stand.length * PX;
-                const crouchH = SPR.crouch.length * PX;
-                // Bottom of obstacle should be between crouchH and standH from ground
-                const minY = gy - standH + 4;  // overlaps standing head/torso
-                const maxY = gy - crouchH - h;  // clears crouching robot
-                y = maxY + Math.random() * Math.max(0, minY - maxY);
+        var GRAV = 1.28, THRUST = 2.82, VMAX = 0.78;     // in screen heights per second: heavy, but it answers
+        function speed() { return W * Math.min(0.46, 0.30 + score * 0.0011); }
+        function shipLen() { return clamp(H * 0.085, 26, 54); }
+        function shipR() { return shipLen() * 0.30; }
+
+        function buildTerrain() {
+            var step = Math.max(28, W * 0.07), n = Math.ceil(W / step) + 4, i;
+            function layer(baseFrac, ampFrac) {
+                var pts = [];
+                for (i = 0; i < n; i++) pts.push({ x: i * step, y: H * baseFrac - Math.random() * H * ampFrac });
+                return { pts: pts, step: step };
             }
-            obstacles.push({ spr: t.spr, x: W() + 20, y, w, h, scale: sc, type: t.type });
+            back = layer(0.965, 0.10);
+            front = layer(0.995, 0.085);
         }
-
-        /* ── Star spawning ── */
-        let starTimer = 0;
-        function spawnStar() {
-            const gy = groundY();
-            starObj = {
-                x: W() + 40,
-                y: gy - SPR.stand.length * PX * 1.5,
-                size: 12,
-                pulse: 0
-            };
-        }
-
-        /* ── Particles ── */
-        function burst(x, y, color, count) {
-            for (let i = 0; i < count; i++) {
-                particles.push({
-                    x, y,
-                    vx: (Math.random() - 0.5) * 6,
-                    vy: (Math.random() - 0.8) * 5,
-                    life: 20 + Math.random() * 15,
-                    color, size: 2 + Math.random() * 3,
-                });
+        function scrollTerrain(layer, dx, baseFrac, ampFrac) {
+            var pts = layer.pts, i;
+            for (i = 0; i < pts.length; i++) pts[i].x -= dx;
+            while (pts.length && pts[0].x < -layer.step * 2) {
+                pts.shift();
+                pts.push({ x: pts[pts.length - 1].x + layer.step, y: H * baseFrac - Math.random() * H * ampFrac });
             }
         }
-
-        /* ── Draw star shape ── */
-        function drawStar(cx, cy, r, color, glow) {
-            if (glow) {
-                ctx.shadowColor = color;
-                ctx.shadowBlur = 12 + Math.sin(frame * 0.1) * 6;
+        function heightAt(layer, x) {                    // the top of the ground under a point
+            var pts = layer.pts, i;
+            for (i = 0; i < pts.length - 1; i++) {
+                if (x >= pts[i].x && x <= pts[i + 1].x) {
+                    var t = (x - pts[i].x) / (pts[i + 1].x - pts[i].x);
+                    return pts[i].y + (pts[i + 1].y - pts[i].y) * t;
+                }
             }
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            for (let i = 0; i < 5; i++) {
-                const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
-                const a2 = a + 2 * Math.PI / 5;
-                ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-                ctx.lineTo(cx + Math.cos(a2) * r * 0.4, cy + Math.sin(a2) * r * 0.4);
-            }
-            ctx.closePath();
-            ctx.fill();
-            ctx.shadowBlur = 0;
+            return pts.length ? pts[pts.length - 1].y : H;
         }
 
-        /* ── Collision (forgiving hitbox) ── */
-        function collides(ax, ay, aw, ah, bx, by, bw, bh) {
-            const shrink = 4;
-            return ax + shrink < bx + bw - shrink &&
-                   ax + aw - shrink > bx + shrink &&
-                   ay + shrink < by + bh - shrink &&
-                   ay + ah - shrink > by + shrink;
+        function makeRock(x, y, r) {
+            var n = Math.floor(rand(9, 13)), verts = [], craters = [], i;
+            for (i = 0; i < n; i++) verts.push(rand(0.74, 1.06));
+            for (i = 0; i < 3; i++) craters.push({ a: rand(0, Math.PI * 2), d: rand(0.15, 0.6), s: rand(0.1, 0.26) });
+            return { x: x, y: y, r: r, verts: verts, craters: craters, rot: rand(0, Math.PI * 2), spin: rand(-0.6, 0.6), vy: rand(-0.05, 0.05) * H, k: rand(0.9, 1.35) };
+        }
+        function spawnRocks() {
+            var top = H * 0.06, bot = heightAt(front, W) - H * 0.06;
+            var big = Math.random() < 0.3;
+            var r = big ? rand(H * 0.075, H * 0.115) : rand(H * 0.032, H * 0.07);
+            var y = rand(top + r, bot - r);
+            rocks.push(makeRock(W + r + 10, y, r));
+            if (!big && Math.random() < 0.22) {           // a second one, with a gap you can fly through
+                var gap = H * rand(0.26, 0.36);
+                var y2 = y + (Math.random() < 0.5 ? -1 : 1) * gap;
+                if (y2 > top + r && y2 < bot - r) rocks.push(makeRock(W + r + rand(20, 120), y2, rand(H * 0.032, H * 0.06)));
+            }
+            spawnIn = clamp(1.08 - score * 0.0022, 0.44, 1.08) * rand(0.78, 1.3);
+        }
+        function spawnCore() {
+            var top = H * 0.12, bot = heightAt(front, W) - H * 0.12;
+            cores.push({ x: W + 20, y: rand(top, bot), r: Math.max(7, H * 0.016), ph: rand(0, 6.28) });
+            coreIn = rand(3.2, 6.4);
+        }
+        function burst(x, y, n, warm, spread) {
+            for (var i = 0; i < n; i++) {
+                var a = rand(0, Math.PI * 2), v = rand(0.06, spread) * H;
+                bits.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: rand(0.35, 1.1), age: 0, r: rand(1.2, 3.6), warm: warm });
+            }
         }
 
-        /* ── Start / Reset ── */
-        function startGame() {
+        function reset() {
+            score = 0; scoreBonus = 0; elapsed = 0; sinceStart = 0; deadFor = 0; shake = 0;
+            rocks = []; cores = []; bits = [];
+            ship.x = W * 0.24; ship.y = H * 0.42; ship.vy = 0;
+            spawnIn = 1.1; coreIn = 2.4;
+            buildTerrain();
+        }
+        function start() {
+            reset();
             state = 'running';
-            score = 0;
-            speed = 3.5;
-            frame = 0;
-            obstacles = [];
-            particles = [];
-            starObj = null;
-            spawnTimer = 70;
-            starTimer = 60 * 50;
-            resetChar();
+            bar.textContent = 'hold to climb · let go to fall';
             startMusic();
         }
-
-        function gameOver() {
+        function crash() {
             state = 'over';
-            sfx(200, 0.3, 'sawtooth', 0.1);
-            sfx(150, 0.4, 'sawtooth', 0.08);
-            if (score > hiScore) {
-                hiScore = score;
-                localStorage.setItem('agentRunnerHi', hiScore);
-            }
-            // Music keeps playing — don't stop it
-            invincible = false;
-            // If star power was active, fade star track back to bg
-            if (starTrack && !starTrack.paused) {
-                deactivateStar();
-            }
+            deadFor = 0;
+            thrusting = false; thrustSound(false);
+            burst(ship.x, ship.y, 34, true, 0.5);
+            burst(ship.x, ship.y, 16, false, 0.34);
+            shake = 1;
+            boom();
+            bgMusic.pause();
+            if (score > best) { best = score; try { localStorage.setItem('orbitHi', String(best)); } catch (e) {} }
+            bar.textContent = 'crashed · ' + GO;
         }
 
-        /* ── Input ── */
-        function doJump() {
-            if (state === 'idle' || state === 'over') { startGame(); return; }
-            if (!jumping && !crouching) {
-                jumping = true;
-                charVY = JUMP_V;
-                sfx(440, 0.1, 'square', 0.06);
-            }
+        /* ── Input ──────────────────────────────────────────────────── */
+        function press() {
+            if (state === 'idle') { start(); thrusting = true; thrustSound(true); return; }
+            if (state === 'over') { if (deadFor > 0.5) { start(); thrusting = true; thrustSound(true); } return; }
+            thrusting = true; thrustSound(true);
         }
-        function doCrouch(down) {
-            if (state !== 'running') return;
-            if (down && !jumping) {
-                crouching = true;
-                charH = SPR.crouch.length * PX;
-                charY = groundY() - charH;
-            } else {
-                crouching = false;
-                charH = SPR.stand.length * PX;
-                charY = groundY() - charH;
-            }
-        }
-
-        document.addEventListener('keydown', e => {
+        function release() { thrusting = false; thrustSound(false); }
+        document.addEventListener('keydown', function (e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-            // Any key starts the game when idle or game over
-            if (state === 'idle' || state === 'over') { e.preventDefault(); doJump(); return; }
-            if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); doJump(); }
-            if (e.code === 'ArrowDown') { e.preventDefault(); doCrouch(true); }
+            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Enter') { e.preventDefault(); if (!e.repeat) press(); }
         });
-        document.addEventListener('keyup', e => {
-            if (e.code === 'ArrowDown') doCrouch(false);
+        document.addEventListener('keyup', function (e) {
+            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Enter') { e.preventDefault(); release(); }
         });
+        wrap.addEventListener('pointerdown', function (e) { e.preventDefault(); press(); });
+        window.addEventListener('pointerup', release);
+        window.addEventListener('pointercancel', release);
+        wrap.addEventListener('touchstart', function (e) { e.preventDefault(); press(); }, { passive: false });
+        wrap.addEventListener('touchend', function (e) { e.preventDefault(); release(); }, { passive: false });
+        window.addEventListener('blur', release);
 
-        // Touch controls
-        let touchStartY = null;
-        const SWIPE_THRESHOLD = 20;
-
-        wrap.addEventListener('touchstart', e => {
-            e.preventDefault();
-            touchStartY = e.touches[0].clientY;
-            if (state === 'idle' || state === 'over') { doJump(); return; }
-        }, { passive: false });
-
-        wrap.addEventListener('touchmove', e => {
-            e.preventDefault();
-            if (touchStartY === null || state !== 'running') return;
-            const dy = e.touches[0].clientY - touchStartY;
-            if (dy < -SWIPE_THRESHOLD) {
-                doJump();
-                touchStartY = null;
-            } else if (dy > SWIPE_THRESHOLD) {
-                doCrouch(true);
-                touchStartY = null;
-            }
-        }, { passive: false });
-
-        wrap.addEventListener('touchend', e => {
-            touchStartY = null;
-            // Only uncrouch if actually crouching — don't interfere with jumps
-            if (crouching) doCrouch(false);
-        });
-
-        wrap.addEventListener('click', e => {
-            if (state === 'idle' || state === 'over') doJump();
-        });
-
-        /* ── Update ── */
-        function update() {
-            if (state !== 'running') return;
-            frame++;
-            score = Math.floor(frame / 4);
-
-            // Gentler speed curve: +0.3 every ~15 seconds, max 9
-            speed = Math.min(9, 3.5 + Math.floor(frame / 900) * 0.3);
-
-            if (jumping) {
-                charVY += GRAVITY;
-                charY += charVY;
-                if (charY >= groundY() - charH) {
-                    charY = groundY() - charH;
-                    charVY = 0;
-                    jumping = false;
-                }
-            }
-
-            if (invincible) {
-                invTimer--;
-                if (invTimer <= 0) deactivateStar();
-            }
-
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                obstacles[i].x -= speed;
-                if (obstacles[i].x + obstacles[i].w < -20) { obstacles.splice(i, 1); continue; }
-
-                if (collides(charX, charY, charW, charH, obstacles[i].x, obstacles[i].y, obstacles[i].w, obstacles[i].h)) {
-                    if (invincible) {
-                        burst(obstacles[i].x + obstacles[i].w/2, obstacles[i].y + obstacles[i].h/2, getColors().fg, 8);
-                        obstacles.splice(i, 1);
-                    } else {
-                        gameOver();
-                        return;
-                    }
-                }
-            }
-
-            if (starObj) {
-                starObj.x -= speed;
-                starObj.pulse += 0.08;
-                if (starObj.x < -30) { starObj.x = W() + 40; }
-                else {
-                    const sr = starObj.size;
-                    if (collides(charX, charY, charW, charH, starObj.x - sr, starObj.y - sr, sr*2, sr*2)) {
-                        burst(starObj.x, starObj.y, getColors().fg, 12);
-                        sfx(660, 0.12, 'sine', 0.1);
-                        activateStar();
-                        starObj = null;
-                    }
-                }
-            }
-
-            // Spawn obstacles — gentler curve
-            spawnTimer--;
-            if (spawnTimer <= 0) {
-                spawnObstacle();
-                minSpawn = Math.max(50, 90 - Math.floor(frame / 500));
-                spawnTimer = minSpawn + Math.floor(Math.random() * 60);
-            }
-
-            if (!starObj && !invincible) {
-                starTimer--;
-                if (starTimer <= 0) {
-                    spawnStar();
-                    starTimer = 60 * (45 + Math.random() * 15);
-                }
-            }
-
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.2;
-                p.life--;
-                if (p.life <= 0) particles.splice(i, 1);
-            }
-        }
-
-        /* ── Render ── */
-        function render() {
-            const w = W(), h = H(), gy = groundY();
-            const C = getColors();
-            resize();
-
-            // Background
-            ctx.fillStyle = C.bg;
-            ctx.fillRect(0, 0, w, h);
-
-            // Ground line
-            ctx.fillStyle = C.ground;
-            ctx.fillRect(0, gy, w, 1.5);
-
-            // Ground texture dots
-            ctx.fillStyle = C.dim;
-            for (let i = (frame * speed * 0.5) % 20 - 20; i < w; i += 20) {
-                ctx.fillRect(i, gy + 6, 2, 1);
-                ctx.fillRect(i + 10, gy + 12, 1, 1);
-            }
-
+        /* ── Step ───────────────────────────────────────────────────── */
+        function update(dt) {
+            sinceStart += dt;
+            var i;
             if (state === 'idle') {
-                const titleSize = Math.max(18, Math.min(32, w * 0.028));
-                const subSize = Math.max(12, Math.min(16, w * 0.014));
-                const hintSize = Math.max(10, Math.min(14, w * 0.012));
-                const handSize = Math.max(14, Math.min(22, w * 0.02));
-
-                ctx.fillStyle = C.fg;
-                ctx.font = `700 ${titleSize}px 'Space Grotesk', sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.fillText('AI AGENT RUNNER', w/2, h * 0.3);
-                ctx.fillStyle = C.muted;
-                ctx.font = `${subSize}px 'Space Grotesk', sans-serif`;
-                ctx.fillText('Press SPACE or tap to start', w/2, h * 0.42);
-                ctx.font = `${hintSize}px 'JetBrains Mono', monospace`;
-                ctx.fillText('\u2191 jump  \u00b7  \u2193 crouch', w/2, h * 0.52);
-                ctx.font = `${handSize}px 'Covered By Your Grace', cursive`;
-                ctx.fillStyle = C.fg;
-                ctx.globalAlpha = 0.5;
-                ctx.fillText('dodge, duck, survive', w/2, h * 0.62);
-                ctx.globalAlpha = 1;
-                // Draw idle robot
-                const idleY = gy - SPR.stand.length * PX;
-                drawSprite(SPR.stand, w/2 - SPR.stand[0].length * PX / 2, idleY, PX, C.fg);
-                ctx.textAlign = 'start';
-                bar.textContent = hiScore > 0 ? 'high score: ' + hiScore : 'press space or tap to start';
+                ship.x = W * 0.24;
+                ship.y = H * 0.42 + Math.sin(sinceStart * 1.6) * H * 0.02;
+                scrollTerrain(front, W * 0.06 * dt, 0.995, 0.085);
+                scrollTerrain(back, W * 0.03 * dt, 0.965, 0.10);
+                return;
+            }
+            if (state === 'over') {
+                deadFor += dt;
+                shake = Math.max(0, shake - dt * 2.2);
+                for (i = bits.length - 1; i >= 0; i--) {
+                    var q = bits[i]; q.age += dt;
+                    q.x += q.vx * dt; q.y += q.vy * dt; q.vy += H * 0.7 * dt;
+                    if (q.age > q.life) bits.splice(i, 1);
+                }
                 return;
             }
 
-            // Obstacles
-            obstacles.forEach(o => {
-                drawSprite(SPR[o.spr], o.x, o.y, o.scale, C.muted);
-            });
+            elapsed += dt;
+            score = Math.floor(elapsed * 10) + scoreBonus;
+            var dx = speed() * dt;
 
-            // Star
-            if (starObj) {
-                const pulse = 1 + Math.sin(starObj.pulse) * 0.2;
-                drawStar(starObj.x, starObj.y, starObj.size * pulse, C.fg, true);
+            ship.vy += GRAV * H * dt;
+            if (thrusting) ship.vy -= THRUST * H * dt;
+            ship.vy = clamp(ship.vy, -VMAX * H, VMAX * H);
+            ship.y += ship.vy * dt;
+            ship.len = shipLen();
+
+            var r = shipR();
+            if (ship.y < r) { ship.y = r; ship.vy = Math.max(ship.vy, 0); }   // the top of the frame is a wall
+            if (ship.y > heightAt(front, ship.x) - r * 0.55) { crash(); return; }
+
+            if (thrusting && Math.random() < 0.9) {                            // sparks off the plume
+                bits.push({ x: ship.x - ship.len * 0.5, y: ship.y + rand(-2, 2), vx: -rand(0.05, 0.16) * W, vy: rand(-0.03, 0.03) * H, life: rand(0.16, 0.4), age: 0, r: rand(1, 2.6), warm: true });
             }
 
-            // Character
-            let spr;
-            if (jumping) spr = SPR.jump;
-            else if (crouching) spr = SPR.crouch;
-            else spr = (Math.floor(frame / 6) % 2 === 0) ? SPR.stand : SPR.run2;
+            scrollTerrain(front, dx, 0.995, 0.085);
+            scrollTerrain(back, dx * 0.45, 0.965, 0.10);
 
-            const charColor = invincible ? (Math.floor(frame / 3) % 2 === 0 ? C.fg : C.fgLight) : C.fg;
+            spawnIn -= dt; if (spawnIn <= 0) spawnRocks();
+            coreIn -= dt; if (coreIn <= 0) spawnCore();
 
-            // Invincibility aura
-            if (invincible) {
-                ctx.fillStyle = C.fgAlpha;
-                ctx.beginPath();
-                ctx.arc(charX + charW/2, charY + charH/2, charW * 1.2 + Math.sin(frame * 0.15) * 4, 0, Math.PI * 2);
-                ctx.fill();
+            for (i = rocks.length - 1; i >= 0; i--) {
+                var k = rocks[i];
+                k.x -= dx * k.k; k.y += k.vy * dt; k.rot += k.spin * dt;
+                if (k.x + k.r < -20) { rocks.splice(i, 1); continue; }
+                var ddx = k.x - ship.x, ddy = k.y - ship.y;
+                if (ddx * ddx + ddy * ddy < Math.pow(k.r * 0.84 + r * 0.8, 2)) { crash(); return; }
             }
-
-            drawSprite(spr, charX, charY, PX, charColor);
-
-            // Particles
-            particles.forEach(p => {
-                ctx.globalAlpha = p.life / 30;
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, p.size, p.size);
-            });
-            ctx.globalAlpha = 1;
-
-            // Score overlay — scale with canvas size
-            const scoreFontSize = Math.max(14, Math.min(20, w * 0.018));
-            const hiFontSize = Math.max(10, Math.min(14, w * 0.013));
-            const pad = Math.max(12, w * 0.015);
-
-            ctx.fillStyle = C.text;
-            ctx.font = `600 ${scoreFontSize}px 'JetBrains Mono', monospace`;
-            ctx.textAlign = 'right';
-            ctx.fillText(String(score).padStart(5, '0'), w - pad, scoreFontSize + 10);
-            if (hiScore > 0) {
-                ctx.fillStyle = C.muted;
-                ctx.font = `${hiFontSize}px 'JetBrains Mono', monospace`;
-                ctx.fillText('HI ' + String(hiScore).padStart(5, '0'), w - pad, scoreFontSize + hiFontSize + 16);
-            }
-            ctx.textAlign = 'start';
-
-            // Invincibility bar
-            if (invincible) {
-                const barW = 70, barH = 5;
-                const barX = 20, barY = 26;
-                ctx.fillStyle = C.dim;
-                ctx.fillRect(barX, barY, barW, barH);
-                ctx.fillStyle = C.fg;
-                ctx.fillRect(barX, barY, barW * (invTimer / 600), barH);
-                drawStar(barX - 8, barY + 2, 6, C.fg, false);
-            }
-
-            bar.textContent = 'score: ' + score + (hiScore > 0 ? '  \u00b7  hi: ' + hiScore : '');
-
-            if (state === 'over') {
-                const goTitleSize = Math.max(18, Math.min(32, w * 0.028));
-                const goScoreSize = Math.max(14, Math.min(22, w * 0.02));
-                const goSubSize = Math.max(10, Math.min(14, w * 0.012));
-
-                ctx.fillStyle = 'rgba(0,0,0,0.45)';
-                ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = C.fg;
-                ctx.font = `700 ${goTitleSize}px 'Space Grotesk', sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.fillText('GAME OVER', w/2, h * 0.34);
-                ctx.fillStyle = '#fff';
-                ctx.font = `600 ${goScoreSize}px 'JetBrains Mono', monospace`;
-                ctx.fillText(String(score).padStart(5, '0'), w/2, h * 0.46);
-                if (score >= hiScore && score > 0) {
-                    ctx.fillStyle = C.fg;
-                    ctx.font = `${goSubSize}px 'Space Grotesk', sans-serif`;
-                    ctx.fillText('NEW HIGH SCORE!', w/2, h * 0.56);
+            for (i = cores.length - 1; i >= 0; i--) {
+                var c = cores[i];
+                c.x -= dx; c.ph += dt * 3;
+                if (c.x + c.r < -20) { cores.splice(i, 1); continue; }
+                var cdx = c.x - ship.x, cdy = c.y - ship.y;
+                if (cdx * cdx + cdy * cdy < Math.pow(c.r + r, 2)) {
+                    cores.splice(i, 1); scoreBonus += 5;
+                    burst(c.x, c.y, 12, true, 0.22);
+                    blip(760, 1240, 0.16, 'triangle', 0.05);
                 }
-                ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                ctx.font = `${goSubSize}px 'Space Grotesk', sans-serif`;
-                ctx.fillText('Tap or press SPACE to retry', w/2, h * 0.68);
-                ctx.textAlign = 'start';
             }
+            for (i = bits.length - 1; i >= 0; i--) {
+                var b2 = bits[i]; b2.age += dt;
+                b2.x += b2.vx * dt - dx * 0.4; b2.y += b2.vy * dt;
+                if (b2.age > b2.life) bits.splice(i, 1);
+            }
+            shake = Math.max(0, shake - dt * 2.2);
         }
 
-        /* ── Game loop ── */
-        function loop() {
-            update();
+        /* ── Draw ───────────────────────────────────────────────────── */
+        function drawTerrain(layer, fill, rim) {
+            var pts = layer.pts; if (!pts.length) return;
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, H + 4);
+            for (var i = 0; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+            ctx.lineTo(pts[pts.length - 1].x, H + 4);
+            ctx.closePath();
+            var g = ctx.createLinearGradient(0, H * 0.86, 0, H);
+            g.addColorStop(0, fill[0]); g.addColorStop(1, fill[1]);
+            ctx.fillStyle = g; ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+            ctx.strokeStyle = rim; ctx.lineWidth = 1.6; ctx.stroke();
+        }
+        function drawRock(k) {
+            ctx.save();
+            ctx.translate(k.x, k.y); ctx.rotate(k.rot);
+            var n = k.verts.length, i;
+            ctx.beginPath();
+            for (i = 0; i < n; i++) {
+                var a = (i / n) * Math.PI * 2, rr = k.r * k.verts[i];
+                var x = Math.cos(a) * rr, y = Math.sin(a) * rr;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            var g = ctx.createLinearGradient(-k.r * 0.7, -k.r * 0.7, k.r * 0.6, k.r * 0.8);
+            g.addColorStop(0, '#7a5f4e'); g.addColorStop(0.42, '#33251d'); g.addColorStop(1, '#110c0a');
+            ctx.fillStyle = g; ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 174, 106, 0.42)'; ctx.lineWidth = 1.2; ctx.stroke();
+            for (i = 0; i < k.craters.length; i++) {
+                var c = k.craters[i], cx = Math.cos(c.a) * k.r * c.d, cy = Math.sin(c.a) * k.r * c.d;
+                ctx.beginPath(); ctx.arc(cx, cy, k.r * c.s, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0,0,0,0.34)'; ctx.fill();
+                ctx.beginPath(); ctx.arc(cx, cy, k.r * c.s, Math.PI * 1.1, Math.PI * 1.9);
+                ctx.strokeStyle = 'rgba(255,214,180,0.13)'; ctx.lineWidth = 1; ctx.stroke();
+            }
+            ctx.restore();
+        }
+        function drawCore(c) {
+            var pulse = 1 + Math.sin(c.ph) * 0.14;
+            var g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r * 3.4 * pulse);
+            g.addColorStop(0, 'rgba(255, 224, 190, 0.95)');
+            g.addColorStop(0.3, 'rgba(255, 174, 106, 0.45)');
+            g.addColorStop(1, 'rgba(255, 174, 106, 0)');
+            ctx.fillStyle = g;
+            ctx.beginPath(); ctx.arc(c.x, c.y, c.r * 3.4 * pulse, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#FFF1E2';
+            ctx.beginPath(); ctx.arc(c.x, c.y, c.r * 0.62 * pulse, 0, Math.PI * 2); ctx.fill();
+        }
+        function drawShip(alive) {
+            var L = shipLen(), w = L * 0.42;
+            var tilt = clamp(ship.vy / (VMAX * H), -1, 1) * 0.42;
+            ctx.save();
+            ctx.translate(ship.x, ship.y);
+            ctx.rotate(tilt);
+            if (thrusting && alive) {                                   // the plume
+                var f = L * (0.45 + Math.random() * 0.5);
+                var pg = ctx.createLinearGradient(-L * 0.46, 0, -L * 0.46 - f, 0);
+                pg.addColorStop(0, 'rgba(255, 240, 220, 0.95)');
+                pg.addColorStop(0.35, 'rgba(255, 174, 106, 0.75)');
+                pg.addColorStop(1, 'rgba(184, 83, 46, 0)');
+                ctx.beginPath();
+                ctx.moveTo(-L * 0.44, -w * 0.3);
+                ctx.quadraticCurveTo(-L * 0.46 - f * 0.6, -w * 0.1, -L * 0.46 - f, 0);
+                ctx.quadraticCurveTo(-L * 0.46 - f * 0.6, w * 0.1, -L * 0.44, w * 0.3);
+                ctx.closePath();
+                ctx.fillStyle = pg; ctx.fill();
+            }
+            ctx.beginPath();                                            // fins
+            ctx.moveTo(-L * 0.16, -w * 0.4); ctx.lineTo(-L * 0.5, -w * 0.98); ctx.lineTo(-L * 0.42, -w * 0.3);
+            ctx.closePath();
+            ctx.moveTo(-L * 0.16, w * 0.4); ctx.lineTo(-L * 0.5, w * 0.98); ctx.lineTo(-L * 0.42, w * 0.3);
+            ctx.closePath();
+            ctx.fillStyle = '#B8532E'; ctx.fill();
+            ctx.beginPath();                                            // hull
+            ctx.moveTo(L * 0.5, 0);
+            ctx.quadraticCurveTo(L * 0.16, -w * 0.5, -L * 0.24, -w * 0.46);
+            ctx.lineTo(-L * 0.44, -w * 0.32);
+            ctx.quadraticCurveTo(-L * 0.5, 0, -L * 0.44, w * 0.32);
+            ctx.lineTo(-L * 0.24, w * 0.46);
+            ctx.quadraticCurveTo(L * 0.16, w * 0.5, L * 0.5, 0);
+            ctx.closePath();
+            var hg = ctx.createLinearGradient(0, -w * 0.5, 0, w * 0.5);
+            hg.addColorStop(0, '#FBF3EA'); hg.addColorStop(0.55, '#D9C3B0'); hg.addColorStop(1, '#8A6552');
+            ctx.fillStyle = hg; ctx.fill();
+            ctx.strokeStyle = 'rgba(45, 26, 14, 0.55)'; ctx.lineWidth = 1; ctx.stroke();
+            ctx.beginPath();                                            // window
+            ctx.arc(L * 0.12, -w * 0.03, w * 0.2, 0, Math.PI * 2);
+            ctx.fillStyle = '#20303F'; ctx.fill();
+            ctx.strokeStyle = '#FFAE6A'; ctx.lineWidth = 1.4; ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(L * 0.09, -w * 0.09, w * 0.08, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 241, 226, 0.6)'; ctx.fill();
+            ctx.restore();
+        }
+        function render() {
+            ctx.clearRect(0, 0, W, H);
+            ctx.save();
+            if (shake > 0) ctx.translate(rand(-1, 1) * shake * 9, rand(-1, 1) * shake * 9);
+
+            var haze = ctx.createLinearGradient(0, H * 0.72, 0, H * 0.93);
+            haze.addColorStop(0, 'rgba(255, 174, 106, 0)'); haze.addColorStop(1, 'rgba(184, 83, 46, 0.13)');
+            ctx.fillStyle = haze; ctx.fillRect(0, H * 0.72, W, H * 0.21);
+            drawTerrain(back, ['rgba(60, 42, 31, 0.9)', 'rgba(12, 8, 6, 0.96)'], 'rgba(184, 83, 46, 0.38)');
+            drawTerrain(front, ['#3B2A1F', '#090605'], 'rgba(255, 174, 106, 0.66)');
+
+            var i;
+            for (i = 0; i < cores.length; i++) drawCore(cores[i]);
+            for (i = 0; i < rocks.length; i++) drawRock(rocks[i]);
+            for (i = 0; i < bits.length; i++) {
+                var b2 = bits[i], k = 1 - b2.age / b2.life;
+                ctx.globalAlpha = Math.max(0, k);
+                ctx.fillStyle = b2.warm ? '#FFC088' : '#8A6552';
+                ctx.beginPath(); ctx.arc(b2.x, b2.y, b2.r * (0.4 + k * 0.6), 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            if (state !== 'over') drawShip(state === 'running');
+
+            ctx.restore();
+
+            if (state === 'idle' || state === 'over') {
+                var ink = css('--text', '#F2EAE0'), dim = css('--text-3', '#896653');
+                ctx.textAlign = 'center';
+                ctx.fillStyle = ink;
+                ctx.font = '600 ' + Math.round(clamp(H * 0.052, 20, 34)) + 'px "Space Grotesk", sans-serif';
+                var ty = H * 0.19;
+                ctx.fillText(state === 'idle' ? 'Orbit' : 'Lost to the rocks', W / 2, ty);
+                ctx.fillStyle = dim;
+                ctx.font = '500 ' + Math.round(clamp(H * 0.024, 11, 14)) + 'px "JetBrains Mono", monospace';
+                ctx.fillText(state === 'idle' ? (TOUCH ? 'HOLD TO FLY · AVOID THE ROCKS' : 'HOLD SPACE TO FLY · AVOID THE ROCKS')
+                                              : 'SCORE ' + score + '   ·   ' + GO.toUpperCase(), W / 2, ty + clamp(H * 0.045, 22, 32));
+            }
+            scoreEl.textContent = (state === 'idle' && !best) ? '' : 'score ' + score + ' · best ' + best;
+        }
+
+        /* ── Loop ───────────────────────────────────────────────────── */
+        var last = 0;
+        function loop(now) {
+            var dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+            last = now;
+            update(dt);
             render();
             requestAnimationFrame(loop);
         }
-        resetChar();
-        loop();
+        resize();
+        reset();
+        state = 'idle';
+        bar.textContent = TOUCH ? 'hold to fly · avoid the rocks' : 'hold space to fly · avoid the rocks';
+        requestAnimationFrame(loop);
+
+        window.__game = {                                  // for the tests: what the rocket is doing
+            state: function () { return state; },
+            y: function () { return ship.y; },
+            vy: function () { return ship.vy; },
+            score: function () { return score; },
+            best: function () { return best; },
+            height: function () { return H; }
+        };
     })();
     </script>
 

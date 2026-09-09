@@ -66,7 +66,8 @@
 
     /* ── Particle positions: black hole or galaxy ─────────────────────── */
     var FORM = 'blackhole';
-    var COUNT = isMobile ? 18000 : 60000;                                       // phones draw the disc twice (second image): keep it light
+    var COUNT = isMobile ? 18000 : 60000;
+    if (canvas.dataset.count) COUNT = Math.max(2000, parseInt(canvas.dataset.count, 10) || COUNT);   // a page that needs the frames back can ask for fewer                                       // phones draw the disc twice (second image): keep it light
     var RADIUS = 4.6, BRANCHES = 3, SPIN = 1.15, RANDOM = 0.32, RPOW = 2.6;
     var RS = 0.5, SHADOW = 1.3, DISC_IN = 1.44, PLUNGE = 1.2;                    // the disc hugs the shadow; the last stretch plunges in                    // Schwarzschild radius, shadow (= far-disc Einstein radius), inner disc edge, plunge floor
     var gPos = new Float32Array(COUNT * 3), gRnd = new Float32Array(COUNT * 3), gScl = new Float32Array(COUNT), gKind = new Float32Array(COUNT);
