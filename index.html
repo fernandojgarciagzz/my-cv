@@ -50,6 +50,8 @@
             --radius: 12px;
 
             /* Dark space (default) */
+            --warm: #FFC088;                 /* the black hole's core */
+            --cool: #3F73BC;                 /* its rim */
             --accent: #8FB0D2;
             --accent-glow: rgba(143, 176, 210, 0.16);
             --green: #6FB08A;
@@ -69,6 +71,8 @@
         }
         /* Boring mode — black on white, nothing moves, no space */
         html.light {
+            --warm: #000000;
+            --cool: #000000;
             --accent: #000000;
             --accent-glow: rgba(0, 0, 0, 0.05);
             --green: #000000;
@@ -88,6 +92,8 @@
         }
         /* Claude Mode — warm palette while the record spins */
         html.claude-mode {
+            --warm: #FFAE6A;
+            --cool: #B8532E;
             --accent: #E8956E;
             --accent-glow: rgba(232, 149, 110, 0.16);
             --green: #C4956B;
@@ -331,7 +337,7 @@
         }
         .route::after {
             content: ''; position: absolute; left: 0; top: 0; width: 1px; height: 100%;
-            background: linear-gradient(to bottom, var(--accent), var(--accent-glow));
+            background: linear-gradient(to bottom, var(--warm), var(--cool));
             transform: scaleY(var(--route, 0)); transform-origin: top; transition: transform 0.25s linear;
             box-shadow: 0 0 10px var(--accent-glow);
         }
@@ -341,9 +347,9 @@
             content: ''; position: absolute; z-index: -1; pointer-events: none;
             width: min(58vw, 760px); height: min(58vw, 760px); border-radius: 50%;
             top: -12%; left: -18%; opacity: 0.8;
-            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 62%);
+            background: radial-gradient(circle, color-mix(in srgb, var(--warm) 14%, transparent) 0%, transparent 62%);
         }
-        .chapter:nth-child(even)::before { left: auto; right: -18%; top: 10%; }
+        .chapter:nth-child(even)::before { left: auto; right: -18%; top: 10%; background: radial-gradient(circle, color-mix(in srgb, var(--cool) 18%, transparent) 0%, transparent 62%); }
         .chapter-inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure)) minmax(0, 1fr); column-gap: 2.5rem; }
         .chapter-label {
             grid-column: 1; justify-self: end; width: var(--rail); position: sticky; top: calc(var(--nav-h) + 1.5rem); align-self: start;
@@ -353,7 +359,7 @@
         .chapter-label .num { position: relative; color: var(--accent); font-family: var(--font-display); font-weight: 600; }
         .chapter-label .num::before {
             content: ''; position: absolute; left: -1.2rem; top: 0.45em; width: 7px; height: 7px; margin-left: -3px; border-radius: 50%;
-            background: var(--accent); box-shadow: 0 0 0 3px rgba(var(--bg-rgb), 1), 0 0 14px var(--accent), 0 0 28px var(--accent-glow);
+            background: var(--warm); box-shadow: 0 0 0 3px rgba(var(--bg-rgb), 1), 0 0 14px var(--warm), 0 0 28px var(--accent-glow);
         }
         .chapter-body { grid-column: 2; min-width: 0; }
         .h2 { font-family: var(--font-display); font-size: var(--t-h2); font-weight: 600; line-height: var(--lh-heading); letter-spacing: var(--track-h2); margin-bottom: 0.9rem; text-wrap: balance; }
@@ -368,14 +374,14 @@
         .trajectory li { position: relative; padding: 0 0 1.6rem 0.4rem; font-size: var(--t-micro); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); line-height: 1.5; }
         .trajectory li:last-child { padding-bottom: 0; }
         .trajectory li::before { content: ''; position: absolute; left: -1.5rem; top: 0.45em; width: 7px; height: 7px; margin-left: -3px; border-radius: 50%; background: var(--bg); border: 1px solid var(--accent); }
-        .trajectory li.now::before { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+        .trajectory li.now::before { background: var(--warm); box-shadow: 0 0 12px var(--warm); }
         .trajectory b { display: block; font-family: var(--font-display); font-size: var(--t-small); font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink); }
         .trajectory li.now b { color: var(--accent); }
 
         /* Experience: log entries on a dashed orbit */
         .timeline { position: relative; padding-left: 2.5rem; }
         .timeline::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 0; border-left: 1px dashed var(--line); transform: scaleY(var(--tl, 1)); transform-origin: top; transition: transform 0.2s linear; }
-        .timeline::after { content: ''; position: absolute; left: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: flowDown 4s ease-in-out infinite; opacity: 0.6; }
+        .timeline::after { content: ''; position: absolute; left: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--warm); box-shadow: 0 0 10px var(--warm); animation: flowDown 4s ease-in-out infinite; opacity: 0.6; }
         @keyframes flowDown { 0% { top: 0; opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.7; } 100% { top: 100%; opacity: 0; } }
         .timeline-item { position: relative; margin-bottom: 1.1rem; padding: 1.25rem 1.4rem 1.2rem; background: var(--card); border: 1px solid var(--line-2); border-radius: 12px; transition: border-color 0.3s, box-shadow 0.3s; }
         .timeline-item:last-child { margin-bottom: 0; }
@@ -383,7 +389,7 @@
         .timeline-item:first-child { border-color: rgba(143, 176, 210, 0.3); box-shadow: 0 0 0 1px rgba(143, 176, 210, 0.06), 0 12px 40px rgba(0, 0, 0, 0.25); }
         .timeline-dot { position: absolute; left: calc(-2.5rem + 0px); top: 1.55rem; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg); }
         .timeline-dot.active { border: 1.5px solid var(--accent); box-shadow: 0 0 16px var(--accent-glow); }
-        .timeline-dot.active::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2s ease-in-out infinite; }
+        .timeline-dot.active::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--warm); box-shadow: 0 0 8px var(--warm); animation: pulse 2s ease-in-out infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.4); } }
         .timeline-dot.completed { border: 1px solid var(--line); }
         .timeline-dot.completed::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); }
@@ -402,8 +408,8 @@
         /* Cards: HUD panels with corner ticks */
         .card { position: relative; background: var(--card); border: 1px solid var(--line-2); border-radius: 12px; padding: 1.6rem; transition: border-color 0.25s, background-color 0.25s, transform 0.25s, box-shadow 0.25s; }
         .card::before, .card::after { content: ''; position: absolute; width: 10px; height: 10px; border: 1px solid var(--accent); opacity: 0.45; transition: opacity 0.25s; pointer-events: none; }
-        .card::before { top: 6px; left: 6px; border-right: 0; border-bottom: 0; border-top-left-radius: 3px; }
-        .card::after { bottom: 6px; right: 6px; border-left: 0; border-top: 0; border-bottom-right-radius: 3px; }
+        .card::before { top: 6px; left: 6px; border-right: 0; border-bottom: 0; border-top-left-radius: 3px; border-color: var(--warm); }
+        .card::after { bottom: 6px; right: 6px; border-left: 0; border-top: 0; border-bottom-right-radius: 3px; border-color: var(--cool); }
         .card:hover { border-color: var(--line); background: var(--card-hover); transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25); }
         .card:hover::before, .card:hover::after { opacity: 1; }
         .card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
@@ -420,20 +426,20 @@
         .skill-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
         .skill-name { font-size: var(--t-small); font-weight: 500; color: var(--ink-2); width: 18rem; flex-shrink: 0; }
         .skill-bar-bg { flex: 1; height: 8px; position: relative; -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 10px); mask-image: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 10px); background: var(--line-2); }
-        .skill-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent) 60%, #FFFFFF); width: 0%; transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .skill-bar-fill { height: 100%; background: linear-gradient(90deg, var(--warm), var(--cool)); width: 0%; transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .skill-pct { font-family: var(--font-display); font-size: var(--t-small); font-weight: 600; color: var(--ink-2); min-width: 2.6rem; text-align: right; }
         .skills-learning { margin-top: 2.5rem; }
         .skills-learning-label { font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3); margin-bottom: 1rem; }
         .tag-row { display: flex; flex-wrap: wrap; gap: 0.6rem; }
         .learning-tag { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--card); border: 1px solid var(--line-2); border-radius: 8px; font-size: var(--t-small); font-weight: 500; color: var(--ink-2); transition: border-color 0.3s, color 0.3s; }
         .learning-tag:hover { border-color: var(--accent); color: var(--accent); }
-        .learning-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2s ease-in-out infinite; flex-shrink: 0; }
+        .learning-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--warm); box-shadow: 0 0 8px var(--warm); animation: pulse 2s ease-in-out infinite; flex-shrink: 0; }
         .learning-tag-status { font-size: var(--t-micro); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); }
 
         /* Hobbies: now playing */
         .hobby-card { display: flex; align-items: center; gap: 1.1rem; text-decoration: none; color: inherit; padding: 1rem 1.2rem; }
         .hobby-card-icon { width: 44px; height: 30px; flex-shrink: 0; display: flex; align-items: flex-end; gap: 3px; }
-        .hobby-card-icon i { display: block; width: 3px; border-radius: 2px; background: var(--accent); height: var(--h, 40%); animation: wave 1.6s ease-in-out infinite; animation-delay: var(--d, 0s); box-shadow: 0 0 8px var(--accent-glow); }
+        .hobby-card-icon i { display: block; width: 3px; border-radius: 2px; background: linear-gradient(to top, var(--cool), var(--warm)); height: var(--h, 40%); animation: wave 1.6s ease-in-out infinite; animation-delay: var(--d, 0s); box-shadow: 0 0 8px var(--accent-glow); }
         @keyframes wave { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
         .hobby-card-text { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; }
         .hobby-card-title { font-family: var(--font-display); font-weight: 600; font-size: var(--t-lead); }
@@ -533,7 +539,7 @@
         .rail.show { opacity: 1; pointer-events: auto; }
         .rail a { position: relative; display: block; width: 14px; height: 14px; }
         .rail a::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; border: 1px solid var(--ink-3); transition: background-color 0.25s, border-color 0.25s, transform 0.25s; }
-        .rail a.on::after { background: var(--accent); border-color: var(--accent); transform: scale(1.25); }
+        .rail a.on::after { background: var(--warm); border-color: var(--warm); transform: scale(1.25); box-shadow: 0 0 8px var(--warm); }
         .rail a span {
             position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%) translateX(6px);
             white-space: nowrap; font-size: var(--t-micro); font-weight: 500; letter-spacing: var(--track-label); text-transform: uppercase;
