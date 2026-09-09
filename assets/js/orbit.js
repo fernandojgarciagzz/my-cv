@@ -25,6 +25,7 @@
     var bar = document.getElementById('gameScoreBar');
     var scoreEl = document.getElementById('gameScore');
     var hud = document.getElementById('gameHud');
+    var rotateNote = document.getElementById('rotateNote');
     var hudTitle = document.getElementById('hudTitle');
     var hudHint = document.getElementById('hudHint');
     var muteBtn = document.getElementById('muteBtn');
@@ -44,6 +45,7 @@
     var rocks = [], cores = [], bits = [], backRidge = null, frontRidge = null;
     var spawnIn = 0, coreIn = 0;
     var GRAV = 1.28, THRUST = 2.82, VMAX = 0.78;      // screen heights per second
+    var needsRotate = false;                          // a phone held upright: the flight waits
     var TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
     var GO = TOUCH ? 'tap to fly again' : 'press space to fly again';
 
@@ -403,8 +405,19 @@
             camera.updateProjectionMatrix();
         }
         buildRidges();
+        checkOrientation();
+    }
+    // A side-scroller needs width. On a phone held upright, ask for the long side and hold everything.
+    function checkOrientation() {
+        var want = TOUCH && H > W * 1.02;
+        if (want === needsRotate) return;
+        needsRotate = want;
+        document.body.classList.toggle('needs-rotate', want);
+        if (want) { thrusting = false; thrustSound(false); bgMusic.pause(); }
+        else if (state === 'running' && !muted) bgMusic.play().catch(function () {});
     }
     window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', function () { setTimeout(resize, 120); });
     function wx(px) { return px - W / 2; }
     function wy(py) { return H / 2 - py; }
 
@@ -533,6 +546,7 @@
 
     /* ── Input ──────────────────────────────────────────────────────── */
     function press() {
+        if (needsRotate) return;
         if (state === 'idle') { start(); thrusting = true; thrustSound(true); return; }
         if (state === 'over') { if (deadFor > 0.5) { start(); thrusting = true; thrustSound(true); } return; }
         thrusting = true; thrustSound(true);
@@ -554,6 +568,7 @@
 
     /* ── Step ───────────────────────────────────────────────────────── */
     function update(dt) {
+        if (needsRotate) return;                          // frozen until the phone turns
         clock += dt;
         var i;
         if (state === 'idle') {

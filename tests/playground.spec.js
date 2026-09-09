@@ -3,7 +3,8 @@ const { test, expect } = require('@playwright/test');
 
 const BASE = 'http://localhost:8080/playground.html';
 const DESKTOP = { width: 1280, height: 800 };
-const MOBILE = { width: 390, height: 844 };
+const MOBILE = { width: 844, height: 390 };        // a phone turned on its side: Orbit needs the width
+const PORTRAIT = { width: 390, height: 844 };
 
 const state = (page) => page.evaluate(() => window.__game.state());
 const shipY = (page) => page.evaluate(() => window.__game.y());
@@ -18,14 +19,13 @@ async function thrust(page, ms) {
 test.describe('Playground — Desktop', () => {
     test.use({ viewport: DESKTOP });
 
-    test('opens dark by default and turns warm white for this visit only', async ({ page }) => {
+    test('has one side: always dark and warm, with no theme toggle', async ({ page }) => {
         await page.goto(BASE);
+        await expect(page.locator('#darkToggle')).toHaveCount(0);
         await expect(page.locator('body')).toHaveClass(/dark/);
         await expect(page.locator('html')).toHaveClass(/claude-mode/);
-        await page.click('#darkToggle');
-        await expect(page.locator('body')).not.toHaveClass(/dark/);
-        await expect(page.locator('html')).toHaveClass(/light/);
-        await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor), { timeout: 4000 }).toContain('250');
+        await expect(page.locator('html')).not.toHaveClass(/light/);
+        await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor), { timeout: 4000 }).toBe('rgb(22, 12, 6)');
         await page.reload();
         await expect(page.locator('body')).toHaveClass(/dark/);
     });
@@ -130,24 +130,24 @@ test.describe('Playground — Desktop', () => {
 test.describe('Playground — Mobile', () => {
     test.use({ viewport: MOBILE, hasTouch: true, isMobile: true });
 
-    test('game area fills the mobile screen', async ({ page }) => {
+    test('game area fills the phone on its side', async ({ page }) => {
         await page.goto(BASE);
         const box = await page.locator('#gameArea').boundingBox();
         expect(box.width).toBeCloseTo(MOBILE.width, 0);
-        expect(box.height).toBeGreaterThan(700);
+        expect(box.height).toBeGreaterThan(MOBILE.height * 0.7);
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
         expect(overflow).toBeLessThanOrEqual(0);
+        await expect(page.locator('#rotateNote')).toBeHidden();
     });
 
-    test('a tap starts the flight and holding lifts the rocket', async ({ page }) => {
+    test('a tap starts the flight and holding lifts the ship', async ({ page }) => {
         await page.goto(BASE);
         const box = await page.locator('#gameArea').boundingBox();
-        const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
-        await page.mouse.move(cx, cy);
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
         await page.mouse.down();
         await expect.poll(() => state(page), { timeout: 3000 }).toBe('running');
         const start = await shipY(page);
-        await page.waitForTimeout(350);
+        await page.waitForTimeout(320);
         const top = await shipY(page);
         await page.mouse.up();
         expect(top).toBeLessThan(start);
@@ -161,9 +161,33 @@ test.describe('Playground — Mobile', () => {
     });
 });
 
+test.describe('Playground — phone held upright', () => {
+    test.use({ viewport: PORTRAIT, hasTouch: true, isMobile: true });
+
+    test('asks for the long side and holds the flight until it gets it', async ({ page }) => {
+        await page.goto(BASE);
+        await expect(page.locator('#rotateNote')).toBeVisible();
+        await expect(page.locator('#rotateNote')).toContainText('Turn your phone');
+        const box = await page.locator('#gameArea').boundingBox();
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        await page.mouse.down();
+        await page.waitForTimeout(400);
+        await page.mouse.up();
+        expect(await state(page)).toBe('idle');                 // nothing started
+        // turned on its side, it plays
+        await page.setViewportSize(MOBILE);
+        await page.waitForTimeout(400);
+        await expect(page.locator('#rotateNote')).toBeHidden();
+        await page.mouse.move(200, 150);
+        await page.mouse.down();
+        await expect.poll(() => state(page), { timeout: 3000 }).toBe('running');
+        await page.mouse.up();
+    });
+});
+
 test.describe('Playground — viewports', () => {
     const VIEWPORTS = [
-        { name: 'small phone', width: 320, height: 568 },
+        { name: 'small phone', width: 568, height: 320 },
         { name: 'tablet', width: 768, height: 1024 },
         { name: 'laptop', width: 1440, height: 900 }
     ];

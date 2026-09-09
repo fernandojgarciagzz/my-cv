@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
     <script src="assets/js/galaxy.js?v=7" defer></script>
-    <script src="assets/js/orbit.js?v=12" defer></script>
+    <script src="assets/js/orbit.js?v=13" defer></script>
     <style>
         body {
             -webkit-user-select: none;
@@ -21,27 +21,8 @@
         }
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+        /* One palette: the playground is always dark, like the album. */
         :root {
-            --bg:        #FAF6F1;
-            --bg-2:      #F2EBE2;
-            --bg-card:   #EFE7DC;
-            --rust:      #D97757;
-            --rust-dark: #C4633F;
-            --rust-light:#F0A882;
-            --rust-dim:  rgba(217,119,87,0.15);
-            --rust-alpha:rgba(217,119,87,0.12);
-            --text:      #2D1A0E;
-            --text-2:    #7A5C48;
-            --text-3:    #A8866E;
-            --border:    rgba(217,119,87,0.2);
-            --nav-bg:    rgba(250,246,241,0.88);
-            --mono: 'JetBrains Mono', monospace;
-            --heading: 'Space Grotesk', sans-serif;
-            --body: 'Inter', sans-serif;
-            --hand: 'Covered By Your Grace', cursive;
-        }
-
-        .dark {
             --bg:        #160C06;
             --bg-2:      #1F1108;
             --bg-card:   #2A1A0D;
@@ -55,6 +36,10 @@
             --text-3:    #896653;
             --border:    rgba(217,119,87,0.18);
             --nav-bg:    rgba(22,12,6,0.92);
+            --mono: 'JetBrains Mono', monospace;
+            --heading: 'Space Grotesk', sans-serif;
+            --body: 'Inter', sans-serif;
+            --hand: 'Covered By Your Grace', cursive;
         }
 
         html, body {
@@ -178,6 +163,25 @@
             font-family: var(--mono); font-size: clamp(0.62rem, 1.6vh, 0.78rem);
             letter-spacing: 0.14em; color: var(--text-3);
         }
+        /* A phone held upright has no room to fly: ask for the long side. */
+        .rotate-note {
+            position: absolute; inset: 0; z-index: 5; display: none;
+            flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+            text-align: center; padding: 0 2rem;
+            background: rgba(22, 12, 6, 0.82);
+            -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+        }
+        body.needs-rotate .rotate-note { display: flex; }
+        body.needs-rotate .game-hud { display: none !important; }
+        .rotate-note svg { width: 54px; height: 54px; color: var(--rust); animation: tipOver 2.6s ease-in-out infinite; }
+        .rotate-note h2 { font-family: var(--heading); font-weight: 600; font-size: 1.35rem; color: var(--text); }
+        .rotate-note p { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em; color: var(--text-3); text-transform: uppercase; }
+        @keyframes tipOver {
+            0%, 45% { transform: rotate(0deg); }
+            65%, 92% { transform: rotate(-90deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @media (prefers-reduced-motion: reduce) { .rotate-note svg { animation: none; transform: rotate(-90deg); } }
 
         /* ── Geometric Swahili pattern (from Roho) ── */
         .geo-corner {
@@ -236,7 +240,6 @@
                     <svg id="soundOn" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
                     <svg id="soundOff" viewBox="0 0 24 24" style="display:none"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
                 </button>
-                <button class="nav-btn" id="darkToggle" aria-label="Toggle dark mode">&#x1F319;</button>
             </div>
         </div>
     </nav>
@@ -255,6 +258,13 @@
         <canvas id="gameTerrain"></canvas>
         <canvas id="gameCanvas"></canvas>
         <div class="game-hud" id="gameHud" aria-hidden="true"><h2 id="hudTitle">Orbit</h2><p id="hudHint">HOLD SPACE TO FLY · AVOID THE ROCKS</p></div>
+        <div class="rotate-note" id="rotateNote" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18.5h2"/>
+            </svg>
+            <h2>Turn your phone</h2>
+            <p>Orbit needs the long side</p>
+        </div>
     </div>
 
     <div class="score-bar">
@@ -262,23 +272,10 @@
         <span id="gameScore"></span>
     </div>
 
-    <!-- Dark mode toggle -->
     <script>
-    (function(){
-        const btn = document.getElementById('darkToggle');
-        const root = document.documentElement;
-        // Dark is always the default; the toggle only changes this visit. The black hole reads these
-        // classes off <html>, so it turns with the page: warm on black, ink and rust on white.
-        function apply(dark) {
-            document.body.classList.toggle('dark', dark);
-            root.classList.toggle('dark', dark);
-            root.classList.toggle('light', !dark);
-            root.classList.add('claude-mode');
-            btn.innerHTML = dark ? '&#x2600;' : '&#x1F319;';
-        }
-        apply(true);
-        btn.addEventListener('click', () => apply(!document.body.classList.contains('dark')));
-    })();
+    // The black hole reads the theme off <html>: this page has one, warm on black.
+    document.documentElement.classList.add('dark', 'claude-mode');
+    document.body.classList.add('dark');
     </script>
 
     <!-- Anti-copy protection -->
