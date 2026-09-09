@@ -426,7 +426,7 @@
 
     /* ── Scroll, pointer, drag ──────────────────────────────────────── */
     var scrollP = 0, dirty = true;
-    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? 0.1 : 0, ry: 0 };   // opening tilt: a touch more from above
+    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? -0.27 : 0, ry: 0 };   // opening tilt: the disc seen nearly edge-on, camera a few degrees above its plane
     var mx = 0, my = 0, tiltX = 0, tiltY = 0;                   // cursor-driven tilt of the whole galaxy
     if (!reduce && window.matchMedia('(hover: hover)').matches) {
         window.addEventListener('mousemove', function (e) {
@@ -490,7 +490,7 @@
         var zoom = Math.min(pe, 1.6);
         var after = Math.max(0, p - 1.6);                       // how far past the intro we are
         var hoverK = drag.on ? 0 : Math.max(0, 1 - after);      // full in the hero, gone once past the intro
-        tiltX += (-my * 0.2 * hoverK - tiltX) * 0.045;          // mouse up = look more from above, never edge-on
+        tiltX += (-my * (my > 0 ? 0.06 : 0.2) * hoverK - tiltX) * 0.045;   // mouse up = look more from above; mouse down never dips below the disc
         tiltY += (mx * 0.38 * hoverK - tiltY) * 0.045;
         if (!drag.on) { drag.ry += drag.vy; drag.rx = clamp(drag.rx + drag.vx, -0.75, 0.75); drag.vy *= 0.94; drag.vx *= 0.9; }
 
