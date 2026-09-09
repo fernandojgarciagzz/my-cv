@@ -222,10 +222,15 @@
                 '  }',
                 '  if (inShadow > 0.5 && behind < 0.5) { if (aKind > 1.5 && aKind < 2.5) fade *= 0.15; if (aKind < 0.5) fade *= (1.0 - plungeK); }',
                 '  if (uSecondary > 0.5 && tE2 <= 0.0) visible = 0.0;',
+                // the photon ring is a glow, not a wire: near the shadow edge, jitter the angle a little and use
+                // bigger, dimmer points
+                '  float edgeK = 1.0 - smoothstep(0.0, 0.22 * shadowAng, abs(abs(theta) - shadowAng * 1.04));',
+                '  theta += (fract(aScale * 13.7 + aRandom.y * 31.0) - 0.5) * 0.16 * shadowAng * edgeK;',
+                '  fade *= 1.0 - 0.45 * edgeK;',
                 '  vec3 nd = axis * cos(theta) + pn * sin(theta);',
                 '  pv = nd * Ds;',
                 '  gl_Position = projectionMatrix * vec4(pv, 1.0);',
-                '  float sizeK = aKind < 0.5 ? (1.0 - 0.5 * tcol) : 1.0;',                        // hot inside, faint far out
+                '  float sizeK = (aKind < 0.5 ? (1.0 - 0.5 * tcol) : 1.0) * (1.0 + 1.3 * edgeK);',   // hot inside, faint far out, soft at the ring
                 '  gl_PointSize = uSize * aScale * uPixelRatio * bright * sizeK * (1.0 / max(-pv.z, 0.1));',
                 '  vec3 base = (aKind > 1.5 && aKind < 2.5) ? mix(uOutside, vec3(1.0), 0.55) : mix(uInside, uOutside, tcol);',
                 '  vColor = mix(base, dop > 0.0 ? vec3(1.0) : uOutside, abs(dop) * 0.3);',
