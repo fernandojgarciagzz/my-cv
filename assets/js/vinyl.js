@@ -196,7 +196,7 @@
         function radiusAt(phi) { var ex = P.x + LEN * Math.cos(phi), ey = P.y + LEN * Math.sin(phi); return Math.sqrt(ex * ex + ey * ey); }
         function solve(target, from, to) { var best = from, err = 1e9; for (var a = from; a <= to; a += 0.002) { var e = Math.abs(radiusAt(a) - target); if (e < err) { err = e; best = a; } } return best; }
         ARM_ON = solve(0.95, Math.PI * 1.05, Math.PI * 1.35);
-        ARM_REST = solve(1.24, Math.PI * 1.25, Math.PI * 1.75);
+        ARM_REST = solve(1.19, Math.PI * 1.02, Math.PI * 1.16);        // parked just off the rim, near its own pivot
         armG.visible = false;
         tiltG.add(armG);
     }
@@ -229,7 +229,13 @@
         if (photoReady(spec.photo)) {
             // a picture label: the photo fills the label with the same crop the page uses (scale 1.3 about the point at 25% height)
             ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
-            ctx.drawImage(spec.photo, -0.15 * S, -0.075 * S, 1.3 * S, 1.3 * S);
+            // the page shows the photo as `object-fit: cover` in a square, positioned at 25% height, then
+            // scaled 1.3 about that point. Same crop here, and the photo keeps its own proportions.
+            var iw = spec.photo.naturalWidth, ih = spec.photo.naturalHeight;
+            var cov = Math.max(1 / iw, 1 / ih), dw = iw * cov, dh = ih * cov;       // cover a 1x1 square
+            var dx = (1 - dw) / 2, dy = -(dh - 1) * 0.25;                           // centred, 25% from the top
+            var Z = 1.3, px0 = 0.5 * (1 - 1 / Z), py0 = 0.25 * (1 - 1 / Z);         // what the 1.3 zoom leaves visible
+            ctx.drawImage(spec.photo, (dx - px0) * S * Z, (dy - py0) * S * Z, dw * S * Z, dh * S * Z);
             ctx.restore();
             ctx.strokeStyle = 'rgba(255,255,255,0.32)'; ctx.lineWidth = 5;
             ctx.beginPath(); ctx.arc(cx, cy, R - 2.5, 0, Math.PI * 2); ctx.stroke();
@@ -305,8 +311,21 @@
     }
 
     /* ── Views ───────────────────────────────────────────────────────── */
+    function bezier(x1, y1, x2, y2) {                                    // the CSS curve the photo uses, for the record
+        return function (t) {
+            var lo = 0, hi = 1, u, x;
+            for (var i = 0; i < 18; i++) {
+                u = (lo + hi) / 2;
+                x = 3 * (1 - u) * (1 - u) * u * x1 + 3 * (1 - u) * u * u * x2 + u * u * u;
+                if (x < t) lo = u; else hi = u;
+            }
+            u = (lo + hi) / 2;
+            return 3 * (1 - u) * (1 - u) * u * y1 + 3 * (1 - u) * u * u * y2 + u * u * u;
+        };
+    }
     var EASES = {
         out: function (t) { return 1 - Math.pow(1 - t, 3); },
+        photo: bezier(0.2, 0.7, 0.2, 1),
         inout: function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; },
         linear: function (t) { return t; }
     };
@@ -412,6 +431,7 @@
         tiltG.rotation.set(-view.tilt + view.hx, view.hy, 0);
         tiltG.scale.setScalar(Math.max(0.001, view.scale));
         spinG.rotation.set(Math.sin(view.angle) * wob, Math.cos(view.angle) * wob, -view.angle);
+        label.rotation.z = view.opts.uprightLabel ? view.angle : 0;         // a portrait stays the right way up
         labelMat.map = view.tex; labelMat.needsUpdate = labelMat.map !== view.tex;
         shadow.material.opacity = document.documentElement.classList.contains('light') ? 0.16 : 0.55;
         armG.visible = !!view.opts.arm && view.arm > 0.001;

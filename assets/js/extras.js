@@ -45,14 +45,14 @@
                     if (view || !window.Vinyl) return;
                     view = window.Vinyl.create(vcanvas, {
                         album: 'Roho', title: 'Hatua Kwa Hatua', artist: 'Fernando García', num: '01',
-                        photo: photo, arm: true, band: 0, scale: LABEL, tilt: 0, hover: false, hoverEl: container,
+                        photo: photo, uprightLabel: true, arm: true, band: 0, scale: LABEL, tilt: 0, hover: false, hoverEl: container,
                         onReady: function () { if (stage) stage.classList.add('is-live'); }
                     });
                     if (playing) view.set({ scale: 1, tilt: TILT, arm: 1, band: 1, hover: true });
                     if (playing && container.classList.contains('vinyl-spinning')) view.play();
                 };
                 if (window.Vinyl) { go(); return; }
-                var s = document.createElement('script'); s.src = 'assets/js/vinyl.js?v=5'; s.onload = go; document.body.appendChild(s);
+                var s = document.createElement('script'); s.src = 'assets/js/vinyl.js?v=6'; s.onload = go; document.body.appendChild(s);
             });
         }
         mountVinyl();
@@ -91,7 +91,7 @@
                 claude(true); fadeIn();
                 return;
             }
-            if (view) { view.set({ scale: LABEL, tilt: 0, arm: 0, band: 0, hover: false }); view.animate({ scale: 1 }, GROW, 'out'); }
+            if (view) { view.set({ scale: LABEL, tilt: 0, arm: 0, band: 0, hover: false }); view.animate({ scale: 1 }, GROW, 'photo'); }   // the record grows on the photo's own curve
             later(function () { container.classList.add('vinyl-live'); }, GROW);            // the photo hands off to the label
             later(function () {
                 claude(true);
@@ -117,7 +117,7 @@
             later(function () { container.classList.remove('vinyl-live'); }, 1050);       // the photo returns over the label
             later(function () {
                 container.classList.remove('vinyl-active');                             // the photo grows back; the record shrinks behind it
-                if (view) view.animate({ scale: LABEL }, GROW, 'inout');
+                if (view) view.animate({ scale: LABEL }, GROW, 'photo');
             }, 1300);
         }
         function deactivate() {
