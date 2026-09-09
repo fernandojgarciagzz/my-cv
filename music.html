@@ -86,6 +86,13 @@
         .album-title { font-family: var(--font-hand); font-size: clamp(5.5rem, 13vw, 10.5rem); color: var(--accent); line-height: 0.85; margin: 0.6rem 0 0.4rem; font-weight: 400; text-shadow: 0 0 60px var(--accent-glow); }
         .album-by { font-family: var(--font-display); font-size: var(--t-small); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-weight: 500; }
         .album-desc { font-family: var(--font-hand); font-size: 1.6rem; color: var(--ink-3); margin-top: 1.4rem; }
+        .album-spotify {
+            margin-top: 1.4rem; display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.55rem 1.1rem; border-radius: 999px; border: 1px solid var(--line);
+            font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--ink-2); text-decoration: none; transition: border-color 0.25s, color 0.25s;
+        }
+        .album-spotify:hover { border-color: var(--accent); color: var(--accent); }
         .hero-hint { position: absolute; left: 50%; bottom: 2.2rem; transform: translateX(-50%); font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-3); text-decoration: none; opacity: 0.8; }
         .hero { position: relative; }
         .rise { opacity: 0; transform: translateY(16px); animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--d, 0s); }
@@ -206,6 +213,7 @@
             <h1 class="album-title rise" style="--d: 0.1s">Roho</h1>
             <p class="album-by rise" style="--d: 0.2s">Fernando García</p>
             <p class="album-desc rise" style="--d: 0.3s">soul, in sound</p>
+            <a class="album-spotify rise" style="--d: 0.45s" href="https://open.spotify.com/album/30KUC9e9S7Ufeko1zdSnOh" target="_blank" rel="noopener">Listen on Spotify</a>
             <a class="hero-hint rise" style="--d: 0.6s" href="#tracks">tap a record to play</a>
         </header>
 
