@@ -147,7 +147,7 @@
         return new THREE.ShaderMaterial({
             transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
             uniforms: {
-                uTime: { value: 0 }, uSize: { value: isMobile ? 20 : 24 }, uPixelRatio: { value: DPR },
+                uTime: { value: 0 }, uSize: { value: isMobile ? 19 : 22 }, uPixelRatio: { value: DPR },
                 uSpin: { value: BH ? 0.3 : 0.09 }, uSpinPow: { value: BH ? 1.85 : 1.0 },
                 uOpacity: { value: 1 }, uRadius: { value: RADIUS }, uInner: { value: DISC_IN },
                 uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
@@ -230,11 +230,11 @@
                 '  vec3 nd = axis * cos(theta) + pn * sin(theta);',
                 '  pv = nd * Ds;',
                 '  gl_Position = projectionMatrix * vec4(pv, 1.0);',
-                '  float sizeK = (aKind < 0.5 ? (1.0 - 0.5 * tcol) : 1.0) * (1.0 + 1.3 * edgeK);',   // hot inside, faint far out, soft at the ring
+                '  float sizeK = (aKind < 0.5 ? (0.88 - 0.45 * tcol) : 1.0) * (1.0 + 1.3 * edgeK);',  // hot inside, faint far out, soft at the ring
                 '  gl_PointSize = uSize * aScale * uPixelRatio * bright * sizeK * (1.0 / max(-pv.z, 0.1));',
                 '  vec3 base = (aKind > 1.5 && aKind < 2.5) ? mix(uOutside, vec3(1.0), 0.55) : mix(uInside, uOutside, pow(tcol, 0.7));',
                 '  vColor = mix(base, dop > 0.0 ? vec3(1.0) : uOutside, abs(dop) * 0.3);',
-                '  vAlpha = visible * fade * (uSecondary > 0.5 ? 0.5 : 1.0);',
+                '  vAlpha = visible * fade * (uSecondary > 0.5 ? 0.3 : 1.0);',
                 '}'
             ].join('\n'),
             fragmentShader: [
@@ -265,7 +265,7 @@
         // The shadow itself: a flat black disc that always faces the camera. No shading, no rim, no volume,
         // only a perfect circle of absence; it writes depth so anything behind it is gone and the near
         // side of the disc still crosses in front of it.
-        shadowDisc = new THREE.Mesh(new THREE.CircleGeometry(SHADOW, 96), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+        shadowDisc = new THREE.Mesh(new THREE.CircleGeometry(SHADOW, 96), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 }));
         shadowDisc.renderOrder = -1;
         scene.add(shadowDisc);
         var glowEl = document.querySelector('.space-glow');
@@ -498,10 +498,10 @@
         gGroup.rotation.x = clamp(drag.rx + tiltX, -0.9, 0.9);
         gGroup.updateMatrixWorld();
 
-        var fade = p < 0.85 ? 1 : (p < 2.3 ? Math.max(0.3, 1 - (p - 0.85) * 1.3) : Math.max(0, 0.3 * (1 - (p - 2.3) / 0.7)));
+        var fade = p < 0.85 ? 1 : Math.max(0, 1 - (p - 0.85) / 1.05);          // fully gone by p ≈ 1.9, before the morph section
         galaxy.visible = fade > 0.002 && explode < 1;
         gMat.uniforms.uOpacity.value = cur.gOp * fade;
-        if (BH) { galaxy2.visible = galaxy.visible; shadowDisc.visible = galaxy.visible; shadowDisc.lookAt(camera.position); }
+        if (BH) { galaxy2.visible = galaxy.visible; shadowDisc.visible = galaxy.visible; shadowDisc.material.opacity = fade; shadowDisc.lookAt(camera.position); }
         gMat.uniforms.uExplode.value = explode;
         sMat.uniforms.uOpacity.value = cur.sOp * (1 - explode);
         var dustIn = Math.max(0, Math.min(1, (p - 0.75) / 0.6));   // dust only once the galaxy has receded
