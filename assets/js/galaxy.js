@@ -492,7 +492,7 @@
 
         // Camera: opens a little further out (cleaner start), pulls back through the hero,
         // then keeps looking lower so the galaxy drifts up and out while the stars and dust remain.
-        camera.position.set(0, (FORM === 'blackhole' ? 2.45 : 3.5) + zoom * 2.6, 7.6 + zoom * 5.6);
+        camera.position.set(0, (FORM === 'blackhole' ? 2.75 : 3.5) + zoom * 2.6, 7.6 + zoom * 5.6);   // ~20° above the disc
         camera.lookAt(0, -(zoom + after * 0.9) * 1.15, 0);
         gGroup.rotation.y = t * 0.018 + zoom * 1.1 + drag.ry + tiltY;
         gGroup.rotation.x = clamp(drag.rx + tiltX, -0.9, 0.9);
