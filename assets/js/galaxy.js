@@ -252,7 +252,7 @@
     var galaxy = new THREE.Points(gGeo, gMat);
     var gGroup = new THREE.Group();
     gGroup.add(galaxy);
-    gGroup.rotation.z = 0.14;
+    gGroup.rotation.z = FORM === 'blackhole' ? -0.28 : 0.14;                     // opening roll: the near band slides down to the right
     scene.add(gGroup);
 
     /* ── Secondary image (black hole only). The shadow is not an object: it is the
@@ -424,7 +424,7 @@
 
     /* ── Scroll, pointer, drag ──────────────────────────────────────── */
     var scrollP = 0, dirty = true;
-    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: 0, ry: 0 };
+    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? 0.1 : 0, ry: 0 };   // opening tilt: a touch more from above
     var mx = 0, my = 0, tiltX = 0, tiltY = 0;                   // cursor-driven tilt of the whole galaxy
     if (!reduce && window.matchMedia('(hover: hover)').matches) {
         window.addEventListener('mousemove', function (e) {
@@ -562,6 +562,7 @@
         window.addEventListener('scroll', function () { if (dirty) renderStatic(); }, { passive: true });
         window.addEventListener('resize', function () { renderStatic(); });
     }
-    window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; }, form: FORM };
+    window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; }, form: FORM,
+        pose: function (rx, ry, rz) { drag.rx = rx; drag.ry = ry; drag.vx = 0; drag.vy = 0; if (rz !== undefined) gGroup.rotation.z = rz; } };
     start();
 })();
