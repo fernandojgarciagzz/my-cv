@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-    <script src="assets/js/galaxy.js" defer></script>
+    <script src="assets/js/galaxy.js?v=3" defer></script>
     <style>
         /* ==========================================================
            TOKENS — type scale, one accent, dark-first palette
@@ -750,10 +750,10 @@
     <!-- HERO: the name at the edges, the galaxy between them, pinned for ~1 viewport of scroll -->
     <header class="hero" id="top">
         <div class="hero-pin">
-            <!-- HERO WORDS — the pair at the two edges of the galaxy -->
+            <!-- HERO WORDS — the pair at the two edges of the black hole -->
             <p class="hero-name" aria-hidden="true">
-                <span class="hero-first">AI</span>
-                <span class="hero-last">First</span>
+                <span class="hero-first">Why</span>
+                <span class="hero-last">Not</span>
             </p>
             <div class="hero-hint" aria-hidden="true"><span>Drag · Scroll</span><i></i></div>
         </div>
@@ -1409,7 +1409,7 @@
             else {
                 morphSteps = morph.querySelectorAll('.morph-steps span');
                 var loaded = false;
-                function loadMorph() { if (loaded) return; loaded = true; var s = d.createElement('script'); s.src = 'assets/js/showcase.js'; s.defer = true; d.body.appendChild(s); }
+                function loadMorph() { if (loaded) return; loaded = true; var s = d.createElement('script'); s.src = 'assets/js/showcase.js?v=3'; s.defer = true; d.body.appendChild(s); }
                 if ('IntersectionObserver' in window) {
                     var mo = new IntersectionObserver(function (es) { if (es.some(function (e) { return e.isIntersecting; })) { loadMorph(); mo.disconnect(); } }, { rootMargin: '600px 0px' });
                     mo.observe(morph);
@@ -1422,7 +1422,7 @@
         var extrasP = null;
         function extras() {
             if (extrasP) return extrasP;
-            extrasP = new Promise(function (res, rej) { var s = d.createElement('script'); s.src = 'assets/js/extras.js'; s.onload = res; s.onerror = rej; d.body.appendChild(s); });
+            extrasP = new Promise(function (res, rej) { var s = d.createElement('script'); s.src = 'assets/js/extras.js?v=3'; s.onload = res; s.onerror = rej; d.body.appendChild(s); });
             return extrasP;
         }
         var photo = d.getElementById('vinylTrigger');
