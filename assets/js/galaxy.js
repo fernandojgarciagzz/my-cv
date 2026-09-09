@@ -148,7 +148,7 @@
             transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
             uniforms: {
                 uTime: { value: 0 }, uSize: { value: isMobile ? 20 : 24 }, uPixelRatio: { value: DPR },
-                uSpin: { value: BH ? 0.26 : 0.09 }, uSpinPow: { value: BH ? 1.5 : 1.0 },
+                uSpin: { value: BH ? 0.3 : 0.09 }, uSpinPow: { value: BH ? 1.85 : 1.0 },
                 uOpacity: { value: 1 }, uRadius: { value: RADIUS }, uInner: { value: DISC_IN },
                 uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
                 uExplode: { value: 0 },
@@ -220,7 +220,7 @@
                 '    fade *= 0.25 + 0.75 * smoothstep(0.0, shadowAng, ath);',
                 '    theta = sgn * (shadowAng * 1.02 + (shadowAng - ath) * 0.3);',
                 '  }',
-                '  if (inShadow > 0.5 && behind < 0.5) { if (aKind > 1.5 && aKind < 2.5) fade *= 0.15; if (aKind < 0.5) fade *= (1.0 - plungeK); }',
+                '  if (inShadow > 0.5 && behind < 0.5) { if (aKind > 1.5 && aKind < 2.5) fade *= 0.15; if (aKind < 0.5) fade *= (1.0 - plungeK) * 0.55; }',
                 '  if (uSecondary > 0.5 && tE2 <= 0.0) visible = 0.0;',
                 // the photon ring is a glow, not a wire: near the shadow edge, jitter the angle a little and use
                 // bigger, dimmer points
@@ -232,7 +232,7 @@
                 '  gl_Position = projectionMatrix * vec4(pv, 1.0);',
                 '  float sizeK = (aKind < 0.5 ? (1.0 - 0.5 * tcol) : 1.0) * (1.0 + 1.3 * edgeK);',   // hot inside, faint far out, soft at the ring
                 '  gl_PointSize = uSize * aScale * uPixelRatio * bright * sizeK * (1.0 / max(-pv.z, 0.1));',
-                '  vec3 base = (aKind > 1.5 && aKind < 2.5) ? mix(uOutside, vec3(1.0), 0.55) : mix(uInside, uOutside, tcol);',
+                '  vec3 base = (aKind > 1.5 && aKind < 2.5) ? mix(uOutside, vec3(1.0), 0.55) : mix(uInside, uOutside, pow(tcol, 0.7));',
                 '  vColor = mix(base, dop > 0.0 ? vec3(1.0) : uOutside, abs(dop) * 0.3);',
                 '  vAlpha = visible * fade * (uSecondary > 0.5 ? 0.5 : 1.0);',
                 '}'
@@ -252,7 +252,7 @@
     var galaxy = new THREE.Points(gGeo, gMat);
     var gGroup = new THREE.Group();
     gGroup.add(galaxy);
-    gGroup.rotation.z = 0.14;
+    gGroup.rotation.z = FORM === 'blackhole' ? -0.28 : 0.14;                     // opening roll: the near band slides down to the right
     scene.add(gGroup);
 
     /* ── Secondary image (black hole only). The shadow is not an object: it is the
@@ -378,8 +378,8 @@
 
     /* ── Theme ───────────────────────────────────────────────────────── */
     var THEMES = {
-        dark:        { inside: '#FFDDB4', outside: '#4F78A8', star: '#D8E3F3', dust: '#9FB8D6', gOp: 1.00, sOp: 0.85, dOp: 0.66, add: true },
-        darkClaude:  { inside: '#FFC894', outside: '#C2623D', star: '#F0D6BE', dust: '#E8B48F', gOp: 1.00, sOp: 0.80, dOp: 0.66, add: true },
+        dark:        { inside: '#FFC088', outside: '#3F73BC', star: '#D8E3F3', dust: '#9FB8D6', gOp: 1.00, sOp: 0.85, dOp: 0.66, add: true },
+        darkClaude:  { inside: '#FFAE6A', outside: '#B8532E', star: '#F0D6BE', dust: '#E8B48F', gOp: 1.00, sOp: 0.80, dOp: 0.66, add: true },
         light:       { inside: '#2A425C', outside: '#7EA0BB', star: '#3B5775', dust: '#3B5775', gOp: 0.80, sOp: 0.22, dOp: 0.24, add: false },
         lightClaude: { inside: '#9E4A2A', outside: '#E5A785', star: '#B85C3A', dust: '#B85C3A', gOp: 0.80, sOp: 0.22, dOp: 0.24, add: false }
     };
@@ -424,7 +424,7 @@
 
     /* ── Scroll, pointer, drag ──────────────────────────────────────── */
     var scrollP = 0, dirty = true;
-    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: 0, ry: 0 };
+    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? 0.1 : 0, ry: 0 };   // opening tilt: a touch more from above
     var mx = 0, my = 0, tiltX = 0, tiltY = 0;                   // cursor-driven tilt of the whole galaxy
     if (!reduce && window.matchMedia('(hover: hover)').matches) {
         window.addEventListener('mousemove', function (e) {
@@ -562,6 +562,7 @@
         window.addEventListener('scroll', function () { if (dirty) renderStatic(); }, { passive: true });
         window.addEventListener('resize', function () { renderStatic(); });
     }
-    window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; }, form: FORM };
+    window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; }, form: FORM,
+        pose: function (rx, ry, rz) { drag.rx = rx; drag.ry = ry; drag.vx = 0; drag.vy = 0; if (rz !== undefined) gGroup.rotation.z = rz; } };
     start();
 })();
