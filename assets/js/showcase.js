@@ -327,46 +327,27 @@
             jitter[i*3 + 2] = 0.04 + Math.random() * 0.07; // amplitude
         }
 
+        // Same look as the black hole: soft additive glow points, warm at the core cooling to blue outward
+        const colors = new Float32Array(PARTICLE_COUNT * 3);
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         const pointMat = new THREE.PointsMaterial({
-            // Mobile: bigger dots to compensate for the camera being pulled
-            // further back on portrait viewports (sizeAttenuation shrinks
-            // dots with distance, so without this the figure reads tiny).
-            size: isMobile ? 0.28 : 0.19,
+            size: isMobile ? 0.24 : 0.17,
             map: glowTex,
-            color: 0x3B5775,
+            vertexColors: true,
             transparent: true,
-            // NormalBlending so each dot composites as a real slate mark
-            // against the page (not an additive glow that washes out toward
-            // white). This is what makes the dots read as "darker."
-            blending: THREE.NormalBlending,
+            blending: THREE.AdditiveBlending,
             depthWrite: false,
             sizeAttenuation: true,
-            opacity: 1.0
+            opacity: 0.9
         });
-
+        const cInside = new THREE.Color('#FFC088'), cOutside = new THREE.Color('#3F73BC'), cTmp = new THREE.Color();
         const points = new THREE.Points(geometry, pointMat);
         scene.add(points);
 
         function updateColors() {
-            const styles = getComputedStyle(document.body);
-            const blue = (styles.getPropertyValue('--accent') || '#3B5775').trim();
-            try {
-                pointMat.color.set(blue);
-                // Light mode: darken further so the dots read as deep slate
-                // ink against the cement bg. Dark mode: leave the accent
-                // closer to its lifted variant so the figure stays visible
-                // against the dark page.
-                const isDarkBg = document.body.classList.contains('dark');
-                const hsl = {};
-                pointMat.color.getHSL(hsl);
-                pointMat.color.setHSL(
-                    hsl.h,
-                    hsl.s * 0.65,
-                    isDarkBg ? hsl.l * 1.05 : hsl.l * 0.75
-                );
-            } catch (e) { /* keep prev */ }
-            const isDark = document.body.classList.contains('dark');
-            pointMat.opacity = isDark ? 1.0 : 0.95;
+            const claude = document.documentElement.classList.contains('claude-mode');
+            cInside.set(claude ? '#FFAE6A' : '#FFC088');
+            cOutside.set(claude ? '#B8532E' : '#3F73BC');
         }
         updateColors();
         const themeObs = new MutationObserver(updateColors);
@@ -434,8 +415,12 @@
                 pos[idx]     = A[idx]     * (1 - eT) + B[idx]     * eT + jx;
                 pos[idx + 1] = A[idx + 1] * (1 - eT) + B[idx + 1] * eT + jy;
                 pos[idx + 2] = A[idx + 2] * (1 - eT) + B[idx + 2] * eT + jz;
+                const rr = Math.sqrt(pos[idx] * pos[idx] + pos[idx + 1] * pos[idx + 1] + pos[idx + 2] * pos[idx + 2]);
+                cTmp.copy(cInside).lerp(cOutside, Math.min(1, Math.pow(rr / 3.4, 0.7)));
+                colors[idx] = cTmp.r; colors[idx + 1] = cTmp.g; colors[idx + 2] = cTmp.b;
             }
             geometry.attributes.position.needsUpdate = true;
+            geometry.attributes.color.needsUpdate = true;
 
             /* Camera: continuous slow Y-orbit + gentle Y bob. Scroll progress
              * adds a small extra rotation so each form is seen from a slightly
