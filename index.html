@@ -236,41 +236,38 @@
         .photo::before { content: ''; position: absolute; inset: 4%; border-radius: 50%; z-index: 0; background: radial-gradient(circle, var(--accent-glow), transparent 68%); }
         .photo-wrap {
             position: relative; z-index: 2; width: 74%; aspect-ratio: 1; border-radius: 50%;
-            border: 3px solid var(--line); box-shadow: var(--shadow); transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s, box-shadow 0.4s;
+            border: 3px solid var(--line); box-shadow: var(--shadow);
+            transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.25s ease, border-color 0.4s, box-shadow 0.4s;
             cursor: pointer; -webkit-tap-highlight-color: transparent;
         }
         .photo-wrap:hover { border-color: var(--accent); }
-        .photo-face { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .photo-face { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; }
         .photo-face img { width: 100%; height: 100%; object-fit: cover; object-position: center 25%; transform: scale(1.3); transform-origin: center 25%; }
         .photo-hint { position: absolute; bottom: 8%; right: 8%; z-index: 5; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: var(--t-small); color: var(--accent); background: var(--accent-glow); opacity: 0; pointer-events: none; transition: opacity 0.4s; }
         .photo-wrap:hover .photo-hint { opacity: 1; }
         .vinyl-active .photo-hint { display: none; }
-        /* The back of the photo is a real record: a 3D canvas drawn by assets/js/vinyl.js.
-           It is a little larger than the photo so the tilted disc can break the circle. */
-        .photo-back { position: absolute; inset: -16%; z-index: 2; transform: rotateY(180deg); backface-visibility: hidden; -webkit-backface-visibility: hidden; pointer-events: none; }
-        .photo-back canvas { width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.5s ease; }
-        .photo-back.is-live canvas { opacity: 1; }
-        .photo-back::before {                                        /* a plain record stands in until the 3D one has drawn */
-            content: ''; position: absolute; inset: 12.2%; border-radius: 50%; transition: opacity 0.5s ease;
-            background: radial-gradient(circle, #1a0d06 0 2.2%, #FFB27A 2.6% 30%, #C4633F 31% 33%, #14100d 33.5%, #0f0c0a 100%);
-        }
-        .photo-back.is-live::before { opacity: 0; }
-        .vinyl-active .photo-wrap { transform: rotateY(180deg); border-color: transparent; box-shadow: none; }
+        /* The record lives behind the photo (assets/js/vinyl.js). Click: the photo shrinks to the size of a
+           label while the record grows out from behind it, the photo hands off to a picture label carrying the
+           same crop, the record leans back, spins up, and the tonearm drops. The stage is sized so the record's
+           diameter is 1.6× the photo and its label exactly the shrunken photo. */
+        .vinyl-stage { position: absolute; inset: -26.8%; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 0.35s ease 0.75s; }
+        .vinyl-stage canvas { width: 100%; height: 100%; display: block; }
+        .vinyl-active .vinyl-stage { opacity: 1; transition-delay: 0s; pointer-events: auto; cursor: pointer; }
+        .vinyl-active .photo-wrap { transform: scale(0.536); border-color: rgba(255, 255, 255, 0.32); box-shadow: none; }
+        .vinyl-live .photo-wrap { opacity: 0; }
         .vinyl-active .photo::before { background: radial-gradient(circle, var(--accent-glow), transparent 62%); }
         @keyframes idleNudge { 0%, 90%, 100% { transform: rotate(0deg); } 93% { transform: rotate(2deg); } 96% { transform: rotate(-2deg); } }
         .song-note {
-            position: absolute; top: 50%; left: calc(88% + 1rem); z-index: 10; transform: translateY(-50%) translateX(8px);
-            display: flex; align-items: center; gap: 0.4rem; opacity: 0; pointer-events: none; white-space: nowrap;
-            transition: opacity 0.6s ease 0.4s, transform 0.6s ease 0.4s;
+            position: absolute; top: calc(100% + 2.6rem); left: 50%; z-index: 10; transform: translateX(-50%) translateY(8px);
+            display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.1rem; opacity: 0; pointer-events: none; white-space: nowrap;
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
-        .vinyl-active .song-note { opacity: 1; transform: translateY(-50%); }
-        .song-note svg { width: 56px; height: 32px; flex-shrink: 0; color: var(--accent); }
-        .song-note .v { display: none; }
+        .vinyl-active .song-note { opacity: 1; transform: translateX(-50%); transition-delay: 1.3s; }
+        .song-note svg { display: none; }
         .song-title { font-family: var(--font-display); font-size: var(--t-lead); font-weight: 600; color: var(--accent); line-height: 1.2; }
         .song-by { display: block; font-size: var(--t-small); color: var(--ink-3); }
-        .album-invite { position: absolute; left: calc(88% + 1rem); top: calc(50% + 3.6rem); z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.6s ease 1.4s; }
-        .vinyl-active .album-invite { opacity: 1; pointer-events: auto; }
+        .album-invite { position: absolute; left: 50%; top: calc(100% + 6.6rem); transform: translateX(-50%); z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        .vinyl-active .album-invite { opacity: 1; pointer-events: auto; transition-delay: 2s; }
         .album-invite a { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.9rem; border-radius: 999px; border: 1px solid var(--accent); background: rgba(var(--bg-rgb), 0.85); color: var(--accent); font-size: var(--t-small); font-weight: 500; text-decoration: none; white-space: nowrap; }
         .playground-btn { display: none; }
         .playground-btn.visible { display: inline-flex; }
@@ -632,10 +629,7 @@
             .photo-wrap { animation: idleNudge 6s ease-in-out infinite; }
             .vinyl-active .photo-wrap { animation: none; }
             .photo-hint { display: none; }
-            .song-note { top: auto; left: 50%; bottom: -4.5rem; transform: translateX(-50%) translateY(8px); flex-direction: column; text-align: center; }
-            .vinyl-active .song-note { transform: translateX(-50%); }
-            .song-note .h { display: none; }
-            .song-note .v { display: block; width: 32px; height: 28px; }
+            .song-note { top: calc(100% + 2.2rem); }
             .album-invite { position: fixed; left: 50%; top: auto; bottom: 1.25rem; transform: translateX(-50%); z-index: 150; }
             .card-grid { grid-template-columns: 1fr; }
             .timeline { padding-left: 1.6rem; }
@@ -762,9 +756,9 @@
                 </div>
             </div>
             <div class="photo reveal-media" id="photoContainer" style="--d: 0.2s">
-                <div class="photo-wrap" id="vinylTrigger" role="button" tabindex="0" aria-label="Fernando García. Click to flip.">
+                <div class="vinyl-stage" id="vinylStage" aria-hidden="true"><canvas id="vinylCanvas"></canvas></div>
+                <div class="photo-wrap" id="vinylTrigger" role="button" tabindex="0" aria-label="Fernando García. Click to play the record.">
                     <div class="photo-face"><img src="photo.png" alt="Fernando García" width="512" height="512" fetchpriority="high"></div>
-                    <div class="photo-back" id="photoBack" aria-hidden="true"><canvas id="vinylCanvas"></canvas></div>
                     <span class="photo-hint" aria-hidden="true">♫</span>
                 </div>
                 <div class="song-note" id="songAnnotation" aria-hidden="true">
@@ -1404,7 +1398,7 @@
         var extrasP = null;
         function extras() {
             if (extrasP) return extrasP;
-            extrasP = new Promise(function (res, rej) { var s = d.createElement('script'); s.src = 'assets/js/extras.js?v=4'; s.onload = res; s.onerror = rej; d.body.appendChild(s); });
+            extrasP = new Promise(function (res, rej) { var s = d.createElement('script'); s.src = 'assets/js/extras.js?v=6'; s.onload = res; s.onerror = rej; d.body.appendChild(s); });
             return extrasP;
         }
         var photo = d.getElementById('vinylTrigger');
