@@ -37,6 +37,7 @@
     var root = document.documentElement;
     var canvas = document.getElementById('space');
     if (!canvas) return;
+    var ambient = canvas.hasAttribute('data-ambient');           // a background for another page: pulled back, stays, drifts a little with scroll
     if (!window.THREE) { root.classList.add('no-webgl'); return; }
     var THREE = window.THREE;
 
@@ -445,8 +446,9 @@
     }
 
     function readScroll() {
-        var p = window.scrollY / (window.innerHeight * 1.4);
-        if (reduce) p = window.scrollY > window.innerHeight * 0.6 ? 1.6 : 0;
+        var p = ambient ? 0.5 + window.scrollY / (window.innerHeight * 1.8) : window.scrollY / (window.innerHeight * 1.4);
+        if (reduce) p = ambient ? 0.5 : (window.scrollY > window.innerHeight * 0.6 ? 1.6 : 0);
+        if (ambient) p = Math.min(p, 1.4);                      // it climbs out of the way of the page but never leaves
         p = Math.min(12, Math.max(0, p));
         if (p !== scrollP) { scrollP = p; dirty = true; }
     }
@@ -510,6 +512,7 @@
         gGroup.updateMatrixWorld();
 
         var fade = p < 0.85 ? 1 : Math.max(0, 1 - (p - 0.85) / 1.05);          // fully gone by p ≈ 1.9, before the morph section
+        if (ambient) fade *= 0.85 - 0.35 * clamp((p - 0.5) / 0.5, 0, 1);      // a background: quieter still once the page scrolls over it
         galaxy.visible = fade > 0.002 && explode < 1;
         gMat.uniforms.uOpacity.value = cur.gOp * fade;
         if (BH) { galaxy2.visible = galaxy.visible; shadowDisc.visible = galaxy.visible && explode < 0.999; shadowDisc.material.opacity = fade * (1 - explode); shadowDisc.scale.setScalar(Math.max(0.001, 1 - explode)); shadowDisc.lookAt(camera.position); }
