@@ -2,335 +2,205 @@
 const { test, expect } = require('@playwright/test');
 
 const BASE = 'http://localhost:8080/playground.html';
-
-// Desktop viewport
 const DESKTOP = { width: 1280, height: 800 };
-// Mobile viewport (iPhone 12-ish)
-const MOBILE = { width: 390, height: 844 };
+const MOBILE = { width: 844, height: 390 };        // a phone turned on its side: Orbit needs the width
+const PORTRAIT = { width: 390, height: 844 };
 
-/**
- * Helper: serve files via a simple static server.
- * We use Playwright's built-in webServer config in playwright.config,
- * but these tests also work against any running local server.
- */
+const state = (page) => page.evaluate(() => window.__game.state());
+const shipY = (page) => page.evaluate(() => window.__game.y());
 
-// ─── Desktop Tests ────────────────────────────────────────────────────────────
+/** Hold the thrust key for a while, then let go. */
+async function thrust(page, ms) {
+    await page.keyboard.down('Space');
+    await page.waitForTimeout(ms);
+    await page.keyboard.up('Space');
+}
 
 test.describe('Playground — Desktop', () => {
     test.use({ viewport: DESKTOP });
 
-    test('page loads dark by default, warm Roho light theme after the toggle', async ({ page }) => {
+    test('has one side: always dark and warm, with no theme toggle', async ({ page }) => {
         await page.goto(BASE);
+        await expect(page.locator('#darkToggle')).toHaveCount(0);
         await expect(page.locator('body')).toHaveClass(/dark/);
-        await page.click('#darkToggle');
-        await expect(page.locator('body')).not.toHaveClass(/dark/);
-        // Background settles to warm off-white after the colour transition: rgb(250, 246, 241) = #FAF6F1
-        await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor), { timeout: 4000 }).toContain('250');
+        await expect(page.locator('html')).toHaveClass(/claude-mode/);
+        await expect(page.locator('html')).not.toHaveClass(/light/);
+        await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor), { timeout: 4000 }).toBe('rgb(22, 12, 6)');
+        await page.reload();
+        await expect(page.locator('body')).toHaveClass(/dark/);
     });
 
-    test('game canvas is full viewport height', async ({ page }) => {
+    test('the black hole runs behind the game', async ({ page }) => {
+        await page.goto(BASE, { waitUntil: 'load' });
+        await expect(page.locator('#space')).toHaveAttribute('data-ambient', '');
+        await expect(page.locator('html')).toHaveClass(/space-live|no-webgl/, { timeout: 8000 });
+        const cls = await page.evaluate(() => document.documentElement.className);
+        if (cls.includes('space-live')) {
+            const painted = await page.locator('#space').evaluate(el => el.width > 100 && getComputedStyle(el).opacity !== '0');
+            expect(painted).toBe(true);
+        }
+    });
+
+    test('game canvas fills the space between the nav and the score bar', async ({ page }) => {
         await page.goto(BASE);
-        const area = page.locator('#gameArea');
-        const box = await area.boundingBox();
-        // Game area should take most of the viewport (minus nav ~50px and score bar ~35px)
+        const box = await page.locator('#gameArea').boundingBox();
         expect(box.height).toBeGreaterThan(650);
         expect(box.width).toBeGreaterThanOrEqual(1200);
     });
 
-    test('game starts on Space key', async ({ page }) => {
+    test('Space starts the flight', async ({ page }) => {
         await page.goto(BASE);
-        const bar = page.locator('#gameScoreBar');
-        await expect(bar).toContainText('press space or tap to start');
-
+        await expect(page.locator('#gameScoreBar')).toContainText('fly');
+        expect(await state(page)).toBe('idle');
         await page.keyboard.press('Space');
-        // Wait a frame for the game to start
-        await page.waitForTimeout(200);
-        await expect(bar).toContainText('score:');
+        await expect.poll(() => state(page), { timeout: 3000 }).toBe('running');
+        await expect(page.locator('#gameScoreBar')).toContainText('climb');
     });
 
-    test('jump with ArrowUp', async ({ page }) => {
-        await page.goto(BASE);
-        // Start the game
-        await page.keyboard.press('Space');
-        await page.waitForTimeout(100);
-
-        // Press ArrowUp — should trigger jump (no crash)
-        await page.keyboard.press('ArrowUp');
-        await page.waitForTimeout(100);
-        const bar = page.locator('#gameScoreBar');
-        await expect(bar).toContainText('score:');
-    });
-
-    test('crouch with ArrowDown', async ({ page }) => {
+    test('holding lifts the rocket, letting go drops it', async ({ page }) => {
         await page.goto(BASE);
         await page.keyboard.press('Space');
-        await page.waitForTimeout(100);
-
-        // Hold ArrowDown
-        await page.keyboard.down('ArrowDown');
+        await expect.poll(() => state(page)).toBe('running');
+        const start = await shipY(page);
+        await thrust(page, 350);
+        const top = await shipY(page);
+        expect(top).toBeLessThan(start);                 // up the screen
+        // weight takes over: the climb reverses, then the rocket falls
+        await expect.poll(() => page.evaluate(() => window.__game.vy()), { timeout: 3000 }).toBeGreaterThan(0);
+        const turn = await shipY(page);
         await page.waitForTimeout(300);
-        await page.keyboard.up('ArrowDown');
-
-        // Game should still be running (crouch works without crash)
-        const bar = page.locator('#gameScoreBar');
-        await expect(bar).toContainText('score:');
+        expect(await shipY(page)).toBeGreaterThan(turn);
     });
 
-    test('high score persists across reloads', async ({ page }) => {
+    test('left alone the rocket falls into the ground and the run ends', async ({ page }) => {
         await page.goto(BASE);
-        // Set a high score in localStorage
-        await page.evaluate(() => localStorage.setItem('agentRunnerHi', '100'));
-        await page.reload();
-        await page.waitForTimeout(200);
-
-        const bar = page.locator('#gameScoreBar');
-        await expect(bar).toContainText('high score: 100');
-    });
-
-    test('dark mode toggle works (dark by default)', async ({ page }) => {
-        await page.goto(BASE);
-        const body = page.locator('body');
-        await expect(body).toHaveClass(/dark/);
-
-        await page.click('#darkToggle');
-        await expect(body).not.toHaveClass(/dark/);
-
-        await page.click('#darkToggle');
-        await expect(body).toHaveClass(/dark/);
-    });
-
-    test('mute toggle switches SVG icons', async ({ page }) => {
-        await page.goto(BASE);
-        const soundOn = page.locator('#soundOn');
-        const soundOff = page.locator('#soundOff');
-
-        // Initially sound is on
-        await expect(soundOn).toBeVisible();
-        await expect(soundOff).not.toBeVisible();
-
-        // Mute
-        await page.click('#muteBtn');
-        await expect(soundOn).not.toBeVisible();
-        await expect(soundOff).toBeVisible();
-
-        // Unmute
-        await page.click('#muteBtn');
-        await expect(soundOn).toBeVisible();
-        await expect(soundOff).not.toBeVisible();
-    });
-
-    test('back link goes to portfolio', async ({ page }) => {
-        await page.goto(BASE);
-        const backLink = page.locator('.nav-back');
-        await expect(backLink).toHaveAttribute('href', 'index.html');
-    });
-
-    test('speed does not increase too fast', async ({ page }) => {
-        await page.goto(BASE);
-        // Start game and let it run for 5 seconds
         await page.keyboard.press('Space');
-        await page.waitForTimeout(5000);
+        await expect.poll(() => state(page)).toBe('running');
+        await expect.poll(() => state(page), { timeout: 8000 }).toBe('over');
+        await expect(page.locator('#gameScoreBar')).toContainText('crashed');
+    });
 
-        // Read score — at ~250 frames/sec ÷ 4 = ~312 score in 5s
-        // With gentle speed curve, score should be reasonable
-        const scoreText = await page.locator('#gameScoreBar').textContent();
-        const match = scoreText.match(/score:\s*(\d+)/);
-        expect(match).toBeTruthy();
-        const score = parseInt(match[1]);
-        // Score should be between 100-500 for 5 seconds of play
-        expect(score).toBeGreaterThan(50);
-        expect(score).toBeLessThan(600);
+    test('a new run can be started after a crash', async ({ page }) => {
+        await page.goto(BASE);
+        await page.keyboard.press('Space');
+        await expect.poll(() => state(page), { timeout: 8000 }).toBe('over');
+        await page.waitForTimeout(700);
+        await page.keyboard.press('Space');
+        await expect.poll(() => state(page), { timeout: 3000 }).toBe('running');
+    });
+
+    test('the best score is kept across reloads', async ({ page }) => {
+        await page.goto(BASE);
+        await page.keyboard.press('Space');
+        await thrust(page, 900);
+        await expect.poll(() => state(page), { timeout: 10000 }).toBe('over');
+        const best = await page.evaluate(() => window.__game.best());
+        expect(best).toBeGreaterThan(0);
+        await page.reload();
+        await expect.poll(() => page.evaluate(() => window.__game.best()), { timeout: 4000 }).toBe(best);
+        await expect(page.locator('#gameScore')).toContainText('best ' + best);
+    });
+
+    test('the score bar keeps both readouts on one line', async ({ page }) => {
+        await page.goto(BASE);
+        await page.keyboard.press('Space');
+        await expect.poll(() => state(page)).toBe('running');
+        const heights = await page.evaluate(() => [document.getElementById('gameScoreBar').getBoundingClientRect().height,
+                                                   document.getElementById('gameScore').getBoundingClientRect().height]);
+        expect(heights[0]).toBeLessThan(24);
+        expect(heights[1]).toBeLessThan(24);
+    });
+
+    test('mute toggle switches the icons', async ({ page }) => {
+        await page.goto(BASE);
+        await expect(page.locator('#soundOn')).toBeVisible();
+        await page.click('#muteBtn');
+        await expect(page.locator('#soundOff')).toBeVisible();
+        await expect(page.locator('#soundOn')).toBeHidden();
+        await page.click('#muteBtn');
+        await expect(page.locator('#soundOn')).toBeVisible();
+    });
+
+    test('back link goes to the portfolio', async ({ page }) => {
+        await page.goto(BASE);
+        await expect(page.locator('a.nav-back')).toHaveAttribute('href', 'index.html');
     });
 });
-
-// ─── Mobile Tests ─────────────────────────────────────────────────────────────
 
 test.describe('Playground — Mobile', () => {
-    test.use({
-        viewport: MOBILE,
-        hasTouch: true,
+    test.use({ viewport: MOBILE, hasTouch: true, isMobile: true });
+
+    test('game area fills the phone on its side', async ({ page }) => {
+        await page.goto(BASE);
+        const box = await page.locator('#gameArea').boundingBox();
+        expect(box.width).toBeCloseTo(MOBILE.width, 0);
+        expect(box.height).toBeGreaterThan(MOBILE.height * 0.7);
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        expect(overflow).toBeLessThanOrEqual(0);
+        await expect(page.locator('#rotateNote')).toBeHidden();
     });
 
-    test('game canvas fills mobile screen', async ({ page }) => {
+    test('a tap starts the flight and holding lifts the ship', async ({ page }) => {
         await page.goto(BASE);
-        const area = page.locator('#gameArea');
-        const box = await area.boundingBox();
-        // Should fill width
-        expect(box.width).toBeGreaterThanOrEqual(380);
-        // Should take most of the height (minus nav and score bar)
-        expect(box.height).toBeGreaterThan(700);
+        const box = await page.locator('#gameArea').boundingBox();
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        await page.mouse.down();
+        await expect.poll(() => state(page), { timeout: 3000 }).toBe('running');
+        const start = await shipY(page);
+        await page.waitForTimeout(320);
+        const top = await shipY(page);
+        await page.mouse.up();
+        expect(top).toBeLessThan(start);
     });
 
-    test('tap starts the game', async ({ page }) => {
+    test('the score bar stays visible', async ({ page }) => {
         await page.goto(BASE);
-        const bar = page.locator('#gameScoreBar');
-        await expect(bar).toContainText('press space or tap to start');
-
-        // Tap the game area
-        const area = page.locator('#gameArea');
-        await area.tap();
-        await page.waitForTimeout(300);
-        await expect(bar).toContainText('score:');
-    });
-
-    test('swipe up triggers jump', async ({ page }) => {
-        await page.goto(BASE);
-        const area = page.locator('#gameArea');
-        const box = await area.boundingBox();
-
-        // Start game
-        await area.tap();
-        await page.waitForTimeout(200);
-
-        // Swipe up
-        const cx = box.x + box.width / 2;
-        const cy = box.y + box.height / 2;
-        await page.touchscreen.tap(cx, cy);
-        await page.waitForTimeout(50);
-
-        // Simulate swipe via Playwright touchscreen API
-        await page.touchscreen.tap(cx, cy);
-        await page.waitForTimeout(50);
-        // Manual swipe: touch down, move up, release
-        await page.mouse.move(cx, cy);
-        await page.evaluate(({ x, y1, y2 }) => {
-            const area = document.getElementById('gameArea');
-            // Use simple custom events as fallback for WebKit
-            const makeTouch = (type, clientY, opts) => {
-                const evt = new Event(type, { bubbles: true, cancelable: true });
-                evt.touches = [{ clientX: x, clientY, identifier: 0, target: area }];
-                evt.changedTouches = [{ clientX: x, clientY, identifier: 0, target: area }];
-                evt.preventDefault = () => {};
-                return evt;
-            };
-            area.dispatchEvent(makeTouch('touchstart', y1));
-            area.dispatchEvent(makeTouch('touchmove', y2));
-            area.dispatchEvent(makeTouch('touchend', y2));
-        }, { x: cx, y1: cy, y2: cy - 40 });
-
-        await page.waitForTimeout(200);
-        // Game should still be running
-        const bar = page.locator('#gameScoreBar');
-        await expect(bar).toContainText('score:');
-    });
-
-    test('swipe down triggers crouch', async ({ page }) => {
-        await page.goto(BASE);
-        const area = page.locator('#gameArea');
-        const box = await area.boundingBox();
-
-        // Start game
-        await area.tap();
-        await page.waitForTimeout(200);
-
-        // Swipe down
-        const cx = box.x + box.width / 2;
-        const cy = box.y + box.height / 2;
-
-        await page.evaluate(({ x, y1, y2 }) => {
-            const area = document.getElementById('gameArea');
-            const makeTouch = (type, clientY) => {
-                const evt = new Event(type, { bubbles: true, cancelable: true });
-                evt.touches = [{ clientX: x, clientY, identifier: 0, target: area }];
-                evt.changedTouches = [{ clientX: x, clientY, identifier: 0, target: area }];
-                evt.preventDefault = () => {};
-                return evt;
-            };
-            area.dispatchEvent(makeTouch('touchstart', y1));
-            area.dispatchEvent(makeTouch('touchmove', y2));
-        }, { x: cx, y1: cy, y2: cy + 40 });
-
-        await page.waitForTimeout(300);
-        // Game still running — crouch didn't crash
-        const bar = page.locator('#gameScoreBar');
-        await expect(bar).toContainText('score:');
-
-        // Release (touchend → uncrouch)
-        await page.evaluate(() => {
-            const area = document.getElementById('gameArea');
-            const evt = new Event('touchend', { bubbles: true });
-            evt.changedTouches = [];
-            area.dispatchEvent(evt);
-        });
-    });
-
-    test('nav elements are accessible on mobile', async ({ page }) => {
-        await page.goto(BASE);
-        // Back link
-        await expect(page.locator('.nav-back')).toBeVisible();
-        // Title
-        await expect(page.locator('.nav-title')).toBeVisible();
-        // Mute + dark toggle
-        await expect(page.locator('#muteBtn')).toBeVisible();
-        await expect(page.locator('#darkToggle')).toBeVisible();
-    });
-
-    test('score bar visible on mobile', async ({ page }) => {
-        await page.goto(BASE);
-        const scoreBar = page.locator('.score-bar');
-        await expect(scoreBar).toBeVisible();
-        const box = await scoreBar.boundingBox();
-        // Score bar should be at the bottom of the screen
-        expect(box.y).toBeGreaterThan(780);
-    });
-
-    test('game over allows restart by tapping', async ({ page }) => {
-        await page.goto(BASE);
-        const area = page.locator('#gameArea');
-        const bar = page.locator('#gameScoreBar');
-
-        // Start game
-        await area.tap();
-        await page.waitForTimeout(200);
-
-        // Force game over via JS
-        await page.evaluate(() => {
-            // Access the game state through the closure — we test the restart flow
-            // by dispatching a Space key which works as restart
-        });
-
-        // Let game run briefly then we'll just test the restart mechanism
-        // by starting fresh
-        await page.keyboard.press('Space'); // During running, this is a jump
-        await page.waitForTimeout(100);
-        await expect(bar).toContainText('score:');
+        const bar = await page.locator('.score-bar').boundingBox();
+        expect(bar.y + bar.height).toBeLessThanOrEqual(MOBILE.height + 1);
+        await expect(page.locator('#gameScoreBar')).toBeVisible();
     });
 });
 
-// ─── Responsiveness Tests ─────────────────────────────────────────────────────
+test.describe('Playground — phone held upright', () => {
+    test.use({ viewport: PORTRAIT, hasTouch: true, isMobile: true });
 
-test.describe('Playground — Responsiveness', () => {
-    const viewports = [
-        { name: 'iPhone SE', width: 375, height: 667 },
-        { name: 'iPhone 14 Pro', width: 393, height: 852 },
-        { name: 'iPad', width: 768, height: 1024 },
-        { name: 'Desktop 1080p', width: 1920, height: 1080 },
-        { name: 'Desktop 1440p', width: 2560, height: 1440 },
+    test('asks for the long side and holds the flight until it gets it', async ({ page }) => {
+        await page.goto(BASE);
+        await expect(page.locator('#rotateNote')).toBeVisible();
+        await expect(page.locator('#rotateNote')).toContainText('Turn your phone');
+        const box = await page.locator('#gameArea').boundingBox();
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        await page.mouse.down();
+        await page.waitForTimeout(400);
+        await page.mouse.up();
+        expect(await state(page)).toBe('idle');                 // nothing started
+        // turned on its side, it plays
+        await page.setViewportSize(MOBILE);
+        await page.waitForTimeout(400);
+        await expect(page.locator('#rotateNote')).toBeHidden();
+        await page.mouse.move(200, 150);
+        await page.mouse.down();
+        await expect.poll(() => state(page), { timeout: 3000 }).toBe('running');
+        await page.mouse.up();
+    });
+});
+
+test.describe('Playground — viewports', () => {
+    const VIEWPORTS = [
+        { name: 'small phone', width: 568, height: 320 },
+        { name: 'tablet', width: 768, height: 1024 },
+        { name: 'laptop', width: 1440, height: 900 }
     ];
-
-    for (const vp of viewports) {
-        test(`renders correctly on ${vp.name} (${vp.width}x${vp.height})`, async ({ page }) => {
+    for (const vp of VIEWPORTS) {
+        test(`lays out at ${vp.name} (${vp.width}x${vp.height})`, async ({ page }) => {
             await page.setViewportSize({ width: vp.width, height: vp.height });
             await page.goto(BASE);
-
-            // Canvas should exist and be sized
-            const canvas = page.locator('#gameCanvas');
-            await expect(canvas).toBeVisible();
-            const box = await canvas.boundingBox();
-            expect(box.width).toBeGreaterThan(300);
-            expect(box.height).toBeGreaterThan(200);
-
-            // Nav should be visible
-            await expect(page.locator('nav')).toBeVisible();
-
-            // Score bar should be visible
-            await expect(page.locator('.score-bar')).toBeVisible();
-
-            // No horizontal overflow
-            const overflow = await page.evaluate(() => {
-                return document.documentElement.scrollWidth > document.documentElement.clientWidth;
-            });
-            expect(overflow).toBe(false);
+            await page.waitForTimeout(300);
+            const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+            expect(overflow).toBeLessThanOrEqual(0);
+            const box = await page.locator('#gameArea').boundingBox();
+            expect(box.width).toBeCloseTo(vp.width, 0);
+            expect(box.height).toBeGreaterThan(vp.height * 0.7);
         });
     }
 });
