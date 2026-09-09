@@ -213,7 +213,7 @@
         }
         .lead { font-size: var(--t-lead); line-height: 1.5; color: var(--ink-2); max-width: 34rem; margin-top: 1.6rem; }
         .proof-row {
-            list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem;
+            list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 2rem;
             margin: 2.2rem 0 0; padding-top: 1.4rem; border-top: 1px solid var(--line); max-width: 38rem;
         }
         .proof-row .num { display: block; font-family: var(--font-display); font-size: var(--t-number); font-weight: 600; line-height: 1; letter-spacing: var(--track-h2); color: var(--ink); }
@@ -697,6 +697,7 @@
                 <div class="nav-links" id="navLinks">
                     <a href="#about">about</a>
                     <a href="#experience">experience</a>
+                    <a href="#built">built</a>
                     <a href="#skills">skills</a>
                     <a href="#tools">tools</a>
                     <a href="#education">education</a>
@@ -717,6 +718,7 @@
     <nav class="rail" id="rail" aria-label="Chapters">
         <a href="#about" data-ch="about"><span>about</span></a>
         <a href="#experience" data-ch="experience"><span>experience</span></a>
+        <a href="#built" data-ch="built"><span>built</span></a>
         <a href="#skills" data-ch="skills"><span>skills</span></a>
         <a href="#tools" data-ch="tools"><span>tools</span></a>
         <a href="#education" data-ch="education"><span>education</span></a>
@@ -746,11 +748,12 @@
             <div class="intro-copy">
                 <p class="eyebrow reveal">Solutions Product Manager, Salesforce (Agentforce)</p>
                 <h1 class="display reveal" style="--d: 0.08s">Architecting the Future of Agentic Processes</h1>
-                <p class="lead reveal" style="--d: 0.16s">Engineer and Product Manager with a Master's in Business Intelligence — translating high-stakes industrial workflows into agentic AI products that drive operational performance.</p>
-                <ol class="proof-row reveal" style="--d: 0.24s" aria-label="Three proof points">
-                    <li><span class="num" data-count="20" data-suffix="%">20%</span><span class="cap">working capital reduction across the Toyota program supply chain</span></li>
-                    <li><span class="num" data-count="99" data-suffix="%+">99%+</span><span class="cap">accuracy on AI-generated task outputs across agent blueprints</span></li>
-                    <li><span class="num">2nd</span><span class="cap">CLAUT Innovation Award, automotive cluster</span></li>
+                <p class="lead reveal" style="--d: 0.16s">A strategic thinker who leverages AI. Engineer and Product Manager with a Master's in Business Intelligence — translating high-stakes industrial workflows into agentic AI products that drive operational performance.</p>
+                <ol class="proof-row reveal" style="--d: 0.24s" aria-label="Four proof points">
+                    <li><span class="num" data-count="6" data-suffix=" yrs">6 yrs</span><span class="cap">from the plant floor to agentic AI, one rule the whole way: every dependency matters</span></li>
+                    <li><span class="num" data-count="5">5</span><span class="cap">verticals I design agentic workflows for, supply chain to HR</span></li>
+                    <li><span class="num" data-count="5" data-suffix="+">5+</span><span class="cap">internal tools I've shipped: AI assistants, agents, deterministic solutions, landing pages</span></li>
+                    <li><span class="num" data-count="3">3</span><span class="cap">coding agents I'm expert in, always on the latest release: Claude Code, Codex, Cursor</span></li>
                 </ol>
                 <div class="hero-actions reveal" style="--d: 0.32s">
                     <a href="#experience" class="btn btn-primary"><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M2 1.5v9l8-4.5z"/></svg>View My Impact</a>
@@ -834,10 +837,10 @@
                         </div>
                         <p class="timeline-role">Solutions Product Manager · May 2026 – Present · Remote — Mexico</p>
                         <ul class="timeline-bullets">
-                            <li><strong>Multi-Vertical Solutioning:</strong> Architect and deploy Agentforce solutions across supply chain, finance, and HR verticals, owning end-to-end solution design from business requirements through production implementation.</li>
-                            <li><strong>AI Product Strategy:</strong> Bridge product management and technical solutioning by defining how Salesforce agents interact with external enterprise platforms like Tableau, Slack, and SAP to deliver integrated, intelligent workflows.</li>
-                            <li><strong>Product Roadmap Influence:</strong> Partner with product, engineering, and AI teams to shape the Agentforce feature roadmap, translating enterprise client feedback and real-world workflow gaps into prioritized product improvements.</li>
-                            <li><strong>Business Impact Translation:</strong> Operate at the intersection of AI, platform integration, and multi-vertical product strategy, translating complex agent architectures into clear, measurable business outcomes for enterprise stakeholders.</li>
+                            <li><strong>Process-to-Blueprint Tooling:</strong> Built and maintain a Claude Code plugin that turns a plain-English process description into a production-ready workflow blueprint: domain research, process map, full specification and generation, with two human approval gates and an end-to-end dry-run QA. Adopted across the team; I review and merge contributor PRs, 20+ releases in a matter of weeks.</li>
+                            <li><strong>Blueprint Visualization:</strong> Reverse-engineered a proprietary blueprint file format with no public spec into a standalone tool that renders any blueprint as an interactive map of stages, tasks, dependencies, forms and agent prompts. Used by teammates up to engineering leadership and being formalized as an internal Slack app.</li>
+                            <li><strong>Grounded Agents in Slack:</strong> Designed and shipped a Q&amp;A agent for a 100+ person team, grounded strictly in two authorized sources to rule out invented answers on a fast-moving platform, plus a triage skill that classifies support requests and routes or escalates them with a same-channel status card.</li>
+                            <li><strong>Platform Strategy &amp; Delivery:</strong> Co-drive a recurring platform gap analysis that turns architectural constraints and agent-capability limits into a prioritized, trackable backlog, and deliver production blueprints for enterprise customers across finance, procurement and supply chain, several on same-week turnarounds.</li>
                         </ul>
                     </div>
                     <div class="timeline-item reveal">
@@ -930,10 +933,29 @@
         </div>
     </section>
 
-    <!-- 03 SKILLS -->
+    <!-- 03 BUILT -->
+    <section class="chapter" id="built">
+        <div class="chapter-inner">
+            <aside class="chapter-label"><span class="num">03</span><span>// built</span></aside>
+            <div class="chapter-body">
+                <h2 class="h2 reveal">Things I Built</h2>
+                <p class="section-desc reveal">If it can be built with AI, I'll build it. These are in use today.</p>
+                <div class="card-grid">
+                    <div class="card reveal"><div class="agent-type">tool::solutions_architect</div><h3>Process-to-Blueprint Plugin</h3><p>Describe a business process in plain English. The plugin researches the domain, drafts the process map, specifies every field and handoff, and generates a ready-to-import workflow blueprint, with two human approval gates and a dry-run QA that walks the whole thing end to end. Built and maintained with Claude Code, adopted across my team, contributor PRs reviewed by me.</p></div>
+                    <div class="card reveal" style="--d: 0.08s"><div class="agent-type">tool::blueprint_map</div><h3>Blueprint Map</h3><p>A proprietary blueprint format with no public spec, reverse-engineered into an interactive map: stages, tasks, the full dependency graph, forms, fields and agent prompts on one screen. Used by teammates up to engineering leadership, now becoming an internal Slack app.</p></div>
+                    <div class="card reveal" style="--d: 0.16s"><div class="agent-type">tool::front_desk</div><h3>Operations Brain</h3><p>A Claude Code plugin and knowledge vault that answers from live documentation or points to the exact tool and command. Read-only by design: it advises, it never touches production.</p></div>
+                    <div class="card reveal" style="--d: 0.24s"><div class="agent-type">agent::knowledge // agent::triage</div><h3>Knowledge &amp; Triage Agents</h3><p>A Slack-native Q&amp;A agent for a 100+ person team, grounded strictly in two authorized sources so it cannot invent answers, and a triage skill that classifies incoming support requests and routes or escalates them with a status card in the same channel.</p></div>
+                    <div class="card reveal" style="--d: 0.32s"><div class="agent-type">site::this_one</div><h3>This Site</h3><p>A black hole made of sixty thousand particles, a record you can flip and play, a CV that prints on two pages. Built with Claude Code, tested with Playwright, <a href="https://github.com/fernandojgarciagzz/my-cv" target="_blank" rel="noopener">source on GitHub</a>.</p></div>
+                    <div class="card reveal" style="--d: 0.4s"><div class="agent-type">album::roho // game::playground</div><h3>Roho &amp; the Playground</h3><p>Five tracks of my own with their own player at <a href="music.html">Roho</a>, and a <a href="playground.html">playground</a> game that lives behind a pixel robot. The creator side, in code.</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 04 SKILLS -->
     <section class="chapter" id="skills">
         <div class="chapter-inner">
-            <aside class="chapter-label"><span class="num">03</span><span>// skills</span></aside>
+            <aside class="chapter-label"><span class="num">04</span><span>// skills</span></aside>
             <div class="chapter-body">
                 <h2 class="h2 reveal">Core Skills</h2>
                 <p class="section-desc reveal">The capabilities I bring to every solution I build.</p>
@@ -943,25 +965,28 @@
                     <div class="card reveal" style="--d: 0.16s"><div class="agent-type">agent::analytics</div><h3>Business Intelligence</h3><p>Power BI (Advanced), Tableau, Looker Studio, QAD ERP, Data Modeling</p></div>
                     <div class="card reveal" style="--d: 0.24s"><div class="agent-type">agent::domain</div><h3>Domain Expertise</h3><p>Demand Planning, Production Control, Logistics, S&amp;OP Strategy, Automotive Supply Chain</p></div>
                 </div>
-                <div class="card learning-card reveal"><div class="agent-type">agent::ai // no limits</div><h3>AI Technical Development</h3><p>AI-native builder and evangelist. I ship with Claude Code, Codex, and Cursor every day: this site, internal tools, and Claude Code plugins published to the marketplace and downloaded by colleagues across Salesforce. Everything lives on GitHub. If it can be built with AI, I'll build it.</p></div>
+                <div class="card learning-card reveal"><div class="agent-type">agent::ai // no limits</div><h3>AI Technical Development</h3><p>AI-native builder and evangelist. I ship with Claude Code, Codex, and Cursor every day: this site, internal tools, and Claude Code plugins published to the marketplace and downloaded by colleagues across Salesforce. Claude Code plugins, Slackbot skills, Gemini Gems, Apps Script automations, an Obsidian knowledge vault, and a first merged PR on the core product repo. Everything lives on GitHub. If it can be built with AI, I'll build it.</p></div>
             </div>
         </div>
     </section>
 
-    <!-- 04 TOOLS -->
+    <!-- 05 TOOLS -->
     <section class="chapter" id="tools">
         <div class="chapter-inner">
-            <aside class="chapter-label"><span class="num">04</span><span>// tools</span></aside>
+            <aside class="chapter-label"><span class="num">05</span><span>// tools</span></aside>
             <div class="chapter-body">
                 <h2 class="h2 reveal">Tools &amp; Proficiency</h2>
                 <p class="section-desc reveal">A transparent view of where I stand today.</p>
                 <div class="skills-list" id="skillsList">
                     <div class="skill-row reveal"><span class="skill-name">Agentforce for Supply Chain</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="100"></div></div><span class="skill-pct">100%</span></div>
                     <div class="skill-row reveal" style="--d: 0.05s"><span class="skill-name">Claude Code, GPT / Codex, Cursor, Gemini</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="100"></div></div><span class="skill-pct">100%</span></div>
-                    <div class="skill-row reveal" style="--d: 0.1s"><span class="skill-name">Excel</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95"></div></div><span class="skill-pct">95%</span></div>
-                    <div class="skill-row reveal" style="--d: 0.15s"><span class="skill-name">Power BI</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="90"></div></div><span class="skill-pct">90%</span></div>
-                    <div class="skill-row reveal" style="--d: 0.2s"><span class="skill-name">Tableau</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="80"></div></div><span class="skill-pct">80%</span></div>
-                    <div class="skill-row reveal" style="--d: 0.25s"><span class="skill-name">Google Looker Studio</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="75"></div></div><span class="skill-pct">75%</span></div>
+                    <div class="skill-row reveal" style="--d: 0.1s"><span class="skill-name">Slack Workflows &amp; Skills</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="85"></div></div><span class="skill-pct">85%</span></div>
+                    <div class="skill-row reveal" style="--d: 0.15s"><span class="skill-name">Google Apps Script</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="70"></div></div><span class="skill-pct">70%</span></div>
+                    <div class="skill-row reveal" style="--d: 0.2s"><span class="skill-name">Obsidian</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="70"></div></div><span class="skill-pct">70%</span></div>
+                    <div class="skill-row reveal" style="--d: 0.25s"><span class="skill-name">Excel</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="95"></div></div><span class="skill-pct">95%</span></div>
+                    <div class="skill-row reveal" style="--d: 0.3s"><span class="skill-name">Power BI</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="90"></div></div><span class="skill-pct">90%</span></div>
+                    <div class="skill-row reveal" style="--d: 0.35s"><span class="skill-name">Tableau</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="80"></div></div><span class="skill-pct">80%</span></div>
+                    <div class="skill-row reveal" style="--d: 0.4s"><span class="skill-name">Google Looker Studio</span><div class="skill-bar-bg"><div class="skill-bar-fill" data-width="75"></div></div><span class="skill-pct">75%</span></div>
                 </div>
                 <div class="skills-learning reveal">
                     <p class="skills-learning-label">// currently_exploring</p>
@@ -974,10 +999,10 @@
         </div>
     </section>
 
-    <!-- 05 EDUCATION -->
+    <!-- 06 EDUCATION -->
     <section class="chapter" id="education">
         <div class="chapter-inner">
-            <aside class="chapter-label"><span class="num">05</span><span>// education</span></aside>
+            <aside class="chapter-label"><span class="num">06</span><span>// education</span></aside>
             <div class="chapter-body">
                 <h2 class="h2 reveal">Academic Background</h2>
                 <div class="card-grid" style="margin-top: 2rem;">
@@ -988,10 +1013,10 @@
         </div>
     </section>
 
-    <!-- 06 BEYOND WORK -->
+    <!-- 07 BEYOND WORK -->
     <section class="chapter" id="beyond">
         <div class="chapter-inner">
-            <aside class="chapter-label"><span class="num">06</span><span>// beyond_work</span></aside>
+            <aside class="chapter-label"><span class="num">07</span><span>// beyond_work</span></aside>
             <div class="chapter-body">
                 <h2 class="h2 reveal">Hobbies &amp; Interests</h2>
                 <div class="reveal" style="margin-top: 2rem;">
@@ -1016,10 +1041,10 @@
         </div>
     </section>
 
-    <!-- 07 READING -->
+    <!-- 08 READING -->
     <section class="chapter" id="reading">
         <div class="chapter-inner">
-            <aside class="chapter-label"><span class="num">07</span><span>// reading_list</span></aside>
+            <aside class="chapter-label"><span class="num">08</span><span>// reading_list</span></aside>
             <div class="chapter-body">
                 <h2 class="h2 reveal">Books I Recommend</h2>
                 <p class="section-desc reveal">Seven books that shaped how I think about mind, work, and growth. Tap a title to read why.</p>
@@ -1053,10 +1078,10 @@
         </div>
     </section>
 
-    <!-- 08 DASHBOARDS -->
+    <!-- 09 DASHBOARDS -->
     <section class="chapter" id="dashboards">
         <div class="chapter-inner">
-            <aside class="chapter-label"><span class="num">08</span><span>// live_data</span></aside>
+            <aside class="chapter-label"><span class="num">09</span><span>// live_data</span></aside>
             <div class="chapter-body">
                 <h2 class="h2 reveal">Dashboards</h2>
                 <p class="section-desc reveal">Live data projects I've built.</p>
@@ -1115,9 +1140,10 @@
                 <aside>
                     <div class="cv-block">
                         <h2 class="cv-h">Impact</h2>
-                        <div class="cv-num"><b>20%</b><span>working capital reduction across the Toyota program supply chain</span></div>
-                        <div class="cv-num"><b>99%+</b><span>accuracy on AI-generated task outputs across agent blueprints</span></div>
-                        <div class="cv-num"><b>2nd</b><span>CLAUT Innovation Award, automotive cluster</span></div>
+                        <div class="cv-num"><b>6 yrs</b><span>from the plant floor to agentic AI, one rule the whole way: every dependency matters</span></div>
+                        <div class="cv-num"><b>5</b><span>verticals I design agentic workflows for, supply chain to HR</span></div>
+                        <div class="cv-num"><b>5+</b><span>internal tools I've shipped: AI assistants, agents, deterministic solutions, landing pages</span></div>
+                        <div class="cv-num"><b>3</b><span>coding agents I'm expert in, always on the latest release: Claude Code, Codex, Cursor</span></div>
                     </div>
                     <div class="cv-block">
                         <h2 class="cv-h">Core Skills</h2>
@@ -1125,7 +1151,7 @@
                         <p class="cv-kv"><b>AI &amp; Automation</b>Generative AI (Claude / GPT / Gemini), Agentic Testing &amp; Automation, Prompt Engineering</p>
                         <p class="cv-kv"><b>Business Intelligence</b>Power BI (Advanced), Tableau, Looker Studio, QAD ERP, Data Modeling</p>
                         <p class="cv-kv"><b>Domain Expertise</b>Demand Planning, Production Control, Logistics, S&amp;OP Strategy, Automotive Supply Chain</p>
-                        <p class="cv-kv"><b>AI Technical Development</b>AI-native builder and evangelist. I ship with Claude Code, Codex, and Cursor every day: this site, internal tools, and Claude Code plugins published to the marketplace and downloaded by colleagues across Salesforce. Everything lives on GitHub. If it can be built with AI, I'll build it.</p>
+                        <p class="cv-kv"><b>AI Technical Development</b>AI-native builder and evangelist. I ship with Claude Code, Codex, and Cursor every day: this site, internal tools, and Claude Code plugins published to the marketplace and downloaded by colleagues across Salesforce. Claude Code plugins, Slackbot skills, Gemini Gems, Apps Script automations, an Obsidian knowledge vault, and a first merged PR on the core product repo. Everything lives on GitHub. If it can be built with AI, I'll build it.</p>
                     </div>
                 </aside>
                 <main>
@@ -1140,10 +1166,10 @@
                             <div class="cv-role-h"><b>Salesforce</b><span>May 2026 – Present · Remote — Mexico</span></div>
                             <p class="cv-role-t">Solutions Product Manager · Current</p>
                             <ul>
-                                <li><b>Multi-Vertical Solutioning:</b> Architect and deploy Agentforce solutions across supply chain, finance, and HR verticals, owning end-to-end solution design from business requirements through production implementation.</li>
-                                <li><b>AI Product Strategy:</b> Bridge product management and technical solutioning by defining how Salesforce agents interact with external enterprise platforms like Tableau, Slack, and SAP to deliver integrated, intelligent workflows.</li>
-                                <li><b>Product Roadmap Influence:</b> Partner with product, engineering, and AI teams to shape the Agentforce feature roadmap, translating enterprise client feedback and real-world workflow gaps into prioritized product improvements.</li>
-                                <li><b>Business Impact Translation:</b> Operate at the intersection of AI, platform integration, and multi-vertical product strategy, translating complex agent architectures into clear, measurable business outcomes for enterprise stakeholders.</li>
+                                <li><b>Process-to-Blueprint Tooling:</b> Built and maintain a Claude Code plugin that turns a plain-English process description into a production-ready workflow blueprint, with two human approval gates and an end-to-end dry-run QA; adopted across the team, 20+ releases, contributor PRs reviewed and merged by me.</li>
+                                <li><b>Blueprint Visualization:</b> Reverse-engineered a proprietary blueprint format with no public spec into an interactive map of stages, tasks, dependencies, forms and agent prompts, used up to engineering leadership and becoming an internal Slack app.</li>
+                                <li><b>Grounded Agents in Slack:</b> Shipped a Q&amp;A agent for a 100+ person team grounded strictly in two authorized sources, plus a triage skill that classifies support requests and routes or escalates them with a same-channel status card.</li>
+                                <li><b>Platform Strategy &amp; Delivery:</b> Co-drive a recurring platform gap analysis into a prioritized backlog, and deliver production blueprints for enterprise customers across finance, procurement and supply chain, several on same-week turnarounds.</li>
                             </ul>
                         </div>
                         <div class="cv-role">
@@ -1215,6 +1241,9 @@
                     <h2 class="cv-h">Tools &amp; Proficiency</h2>
                     <div class="cv-bar"><span>Agentforce for Supply Chain</span><i style="--w: 100%"></i><em>100%</em></div>
                     <div class="cv-bar"><span>Claude Code, GPT / Codex, Cursor, Gemini</span><i style="--w: 100%"></i><em>100%</em></div>
+                    <div class="cv-bar"><span>Slack Workflows &amp; Skills</span><i style="--w: 85%"></i><em>85%</em></div>
+                    <div class="cv-bar"><span>Google Apps Script</span><i style="--w: 70%"></i><em>70%</em></div>
+                    <div class="cv-bar"><span>Obsidian</span><i style="--w: 70%"></i><em>70%</em></div>
                     <div class="cv-bar"><span>Excel</span><i style="--w: 95%"></i><em>95%</em></div>
                     <div class="cv-bar"><span>Power BI</span><i style="--w: 90%"></i><em>90%</em></div>
                     <div class="cv-bar"><span>Tableau</span><i style="--w: 80%"></i><em>80%</em></div>

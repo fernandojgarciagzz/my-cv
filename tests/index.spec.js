@@ -2,7 +2,7 @@
 const { test, expect } = require('@playwright/test');
 
 const BASE = 'http://localhost:8080/index.html';
-const ANCHORS = ['about', 'experience', 'skills', 'tools', 'education', 'dashboards', 'contact'];
+const ANCHORS = ['about', 'experience', 'built', 'skills', 'tools', 'education', 'dashboards', 'contact'];
 const VIEWPORTS = [
     { name: 'phone', width: 390, height: 844 },
     { name: 'tablet', width: 834, height: 1194 },
@@ -28,12 +28,12 @@ const visibleContent = () => {
 };
 
 test.describe('Index — structure', () => {
-    test('hero has the words, the galaxy canvas, then the tagline and three proof numbers', async ({ page }) => {
+    test('hero has the words, the galaxy canvas, then the tagline and four proof numbers', async ({ page }) => {
         await page.goto(BASE);
         await expect(page.locator('.hero-first')).toBeVisible();
         await expect(page.locator('#space')).toHaveCount(1);
         await expect(page.locator('.intro h1')).toContainText('Architecting the Future of Agentic Processes');
-        await expect(page.locator('.intro .proof-row li')).toHaveCount(3);
+        await expect(page.locator('.intro .proof-row li')).toHaveCount(4);
         await expect(page.locator('.intro .eyebrow')).toContainText('Solutions Product Manager');
         await page.locator('.intro').scrollIntoViewIfNeeded();
         await expect(page.locator('.intro a[href="#experience"]')).toBeVisible();
