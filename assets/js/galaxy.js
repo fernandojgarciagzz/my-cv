@@ -51,7 +51,7 @@
 
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var isMobile = window.matchMedia('(max-width: 768px)').matches;
-    var DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var DPR = Math.min(window.devicePixelRatio || 1, parseFloat(canvas.dataset.dpr) || 2);   // a page sharing the GPU can ask for less
     renderer.setPixelRatio(DPR);
     renderer.setClearColor(0x000000, 0);
 
