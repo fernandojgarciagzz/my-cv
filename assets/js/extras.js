@@ -26,23 +26,33 @@
         var trigger = document.getElementById('vinylTrigger');
         if (!audio || !container || !trigger) return;
 
-        var FADE = 600, VOL = 0.6, playing = false, spinTimer = null;
+        var FADE = 600, VOL = 0.6, playing = false, timers = [];
+        var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
         audio.volume = VOL;
+        function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+        function clearTimers() { timers.forEach(clearTimeout); timers = []; }
 
-        // the record itself: a 3D one (assets/js/vinyl.js) drawn into the back of the photo
-        var back = document.getElementById('photoBack'), vcanvas = document.getElementById('vinylCanvas'), view = null;
+        // The record behind the photo (assets/js/vinyl.js). The photo becomes the label: the record starts at label
+        // size, hidden behind the photo, and grows out as the photo shrinks to meet it.
+        var LABEL = 0.335, TILT = 0.36, GROW = 700, HANDOFF = 250, SETTLE = 650, ARM = 1000;
+        var stage = document.getElementById('vinylStage'), vcanvas = document.getElementById('vinylCanvas');
+        var photo = container.querySelector('.photo-face img'), view = null;
         function whenThree(cb) { var n = 0; (function poll() { if (window.THREE) cb(); else if (++n < 80) setTimeout(poll, 50); })(); }
         function mountVinyl() {
             if (view || !vcanvas) return;
             whenThree(function () {
                 var go = function () {
                     if (view || !window.Vinyl) return;
-                    view = window.Vinyl.create(vcanvas, { album: 'Roho', title: 'Hatua Kwa Hatua', artist: 'Fernando García', num: '01', hoverEl: container,
-                        onReady: function () { if (back) back.classList.add('is-live'); } });
+                    view = window.Vinyl.create(vcanvas, {
+                        album: 'Roho', title: 'Hatua Kwa Hatua', artist: 'Fernando García', num: '01',
+                        photo: photo, uprightLabel: true, arm: true, band: 0, scale: LABEL, tilt: 0, hover: false, hoverEl: container,
+                        onReady: function () { if (stage) stage.classList.add('is-live'); }
+                    });
+                    if (playing) view.set({ scale: 1, tilt: TILT, arm: 1, band: 1, hover: true });
                     if (playing && container.classList.contains('vinyl-spinning')) view.play();
                 };
                 if (window.Vinyl) { go(); return; }
-                var s = document.createElement('script'); s.src = 'assets/js/vinyl.js?v=1'; s.onload = go; document.body.appendChild(s);
+                var s = document.createElement('script'); s.src = 'assets/js/vinyl.js?v=6'; s.onload = go; document.body.appendChild(s);
             });
         }
         mountVinyl();
@@ -73,35 +83,56 @@
             document.body.classList.toggle('claude-mode', on);
         }
         function activate() {
-            playing = true;
-            container.classList.add('vinyl-active');
-            claude(true);
-            spinTimer = setTimeout(function () {
-                if (playing) { container.classList.add('vinyl-spinning'); if (view) view.play(); fadeIn(); }
-            }, 800);
+            playing = true; clearTimers();
+            container.classList.add('vinyl-active');                            // the photo shrinks; the stage fades in
+            if (reduce) {
+                container.classList.add('vinyl-live', 'vinyl-spinning');
+                if (view) view.set({ scale: 1, tilt: TILT, arm: 1, band: 1, hover: false });
+                claude(true); fadeIn();
+                return;
+            }
+            if (view) { view.set({ scale: LABEL, tilt: 0, arm: 0, band: 0, hover: false }); view.animate({ scale: 1 }, GROW, 'photo'); }   // the record grows on the photo's own curve
+            later(function () { container.classList.add('vinyl-live'); }, GROW);            // the photo hands off to the label
+            later(function () {
+                claude(true);
+                if (view) view.animate({ tilt: TILT, band: 1 }, SETTLE, 'inout');           // the record leans back, the label gets its print
+            }, GROW + HANDOFF);
+            later(function () {
+                if (!playing) return;
+                container.classList.add('vinyl-spinning');
+                if (view) { view.play(); view.animate({ arm: 1 }, ARM, 'inout'); view.set({ hover: true }); }   // motor on, the arm swings in and drops
+            }, GROW + HANDOFF + 300);
+            later(function () { if (playing) fadeIn(); }, GROW + HANDOFF + 300 + ARM - 120);   // the needle lands: music
+        }
+        function settle() {                                                     // everything back where it was
+            container.classList.remove('vinyl-spinning');
+            if (view) { view.stop(); view.set({ hover: false }); }
+            if (reduce) {
+                container.classList.remove('vinyl-live', 'vinyl-active'); claude(false);
+                if (view) view.set({ scale: LABEL, tilt: 0, arm: 0, band: 0 });
+                return;
+            }
+            if (view) view.animate({ arm: 0 }, 700, 'inout');                             // the arm lifts and swings out
+            later(function () { claude(false); if (view) view.animate({ tilt: 0, band: 0 }, 500, 'inout'); }, 500);
+            later(function () { container.classList.remove('vinyl-live'); }, 1050);       // the photo returns over the label
+            later(function () {
+                container.classList.remove('vinyl-active');                             // the photo grows back; the record shrinks behind it
+                if (view) view.animate({ scale: LABEL }, GROW, 'photo');
+            }, 1300);
         }
         function deactivate() {
-            playing = false;
-            clearTimeout(spinTimer);
-            container.classList.remove('vinyl-spinning');
-            if (view) view.stop();
-            fadeOut(function () {
-                audio.currentTime = 0;
-                container.classList.remove('vinyl-active');
-                claude(false);
-            });
+            playing = false; clearTimers();
+            fadeOut(function () { audio.currentTime = 0; });
+            settle();
         }
         trigger.addEventListener('click', function (e) {
             e.stopPropagation();
             if (playing) deactivate(); else activate();
         });
+        if (stage) stage.addEventListener('click', function (e) { e.stopPropagation(); if (playing) deactivate(); });
         audio.addEventListener('ended', function () {
-            clearTimeout(spinTimer);
-            container.classList.remove('vinyl-spinning');
-            if (view) view.stop();
-            container.classList.remove('vinyl-active');
-            claude(false);
-            playing = false;
+            playing = false; clearTimers();
+            settle();
         });
     })();
 
@@ -155,6 +186,9 @@
         window.addEventListener('resize', resizeOverlay);
 
         function getVinylCenter() {
+            // the robot sets off from the record's lower-left edge, not from the label (his face)
+            var stage = document.getElementById('vinylStage');
+            if (stage) { var sr = stage.getBoundingClientRect(); return { x: sr.left + sr.width * 0.24, y: sr.top + sr.height * 0.68 }; }
             var rect = document.getElementById('vinylTrigger').getBoundingClientRect();
             return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
         }
