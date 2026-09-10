@@ -3,9 +3,9 @@
     --monkey-edge: clamp(1rem, calc(50vw - 30rem), 3.25rem);
     position: fixed;
     right: max(var(--monkey-edge), env(safe-area-inset-right));
-    bottom: max(1rem, env(safe-area-inset-bottom));
+    bottom: calc(max(1rem, env(safe-area-inset-bottom)) + 2rem);
     z-index: 80;
-    width: min(30svh, clamp(72px, calc(50vw - var(--measure, 42rem) / 2 - var(--monkey-edge) - 1.5rem), 220px));
+    width: min(38svh, clamp(96px, calc(50vw - var(--measure, 42rem) / 2 - var(--monkey-edge) - 1rem), 300px));
     pointer-events: none;
     color: #b8c2cc;
     font-family: var(--font-text, system-ui, sans-serif);
@@ -31,19 +31,12 @@
     position: relative;
     pointer-events: none;
     width: 100%;
-    aspect-ratio: 1.18;
-    border-radius: 18px;
-    overflow: hidden;
+    aspect-ratio: 1.02;
 }
-.monkey-art::after {
-    /* A CSS mask on this animated layer can suppress video painting.
-       Fade the opaque source into the dark site with an ordinary overlay instead. */
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center, transparent 48%, rgba(6, 8, 11, .2) 63%, #06080b 83%);
-}
-.monkey-art img, .monkey-art video {
+/* The source frames are the astronaut over black. The script keys that black out and paints
+   the result here, so nothing but the astronaut is drawn. The video and the still stay in the
+   layout, transparent, because a hidden video will not decode frames to read from. */
+.monkey-art img, .monkey-art video, .monkey-keyed {
     position: absolute;
     inset: 0;
     display: block;
@@ -51,30 +44,47 @@
     height: 100%;
     object-fit: contain;
 }
-.monkey-art video { visibility: hidden; }
-.monkey-companion.has-frame .monkey-art video { visibility: visible; }
-.monkey-companion.has-frame .monkey-art img { visibility: hidden; }
+.monkey-art img, .monkey-art video { opacity: 0; }
+.monkey-keyed {
+    opacity: 0;
+    transform: rotate(-32deg);
+    transition: opacity .6s ease;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, .38));
+}
+.monkey-companion.has-frame .monkey-keyed { opacity: 1; }
 @media (prefers-reduced-motion: no-preference) {
-    .monkey-art { animation: monkey-drift 6s ease-in-out infinite; animation-play-state: paused; }
-    .monkey-companion.is-playing .monkey-art { animation-play-state: running; }
+    .monkey-art { animation: monkey-drift 17s ease-in-out infinite; }
+    .monkey-keyed { animation: monkey-turn 23s ease-in-out infinite; }
 }
 @keyframes monkey-drift {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-6px) rotate(1deg); }
+    0%   { transform: translate3d(0, 0, 0); }
+    25%  { transform: translate3d(-5%, -7%, 0); }
+    50%  { transform: translate3d(2%, -11%, 0); }
+    75%  { transform: translate3d(6%, -4%, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+}
+@keyframes monkey-turn {
+    0%   { transform: rotate(-35deg) scale(1); }
+    35%  { transform: rotate(-29.5deg) scale(1.03); }
+    70%  { transform: rotate(-28deg) scale(.985); }
+    100% { transform: rotate(-35deg) scale(1); }
 }
 .monkey-options-hint {
     position: absolute;
-    right: 4px;
-    bottom: 0;
-    width: 24px;
-    border-radius: 12px;
-    background: rgba(6, 8, 11, .65);
+    right: 2px;
+    bottom: -2px;
+    width: 22px;
+    border-radius: 11px;
+    background: rgba(6, 8, 11, .5);
     color: #b8c2cc;
-    font: 18px/20px system-ui, sans-serif;
+    font: 17px/19px system-ui, sans-serif;
     letter-spacing: 1px;
+    opacity: 0;
+    transition: opacity .25s ease, color .25s ease, background-color .25s ease;
 }
 .monkey-launcher:hover .monkey-options-hint,
-.monkey-launcher[aria-expanded="true"] .monkey-options-hint { color: #fff; background: #1c2632; }
+.monkey-launcher:focus-visible .monkey-options-hint,
+.monkey-launcher[aria-expanded="true"] .monkey-options-hint { opacity: 1; color: #fff; background: #1c2632; }
 .monkey-panel {
     position: absolute;
     right: 0;
@@ -107,9 +117,9 @@
 .monkey-companion button:focus-visible { outline: 2px solid #c5e1f5; outline-offset: 4px; }
 @media (max-width: 900px) {
     .monkey-companion {
-        width: clamp(72px, 18vw, 96px);
-        right: max(12px, env(safe-area-inset-right));
-        bottom: max(12px, env(safe-area-inset-bottom));
+        width: clamp(132px, 36vw, 190px);
+        right: max(22px, env(safe-area-inset-right));
+        bottom: calc(max(20px, env(safe-area-inset-bottom)) + 4px);
     }
     /* Only lift the companion when the optional music invitation is present. */
     body:has(.vinyl-active) .monkey-companion { bottom: calc(72px + env(safe-area-inset-bottom)); }
@@ -118,7 +128,7 @@
     body:has(.vinyl-active) #contact { padding-bottom: calc(var(--space-chapter) * 1.2 + 11rem + env(safe-area-inset-bottom)); }
 }
 @media (max-height: 500px) {
-    .monkey-companion { width: 64px; bottom: max(8px, env(safe-area-inset-bottom)); }
+    .monkey-companion { width: 118px; bottom: calc(max(6px, env(safe-area-inset-bottom)) + 14px); }
     .monkey-panel { bottom: 0; right: calc(100% + 8px); }
 }
 @media print { .monkey-companion { display: none !important; } }
