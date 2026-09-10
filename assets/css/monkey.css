@@ -1,0 +1,124 @@
+.monkey-companion {
+    /* Fit the empty gutter beside the centered reading column as the window changes. */
+    --monkey-edge: clamp(1rem, calc(50vw - 30rem), 3.25rem);
+    position: fixed;
+    right: max(var(--monkey-edge), env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: 80;
+    width: min(30svh, clamp(72px, calc(50vw - var(--measure, 42rem) / 2 - var(--monkey-edge) - 1.5rem), 220px));
+    pointer-events: none;
+    color: #b8c2cc;
+    font-family: var(--font-text, system-ui, sans-serif);
+}
+.monkey-companion[hidden], .monkey-panel[hidden], html.light .monkey-companion { display: none !important; }
+.monkey-launcher {
+    display: block;
+    position: relative;
+    width: 100%;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+}
+.monkey-art {
+    display: block;
+    position: relative;
+    pointer-events: none;
+    width: 100%;
+    aspect-ratio: 1.18;
+    border-radius: 18px;
+    overflow: hidden;
+}
+.monkey-art::after {
+    /* A CSS mask on this animated layer can suppress video painting.
+       Fade the opaque source into the dark site with an ordinary overlay instead. */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 48%, rgba(6, 8, 11, .2) 63%, #06080b 83%);
+}
+.monkey-art img, .monkey-art video {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.monkey-art video { visibility: hidden; }
+.monkey-companion.has-frame .monkey-art video { visibility: visible; }
+.monkey-companion.has-frame .monkey-art img { visibility: hidden; }
+@media (prefers-reduced-motion: no-preference) {
+    .monkey-art { animation: monkey-drift 6s ease-in-out infinite; animation-play-state: paused; }
+    .monkey-companion.is-playing .monkey-art { animation-play-state: running; }
+}
+@keyframes monkey-drift {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(1deg); }
+}
+.monkey-options-hint {
+    position: absolute;
+    right: 4px;
+    bottom: 0;
+    width: 24px;
+    border-radius: 12px;
+    background: rgba(6, 8, 11, .65);
+    color: #b8c2cc;
+    font: 18px/20px system-ui, sans-serif;
+    letter-spacing: 1px;
+}
+.monkey-launcher:hover .monkey-options-hint,
+.monkey-launcher[aria-expanded="true"] .monkey-options-hint { color: #fff; background: #1c2632; }
+.monkey-panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 12px);
+    width: min(224px, calc(100vw - 32px));
+    box-sizing: border-box;
+    padding: 14px;
+    border: 1px solid rgba(184, 194, 204, .26);
+    border-radius: 14px;
+    background: rgba(6, 8, 11, .97);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .3);
+    pointer-events: auto;
+}
+.monkey-credit { margin: 0 0 10px; font-size: 11px; line-height: 1.6; }
+.monkey-credit span { display: block; color: #d2dbe3; font-size: 12px; letter-spacing: .08em; }
+.monkey-controls { display: flex; gap: 8px; }
+.monkey-controls button {
+    flex: 1;
+    min-height: 44px;
+    padding: 8px;
+    border: 1px solid rgba(184, 194, 204, .26);
+    border-radius: 8px;
+    background: rgba(184, 194, 204, .06);
+    color: #d2dbe3;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+.monkey-controls button:hover { background: #1c2632; border-color: #b8c2cc; }
+.monkey-companion button:focus-visible { outline: 2px solid #c5e1f5; outline-offset: 4px; }
+@media (max-width: 900px) {
+    .monkey-companion {
+        width: clamp(72px, 18vw, 96px);
+        right: max(12px, env(safe-area-inset-right));
+        bottom: max(12px, env(safe-area-inset-bottom));
+    }
+    /* Only lift the companion when the optional music invitation is present. */
+    body:has(.vinyl-active) .monkey-companion { bottom: calc(72px + env(safe-area-inset-bottom)); }
+    /* Final contact links and metadata can scroll fully clear of the floating corner. */
+    #contact { padding-bottom: calc(var(--space-chapter) * 1.2 + 7rem + env(safe-area-inset-bottom)); }
+    body:has(.vinyl-active) #contact { padding-bottom: calc(var(--space-chapter) * 1.2 + 11rem + env(safe-area-inset-bottom)); }
+}
+@media (max-height: 500px) {
+    .monkey-companion { width: 64px; bottom: max(8px, env(safe-area-inset-bottom)); }
+    .monkey-panel { bottom: 0; right: calc(100% + 8px); }
+}
+@media print { .monkey-companion { display: none !important; } }
