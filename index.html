@@ -17,6 +17,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
     <script src="assets/js/galaxy.js?v=3" defer></script>
+    <link rel="stylesheet" href="assets/css/monkey.css?v=4">
+    <script src="assets/js/monkey.js?v=3" defer></script>
     <style>
         /* ==========================================================
            TOKENS — type scale, one accent, dark-first palette
@@ -1124,6 +1126,24 @@
 
     </div><!-- /chapters -->
     </div><!-- /page -->
+
+    <!-- A decorative companion joins the journey at About. Controls remain accessible. -->
+    <aside class="monkey-companion" id="monkeyCompanion" aria-label="Astronaut companion" aria-describedby="monkeyCredit" hidden>
+        <button class="monkey-launcher" id="monkeyOptions" type="button" aria-label="Astronaut options" aria-expanded="false" aria-controls="monkeyPanel" title="Astronaut options">
+            <span class="monkey-art" aria-hidden="true">
+                <img src="assets/media/monkey-poster.jpg" alt="" width="768" height="648" decoding="async">
+                <video id="monkeyVideo" muted playsinline loop preload="none" poster="assets/media/monkey-poster.jpg" disablepictureinpicture></video>
+            </span>
+            <span class="monkey-options-hint" aria-hidden="true">···</span>
+        </button>
+        <div class="monkey-panel" id="monkeyPanel" hidden>
+            <p class="monkey-credit" id="monkeyCredit"><span>FG AI Labs</span>Created by Fernando García with AI</p>
+            <div class="monkey-controls">
+                <button id="monkeyToggle" type="button" aria-label="Play astronaut animation"><span>Play</span></button>
+                <button id="monkeyDismiss" type="button" aria-label="Hide astronaut companion for this session">Hide</button>
+            </div>
+        </div>
+    </aside>
 
     <!-- PRINT PREVIEW / CV — shown in light mode on screen, and always when printing -->
     <div class="cv" id="cv" aria-label="Printable CV">
