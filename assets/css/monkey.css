@@ -9,6 +9,14 @@
     pointer-events: none;
     color: #b8c2cc;
     font-family: var(--font-text, system-ui, sans-serif);
+    transform: translate3d(calc(100% + 4rem), 8%, 0);
+    opacity: 0;
+    transition: transform 1.05s cubic-bezier(.22, .68, .24, 1), opacity .6s ease;
+    will-change: transform;
+}
+.monkey-companion.is-in { transform: translate3d(0, 0, 0); opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+    .monkey-companion { transform: none; opacity: 1; transition: none; }
 }
 .monkey-companion[hidden], .monkey-panel[hidden], html.light .monkey-companion { display: none !important; }
 .monkey-launcher {

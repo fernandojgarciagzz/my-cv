@@ -98,6 +98,24 @@
         toggle.firstElementChild.textContent = playing ? 'Pause' : 'Play';
     }
 
+    /* Arriving and leaving are a drift in and out of the right edge, so he is never
+       simply switched on. The element only leaves the page once the exit has played. */
+    var exitTimer = null;
+    function show() {
+        if (exitTimer) { clearTimeout(exitTimer); exitTimer = null; }
+        if (companion.hidden) {
+            companion.hidden = false;
+            void companion.offsetWidth;                    // start the entry from off the edge
+        }
+        companion.classList.add('is-in');
+    }
+    function hide() {
+        if (companion.hidden) return;
+        companion.classList.remove('is-in');
+        if (exitTimer) clearTimeout(exitTimer);
+        exitTimer = setTimeout(function () { exitTimer = null; companion.hidden = true; }, 1100);
+    }
+
     function closeOptions(restoreFocus) {
         panel.hidden = true;
         options.setAttribute('aria-expanded', 'false');
@@ -148,8 +166,7 @@
         var unavailable = dismissed || printing || print.matches || document.documentElement.classList.contains('light');
         var top = unavailable ? Infinity : about.getBoundingClientRect().top;
         var visible = !unavailable && top <= window.innerHeight * 0.8;
-        companion.hidden = !visible;
-        if (!visible) closeOptions(false);
+        if (visible) show(); else { hide(); closeOptions(false); }
         // Assigning src is delayed until About is near, and never done for reduced motion
         // until the visitor explicitly requests playback.
         if (!unavailable && !document.hidden && top <= window.innerHeight + 300 && canAnimate() && !video.hasAttribute('src')) {
