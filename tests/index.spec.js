@@ -217,3 +217,71 @@ test.describe('Index — viewports', () => {
         });
     }
 });
+
+test.describe('Index — ambient score', () => {
+    test.use({ viewport: { width: 1440, height: 900 } });
+    const ambient = (page, fn) => page.evaluate(f => window.__ambient[f](), fn);
+    async function touchPage(page) {                       // a first interaction, away from any control
+        await page.mouse.click(40, 400);
+    }
+
+    test('is on by default, and never replaces the record', async ({ page }) => {
+        await page.goto(BASE, { waitUntil: 'load' });
+        await expect(page.locator('#ambientToggle')).toHaveAttribute('aria-pressed', 'true');
+        expect(await ambient(page, 'wanted')).toBe(true);
+        await expect(page.locator('#easterEggAudio source')).toHaveAttribute('src', /Hatua Kwa Hatua/);
+    });
+
+    test('tries to play as soon as the page loads, with no click', async ({ page }) => {
+        await page.goto(BASE, { waitUntil: 'load' });
+        // whether sound may start is the browser's call; the page must at least ask for it
+        await expect.poll(() => ambient(page, 'fetched'), { timeout: 4000 }).toBe(true);
+    });
+
+    test('a click on the button stops it once it is playing', async ({ page }) => {
+        await page.goto(BASE, { waitUntil: 'load' });
+        await page.mouse.click(40, 400);
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 6000 }).toBe(true);
+        await page.click('#ambientToggle');
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 4000 }).toBe(false);
+        await expect(page.locator('#ambientToggle')).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    test('starts on the first interaction when the browser holds it back', async ({ page }) => {
+        await page.goto(BASE, { waitUntil: 'load' });
+        await page.waitForTimeout(800);
+        await touchPage(page);
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 6000 }).toBe(true);
+        expect(await ambient(page, 'fetched')).toBe(true);
+    });
+
+    test('turning it off holds for the visit', async ({ page }) => {
+        await page.goto(BASE, { waitUntil: 'load' });
+        await touchPage(page);
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 6000 }).toBe(true);
+        await page.click('#ambientToggle');
+        await expect(page.locator('#ambientToggle')).toHaveAttribute('aria-pressed', 'false');
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 4000 }).toBe(false);
+        await page.reload({ waitUntil: 'load' });
+        await expect(page.locator('#ambientToggle')).toHaveAttribute('aria-pressed', 'false');
+        await touchPage(page);
+        await page.waitForTimeout(800);
+        expect(await ambient(page, 'playing')).toBe(false);
+    });
+
+    test('the record takes the room while it plays, then the score comes back', async ({ page }) => {
+        await page.goto(BASE, { waitUntil: 'load' });
+        await page.waitForTimeout(2500);
+        await touchPage(page);
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 6000 }).toBe(true);
+        await page.locator('#vinylTrigger').scrollIntoViewIfNeeded();
+        await page.waitForTimeout(800);
+        const box = await page.locator('#vinylTrigger').boundingBox();
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        await expect.poll(() => ambient(page, 'yielded'), { timeout: 4000 }).toBe(true);
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 4000 }).toBe(false);
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        await expect.poll(() => ambient(page, 'yielded'), { timeout: 4000 }).toBe(false);
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 6000 }).toBe(true);
+    });
+});

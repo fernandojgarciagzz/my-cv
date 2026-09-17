@@ -82,8 +82,10 @@
             document.documentElement.classList.toggle('claude-mode', on);
             document.body.classList.toggle('claude-mode', on);
         }
+        function announce(on) { window.dispatchEvent(new CustomEvent('site:record', { detail: { playing: on } })); }
         function activate() {
             playing = true; clearTimers();
+            announce(true);
             container.classList.add('vinyl-active');                            // the photo shrinks; the stage fades in
             if (reduce) {
                 container.classList.add('vinyl-live', 'vinyl-spinning');
@@ -122,6 +124,7 @@
         }
         function deactivate() {
             playing = false; clearTimers();
+            announce(false);
             fadeOut(function () { audio.currentTime = 0; });
             settle();
         }
@@ -132,6 +135,7 @@
         if (stage) stage.addEventListener('click', function (e) { e.stopPropagation(); if (playing) deactivate(); });
         audio.addEventListener('ended', function () {
             playing = false; clearTimers();
+            announce(false);
             settle();
         });
     })();

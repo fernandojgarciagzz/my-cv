@@ -19,6 +19,7 @@
     <script src="assets/js/galaxy.js?v=3" defer></script>
     <link rel="stylesheet" href="assets/css/monkey.css?v=9">
     <script src="assets/js/monkey.js?v=6" defer></script>
+    <script src="assets/js/ambient.js?v=7" defer></script>
     <style>
         /* ==========================================================
            TOKENS — type scale, one accent, dark-first palette
@@ -171,6 +172,16 @@
         .icon-btn { width: 36px; height: 36px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2); border: 1px solid var(--line); transition: border-color 0.2s, color 0.2s; }
         .icon-btn:hover { border-color: var(--ink); color: var(--ink); }
         .icon-btn svg { width: 16px; height: 16px; }
+        .sound-btn .bars { display: flex; align-items: center; gap: 2px; height: 14px; }
+        .sound-btn .bars i { display: block; width: 2px; height: 4px; border-radius: 1px; background: currentColor; transition: height 0.4s ease; }
+        .sound-btn .bars i:nth-child(1) { height: 6px; } .sound-btn .bars i:nth-child(2) { height: 11px; } .sound-btn .bars i:nth-child(3) { height: 8px; } .sound-btn .bars i:nth-child(4) { height: 5px; }
+        .sound-btn.is-on { color: var(--accent); border-color: var(--accent); }
+        .sound-btn.is-sounding .bars i { animation: soundBar 1.15s ease-in-out infinite; }
+        .sound-btn.is-sounding .bars i:nth-child(2) { animation-delay: -0.35s; }
+        .sound-btn.is-sounding .bars i:nth-child(3) { animation-delay: -0.7s; }
+        .sound-btn.is-sounding .bars i:nth-child(4) { animation-delay: -0.2s; }
+        @keyframes soundBar { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+        @media (prefers-reduced-motion: reduce) { .sound-btn.is-sounding .bars i { animation: none; height: 10px; } }
         .cv-btn {
             height: 36px; padding: 0 0.85rem; border-radius: 999px;
             border: 1px solid var(--line); color: var(--ink-2);
@@ -714,6 +725,9 @@
                     <a href="#dashboards">dashboards</a>
                     <a href="#contact">contact</a>
                 </div>
+                <button class="icon-btn sound-btn" id="ambientToggle" type="button" aria-label="Turn the music off" aria-pressed="true" title="Music">
+                    <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                </button>
                 <button class="cv-btn" id="themeToggle" aria-label="See the CV" aria-pressed="true">
                     <svg class="doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
                     <svg class="back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -1466,7 +1480,7 @@
         var extrasP = null;
         function extras() {
             if (extrasP) return extrasP;
-            extrasP = new Promise(function (res, rej) { var s = d.createElement('script'); s.src = 'assets/js/extras.js?v=7'; s.onload = res; s.onerror = rej; d.body.appendChild(s); });
+            extrasP = new Promise(function (res, rej) { var s = d.createElement('script'); s.src = 'assets/js/extras.js?v=8'; s.onload = res; s.onerror = rej; d.body.appendChild(s); });
             return extrasP;
         }
         var photo = d.getElementById('vinylTrigger');
