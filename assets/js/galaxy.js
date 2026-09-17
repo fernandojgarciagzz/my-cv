@@ -262,7 +262,7 @@
     var galaxy = new THREE.Points(gGeo, gMat);
     var gGroup = new THREE.Group();
     gGroup.add(galaxy);
-    gGroup.rotation.z = FORM === 'blackhole' ? -0.28 : 0.14;                     // opening roll: the near band slides down to the right
+    gGroup.rotation.z = FORM === 'blackhole' ? 0.16 : 0.14;                      // opening roll: the band rises gently to the right
     scene.add(gGroup);
 
     /* ── Secondary image (black hole only). The shadow is not an object: it is the
@@ -434,9 +434,10 @@
 
     /* ── Scroll, pointer, drag ──────────────────────────────────────── */
     var scrollP = 0, dirty = true;
-    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? -0.27 : 0, ry: 0 };   // opening tilt: the disc seen nearly edge-on, camera a few degrees above its plane
+    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? -0.22 : 0, ry: 0 };   // opening tilt: a little above the disc, so its near side spreads toward the lens
     var mx = 0, my = 0, tiltX = 0, tiltY = 0;                   // cursor-driven tilt of the whole galaxy
-    var SCROLL = BH ? { yaw: -1.1, tilt: 0.0 } : { yaw: 1.1, tilt: 0.0 };   // how the view moves as the hero scrolls away
+    var SCROLL = BH ? { yaw: 1.1, tilt: 0.0 } : { yaw: 1.1, tilt: 0.0 };   // with the opening roll rising to the right, this turn keeps the disc open from above
+    var CAM_K = BH ? 0.88 : 1, CAM_SET = null;                         // opening camera distance: close enough that the outer disc sweeps past the lens   // how the view moves as the hero scrolls away
     if (!reduce && window.matchMedia('(hover: hover)').matches) {
         window.addEventListener('mousemove', function (e) {
             mx = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -506,7 +507,7 @@
 
         // Camera: opens a little further out (cleaner start), pulls back through the hero,
         // then keeps looking lower so the galaxy drifts up and out while the stars and dust remain.
-        camera.position.set(0, (FORM === 'blackhole' ? 2.75 : 3.5) + zoom * 2.6, 7.6 + zoom * 5.6);   // ~20° above the disc
+        camera.position.set(0, (FORM === 'blackhole' ? 2.75 : 3.5) * CAM_K + zoom * 2.6, 7.6 * CAM_K + zoom * 5.6);   // ~20° above the disc; CAM_K brings the opening in
         camera.lookAt(0, -(zoom + after * 0.9) * 1.15, 0);
         gGroup.rotation.y = (BH ? 0.0 : t * 0.018) + zoom * SCROLL.yaw + drag.ry + tiltY;   // the black hole keeps its pose; only the disc spins
         gGroup.rotation.x = clamp(drag.rx + tiltX + zoom * SCROLL.tilt, -0.9, 0.9);
@@ -538,6 +539,9 @@
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
+        // wide screens get the close view; on tall ones the hole would fill the width, so the camera
+        // backs off until the shadow spans about 58% of the screen's width
+        if (BH && CAM_SET === null) CAM_K = Math.max(0.88, 0.595 / camera.aspect);
         dMat.uniforms.uAspect.value = camera.aspect;
         dirty = true;
     }
@@ -579,6 +583,7 @@
     }
     window.__space = { rotationY: function () { return gGroup.rotation.y; }, explode: function () { return explode; }, form: FORM,
         pose: function (rx, ry, rz) { drag.rx = rx; drag.ry = ry; drag.vx = 0; drag.vy = 0; if (rz !== undefined) gGroup.rotation.z = rz; },
-        scroll: function (yaw, tilt) { SCROLL.yaw = yaw; SCROLL.tilt = tilt; } };
+        scroll: function (yaw, tilt) { SCROLL.yaw = yaw; SCROLL.tilt = tilt; },
+        cam: function (k) { CAM_SET = k; CAM_K = k; dirty = true; } };
     start();
 })();
