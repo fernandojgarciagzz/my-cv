@@ -434,9 +434,9 @@
 
     /* ── Scroll, pointer, drag ──────────────────────────────────────── */
     var scrollP = 0, dirty = true;
-    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? -0.22 : 0, ry: 0 };   // opening tilt: a little above the disc, so its near side spreads toward the lens
+    var drag = { on: false, x: 0, y: 0, vx: 0, vy: 0, rx: FORM === 'blackhole' ? -0.22 : 0, ry: FORM === 'blackhole' ? 2.8 : 0 };   // opening pose: a little above the disc, turned so the infall stream's far end drifts past the lens
     var mx = 0, my = 0, tiltX = 0, tiltY = 0;                   // cursor-driven tilt of the whole galaxy
-    var SCROLL = BH ? { yaw: 1.1, tilt: 0.0 } : { yaw: 1.1, tilt: 0.0 };   // with the opening roll rising to the right, this turn keeps the disc open from above
+    var SCROLL = BH ? { yaw: -1.1, tilt: 0.0 } : { yaw: 1.1, tilt: 0.0 };  // from the opening pose, this turn keeps the disc open from above and sweeps the stream across
     var CAM_K = BH ? 0.88 : 1, CAM_SET = null;                         // opening camera distance: close enough that the outer disc sweeps past the lens   // how the view moves as the hero scrolls away
     if (!reduce && window.matchMedia('(hover: hover)').matches) {
         window.addEventListener('mousemove', function (e) {
