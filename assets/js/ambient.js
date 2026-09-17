@@ -1,11 +1,10 @@
-/* Ambient — the site's own score, behind the black hole, on by default.
+/* Ambient — the site's own score, behind the black hole, playing from the start.
  *
- * A sound button in the nav, pressed from the start. Browsers will not play sound
- * a visitor has not interacted with, so where the browser allows it the score
- * starts at once, and everywhere else it starts on the first click or key press
- * anywhere on the page. Until then the button shows the music as on and waiting.
- * The file is not fetched while it waits, so a visitor who never interacts never
- * downloads it.
+ * On load it simply plays. Browsers decide whether sound may start before the
+ * visitor has touched the page: Chrome allows it for sites a visitor already listens
+ * to, and some visitors allow it everywhere. Where the browser holds it back, the
+ * very first touch of any kind starts it: a click, a tap or a key, anywhere on the
+ * page. The button in the nav stops it, and starts it again.
  *
  * It loops with a slow fade in and out. It yields to the record: flip the photo and
  * the score fades down for Hatua Kwa Hatua, then comes back when the record stops.
@@ -55,16 +54,20 @@
 
     function sound() {
         if (!audio.getAttribute('src')) audio.src = SRC;
+        // start barely audible rather than silent: Safari would let a silent start through and then
+        // pause it as the fade rises, so this way it refuses up front and the first touch takes over
+        if (audio.paused && audio.volume < 0.01) audio.volume = 0.01;
         var p = audio.play();
         if (p && typeof p.then === 'function') {
             p.then(function () { fadeTo(VOL, FADE_IN); label(); })
-             .catch(function () { waitForGesture(); label(); });
+             .catch(function () { if (audio.paused) waitForGesture(); label(); });
         } else {
             fadeTo(VOL, FADE_IN); label();
         }
     }
+    var pausedByUs = false;
     function hush() {
-        fadeTo(0, FADE_OUT, function () { audio.pause(); label(); });
+        fadeTo(0, FADE_OUT, function () { pausedByUs = true; audio.pause(); label(); });
     }
 
     // what should be happening, given the choice, the record and the tab
@@ -75,22 +78,22 @@
 
     // until the visitor touches the page, the score waits without downloading anything
     var armed = false;
+    var TOUCHES = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'];
     function go(e) {
         if (e && btn.contains(e.target)) return;             // the button handles its own click
-        disarm();
-        settle();
+        // try on every part of the touch until one of them is allowed; playing disarms the rest,
+        // because some browsers only unlock sound on the release or the click, not the press
+        if (wanted && !yielded && !hidden) sound(); else { disarm(); settle(); }
     }
     function waitForGesture() {
         if (armed) return;
         armed = true;
-        window.addEventListener('pointerdown', go, true);
-        window.addEventListener('keydown', go, true);
+        TOUCHES.forEach(function (t) { window.addEventListener(t, go, true); });
     }
     function disarm() {
         if (!armed) return;
         armed = false;
-        window.removeEventListener('pointerdown', go, true);
-        window.removeEventListener('keydown', go, true);
+        TOUCHES.forEach(function (t) { window.removeEventListener(t, go, true); });
     }
 
     btn.addEventListener('click', function () {
@@ -110,15 +113,24 @@
         hidden = document.hidden;
         settle();
     });
-    audio.addEventListener('playing', label);
-    audio.addEventListener('pause', label);
+    audio.addEventListener('playing', function () { pausedByUs = false; disarm(); label(); });
+    // Safari lets the score start while it is silent, then pauses it itself the moment the fade
+    // makes it audible without a touch. A pause we did not ask for waits for the next touch.
+    audio.addEventListener('pause', function () {
+        if (pausedByUs) pausedByUs = false;
+        else if (wanted && !yielded && !hidden) waitForGesture();
+        label();
+    });
 
     try { if (sessionStorage.getItem(KEY) === 'off') wanted = false; } catch (e) {}
     label();
     if (wanted) {
         // ask before fetching: only start right away where the browser already allows sound
         var policy = navigator.getAutoplayPolicy ? navigator.getAutoplayPolicy('mediaelement') : 'unknown';
-        if (policy === 'allowed') settle(); else waitForGesture();
+        // listen for the first touch at the same time as trying, so a click that lands while the
+        // browser is still deciding is not lost; whichever succeeds first disarms the other
+        if (policy === 'disallowed' || policy === 'allowed-muted') waitForGesture();
+        else { sound(); waitForGesture(); }
     }
 
     window.__ambient = {

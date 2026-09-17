@@ -232,6 +232,21 @@ test.describe('Index — ambient score', () => {
         await expect(page.locator('#easterEggAudio source')).toHaveAttribute('src', /Hatua Kwa Hatua/);
     });
 
+    test('tries to play as soon as the page loads, with no click', async ({ page }) => {
+        await page.goto(BASE, { waitUntil: 'load' });
+        // whether sound may start is the browser's call; the page must at least ask for it
+        await expect.poll(() => ambient(page, 'fetched'), { timeout: 4000 }).toBe(true);
+    });
+
+    test('a click on the button stops it once it is playing', async ({ page }) => {
+        await page.goto(BASE, { waitUntil: 'load' });
+        await page.mouse.click(40, 400);
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 6000 }).toBe(true);
+        await page.click('#ambientToggle');
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 4000 }).toBe(false);
+        await expect(page.locator('#ambientToggle')).toHaveAttribute('aria-pressed', 'false');
+    });
+
     test('starts on the first interaction when the browser holds it back', async ({ page }) => {
         await page.goto(BASE, { waitUntil: 'load' });
         await page.waitForTimeout(800);
