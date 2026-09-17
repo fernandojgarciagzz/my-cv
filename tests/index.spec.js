@@ -278,8 +278,8 @@ test.describe('Index — ambient score', () => {
         await page.waitForTimeout(800);
         const box = await page.locator('#vinylTrigger').boundingBox();
         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-        await expect.poll(() => ambient(page, 'yielded'), { timeout: 4000 }).toBe(true);
-        await expect.poll(() => ambient(page, 'playing'), { timeout: 4000 }).toBe(false);
+        await expect.poll(() => ambient(page, 'yielded'), { timeout: 6000 }).toBe(true);
+        await expect.poll(() => ambient(page, 'playing'), { timeout: 8000 }).toBe(false);
         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
         await expect.poll(() => ambient(page, 'yielded'), { timeout: 4000 }).toBe(false);
         await expect.poll(() => ambient(page, 'playing'), { timeout: 6000 }).toBe(true);

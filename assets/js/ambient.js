@@ -59,7 +59,8 @@
         if (audio.paused && audio.volume < 0.01) audio.volume = 0.01;
         var p = audio.play();
         if (p && typeof p.then === 'function') {
-            p.then(function () { fadeTo(VOL, FADE_IN); label(); })
+            // a start that lands late must not fade back in over a hush that came after it
+            p.then(function () { if (wanted && !yielded && !hidden) fadeTo(VOL, FADE_IN); label(); })
              .catch(function () { if (audio.paused) waitForGesture(); label(); });
         } else {
             fadeTo(VOL, FADE_IN); label();
