@@ -16,7 +16,7 @@
     var btn = document.getElementById('ambientToggle');
     if (!btn) return;
 
-    var SRC = 'assets/media/ambient-interstellar-inspo.mp3';
+    var SRC = 'assets/media/ambient-vast-deep-space.mp3';
     var VOL = 0.34, FADE_IN = 2600, FADE_OUT = 900;
     var KEY = 'fg-ambient';
 
