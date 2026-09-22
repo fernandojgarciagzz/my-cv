@@ -9,8 +9,10 @@
  * itself, light captured inside the shadow disappears, and a second pass draws
  * the secondary image (the arc under the hole). Doppler beaming brightens the
  * side of the disc coming toward you. The flow is 3D: matter spirals inward
- * through the disc (xz), a stream falls in from one side, and two polar jets
- * stream out along the axis (xy). Same particles, shader family and theme as
+ * through the disc (xz), a tail is flung out along one side, and two polar jets
+ * stream out along the axis (xy). The disc and the tail are steady flows: their
+ * shapes hold while the matter moves through them, so the view looks the same
+ * a second or an hour after the page opens. Same particles, shader family and theme as
  * the galaxy; the galaxy generator is still here behind FORM.
  *
  * Scroll drives the camera: the galaxy opens the page, pulls back through the
@@ -70,27 +72,39 @@
     if (canvas.dataset.count) COUNT = Math.max(2000, parseInt(canvas.dataset.count, 10) || COUNT);   // a page that needs the frames back can ask for fewer                                       // phones draw the disc twice (second image): keep it light
     var RADIUS = 4.6, BRANCHES = 3, SPIN = 1.15, RANDOM = 0.32, RPOW = 2.6;
     var RS = 0.5, SHADOW = 1.3, DISC_IN = 1.44, PLUNGE = 1.2;                    // the disc hugs the shadow; the last stretch plunges in                    // Schwarzschild radius, shadow (= far-disc Einstein radius), inner disc edge, plunge floor
+    // The disc is a steady flow. A cycle variable c runs from 1 (born at the rim) down to 0 (the inner edge),
+    // then through the plunge to -DISC_CP. Radius r = (al + be c)^(1 / (1 - DISC_S)), so particles spread evenly in c
+    // pile up toward the inner edge (density ~ r^-DISC_S). Every particle starts somewhere on its cycle, so the
+    // first frame already looks the way the disc looks an hour later.
+    var DISC_S = 1.5, DISC_CP = 0.075, DISC_FLOW = 0.01;                        // density slope, plunge share of a cycle, cycles per second
+    var DISC_AL = Math.pow(DISC_IN, 1 - DISC_S), DISC_BE = Math.pow(RADIUS, 1 - DISC_S) - DISC_AL;
+    function discR(c) { return c >= 0 ? Math.pow(DISC_AL + DISC_BE * c, 1 / (1 - DISC_S)) : DISC_IN + (PLUNGE - DISC_IN) * (-c / DISC_CP); }
+    // The stream: a tail of matter flung out along one side on a fixed spiral, angle = STREAM_A - STREAM_K (STREAM_OUT - r)
+    // (the shader's angle convention: x = sin(angle) r, z = cos(angle) r). Each particle drifts outward along it for
+    // one short life at the disc's own angular speed, fades, and starts again where it was born; births lean
+    // toward the disc because the inner particles travel farthest in one life.
+    var STREAM_IN = DISC_IN, STREAM_OUT = 7.6, STREAM_K = Math.PI * 2.2 / (STREAM_OUT - DISC_IN), STREAM_A = -Math.PI * 0.35, STREAM_BIRTH = 0.42;
     var gPos = new Float32Array(COUNT * 3), gRnd = new Float32Array(COUNT * 3), gScl = new Float32Array(COUNT), gKind = new Float32Array(COUNT);
     if (FORM === 'blackhole') {
         var nDisc = Math.floor(COUNT * 0.72), nStream = Math.floor(COUNT * 0.07), nCorona = Math.floor(COUNT * 0.10), nJet = COUNT - nDisc - nStream - nCorona;
         for (var i = 0; i < nDisc; i++) {                                         // kind 0: the disc
-            var i3 = i * 3, u = Math.random();
-            var r = DISC_IN + (RADIUS - DISC_IN) * Math.pow(u, 1.9);
+            var i3 = i * 3;
+            var r = discR(-DISC_CP + Math.random() * (1 + DISC_CP));
             var a = Math.random() * Math.PI * 2;
             gPos[i3] = Math.cos(a) * r; gPos[i3 + 1] = 0; gPos[i3 + 2] = Math.sin(a) * r;
-            var t = (r - DISC_IN) / (RADIUS - DISC_IN);
+            var t = clamp((r - DISC_IN) / (RADIUS - DISC_IN), 0, 1);
             gRnd[i3]     = sgn() * Math.pow(Math.random(), 2.2) * (0.02 + 0.08 * t);
             gRnd[i3 + 1] = sgn() * Math.pow(Math.random(), 1.6) * (0.012 + 0.09 * t);
             gRnd[i3 + 2] = sgn() * Math.pow(Math.random(), 2.2) * (0.02 + 0.08 * t);
             gScl[i] = Math.random() < 0.02 ? 1.8 + Math.random() * 1.4 : 0.45 + Math.random() * 0.9;
             gKind[i] = 0;
         }
-        for (var k = 0; k < nStream; k++) {                                       // kind 1: matter falling in from one side
+        for (var k = 0; k < nStream; k++) {                                       // kind 1: a tail flung out along one side
             var j = nDisc + k, j3 = j * 3;
-            var q = Math.pow(Math.random(), 0.8);
-            var sr = 7.6 - (7.6 - DISC_IN) * q, sa = Math.PI * 0.85 + q * Math.PI * 2.2, sy = 1.6 * (1 - q) * (1 - q);
+            var q = Math.pow(Math.random(), STREAM_BIRTH);                        // where on the tail this particle is born (1 = at the disc)
+            var sr = STREAM_OUT - (STREAM_OUT - STREAM_IN) * q, sa = STREAM_A - STREAM_K * (STREAM_OUT - sr), sy = 1.6 * (1 - q) * (1 - q);
             var spread = 0.05 + 0.5 * (1 - q);
-            gPos[j3] = Math.cos(sa) * sr; gPos[j3 + 1] = sy; gPos[j3 + 2] = Math.sin(sa) * sr;
+            gPos[j3] = Math.sin(sa) * sr; gPos[j3 + 1] = sy; gPos[j3 + 2] = Math.cos(sa) * sr;
             gRnd[j3] = sgn() * Math.pow(Math.random(), 1.5) * spread; gRnd[j3 + 1] = sgn() * Math.pow(Math.random(), 1.5) * spread * 0.6; gRnd[j3 + 2] = sgn() * Math.pow(Math.random(), 1.5) * spread;
             gScl[j] = 0.35 + Math.random() * 0.7;
             gKind[j] = 1;
@@ -155,7 +169,7 @@
                 uInside: { value: new THREE.Color('#FFE3C2') }, uOutside: { value: new THREE.Color('#4F78A8') },
                 uExplode: { value: 0 },
                 uBH: { value: new THREE.Vector3(0, 0, -8) }, uRs: { value: BH ? RS : 0 }, uShadow: { value: SHADOW },
-                uSecondary: { value: secondary ? 1 : 0 }, uFlow: { value: BH ? 0.032 : 0 }, uDoppler: { value: BH ? 1 : 0 }, uPlunge: { value: PLUNGE }
+                uSecondary: { value: secondary ? 1 : 0 }, uFlow: { value: BH ? DISC_FLOW : 0 }, uDoppler: { value: BH ? 1 : 0 }, uPlunge: { value: PLUNGE }
             },
             vertexShader: [
                 'uniform float uTime; uniform float uSize; uniform float uPixelRatio; uniform float uRadius; uniform float uInner; uniform float uSpin; uniform float uSpinPow;',
@@ -163,27 +177,57 @@
                 'uniform vec3 uBH; uniform float uRs; uniform float uShadow; uniform float uSecondary; uniform float uFlow; uniform float uDoppler; uniform float uPlunge;',
                 'attribute vec3 aRandom; attribute float aScale; attribute float aKind;',
                 'varying vec3 vColor; varying float vAlpha;',
+                // The disc flow (see DISC_S above). Angles come from integrating the spin along the way in, never
+                // from time x spin, so every particle orbits at exactly the speed of its current radius at any hour.
+                'const float DS = ' + DISC_S.toFixed(3) + '; const float CP = ' + DISC_CP.toFixed(3) + ';',
+                'const float SI = ' + STREAM_IN.toFixed(4) + '; const float SO = ' + STREAM_OUT.toFixed(4) + '; const float SK = ' + STREAM_K.toFixed(6) + '; const float SA = ' + STREAM_A.toFixed(6) + ';',
+                'float discBase(float c) { float al = pow(uInner, 1.0 - DS); return al + (pow(uRadius, 1.0 - DS) - al) * c; }',
+                'float discR(float c) { return c >= 0.0 ? pow(discBase(c), 1.0 / (1.0 - DS)) : mix(uInner, uPlunge, -c / CP); }',
+                'float discC(float r) { float al = pow(uInner, 1.0 - DS); return r >= uInner ? (pow(r, 1.0 - DS) - al) / (pow(uRadius, 1.0 - DS) - al) : -CP * (uInner - r) / (uInner - uPlunge); }',
+                'float discTurn(float c) {',                                                    // angle swept from the rim down to c
+                '  float be = pow(uRadius, 1.0 - DS) - pow(uInner, 1.0 - DS); float m1 = 1.0 - uSpinPow / (1.0 - DS);',
+                '  float k = uSpin / (uFlow * m1 * be);',
+                '  if (c >= 0.0) return k * (pow(discBase(1.0), m1) - pow(discBase(c), m1));',
+                '  float plunge = 1.0 - smoothstep(uPlunge, uInner, discR(c));',
+                '  return k * (pow(discBase(1.0), m1) - pow(discBase(0.0), m1)) - c / uFlow * uSpin / pow(uInner, uSpinPow) + plunge * plunge * 3.0;',
+                '}',
                 'void main() {',
                 '  vec3 p = position; float ang = atan(p.x, p.z); float r0 = length(p.xz);',
                 '  vec3 q; vec3 tdir = vec3(0.0); float fade = 1.0; float tcol = 0.0; float plungeK = 0.0;',
-                '  if (aKind < 0.5) {',
-                // disc: slow accretion inflow; below the inner edge matter plunges into the hole (tighter spiral,
-                // fading) before it is reborn at a soft outer edge. Wrap radius is spread so there is no hard rim.
-                '    float span = uRadius - uPlunge + fract(aScale * 7.31 + aRandom.z * 53.0) * 3.2;',
-                '    float cyc = mod(r0 - uPlunge + span - uTime * uFlow, span);',
-                '    float r = uPlunge + cyc;',
-                '    fade *= smoothstep(0.0, 0.6, span - cyc);',                                   // reborn at the rim: fade in, never pop
+                '  if (aKind < 0.5 && uFlow > 0.0) {',
+                // disc: accretion inflow that hugs tighter as it goes; below the inner edge matter plunges into
+                // the hole (tighter spiral, fading) before it is reborn, fading in, at the rim
+                '    float c0 = discC(r0);',
+                '    float c = mod(c0 + CP - uTime * uFlow, 1.0 + CP) - CP;',
+                '    float r = discR(c);',
+                '    fade *= smoothstep(1.0, 0.9, c) * smoothstep(-CP, -CP * 0.6, c);',             // reborn at the rim, gone at the floor: never pops
                 '    float plunge = 1.0 - smoothstep(uPlunge, uInner, r);',
-                '    ang += uTime * uSpin / pow(max(r, 0.6), uSpinPow) + plunge * plunge * 3.0;',
-                '    q = vec3(sin(ang) * r, 0.0, cos(ang) * r) + aRandom * (1.0 - plunge * 0.7);',
-                '    tdir = vec3(cos(ang), 0.0, -sin(ang));',
+                '    ang += discTurn(c) - discTurn(c0);',
+                '    float t0 = clamp((r0 - uInner) / (uRadius - uInner), 0.0, 1.0);',
                 '    tcol = clamp((r - uInner) / (uRadius - uInner), 0.0, 1.0);',
+                '    vec3 thick = (vec3(0.02, 0.012, 0.02) + vec3(0.08, 0.09, 0.08) * tcol) / (vec3(0.02, 0.012, 0.02) + vec3(0.08, 0.09, 0.08) * t0);',   // thin inside, thicker out, wherever it was born
+                '    q = vec3(sin(ang) * r, 0.0, cos(ang) * r) + aRandom * thick * (1.0 - plunge * 0.7);',
+                '    tdir = vec3(cos(ang), 0.0, -sin(ang));',
                 '    fade *= 1.0 - plunge * 0.55; plungeK = plunge;',
-                '  } else if (aKind < 1.5) {',
+                '  } else if (aKind < 0.5) {',                                                    // the galaxy: plain rotation
                 '    ang += uTime * uSpin / pow(max(r0, 0.6), uSpinPow);',
-                '    q = vec3(sin(ang) * r0, p.y, cos(ang) * r0) + aRandom;',
+                '    q = vec3(sin(ang) * r0, 0.0, cos(ang) * r0) + aRandom;',
                 '    tdir = vec3(cos(ang), 0.0, -sin(ang));',
                 '    tcol = clamp((r0 - uInner) / (uRadius - uInner), 0.0, 1.0);',
+                '  } else if (aKind < 1.5) {',
+                // the tail keeps its shape while its matter drifts out along it: u = r^(1 + spin power) climbing
+                // linearly moves each particle along the spiral at the disc's own angular speed for its radius
+                '    float E = 1.0 + uSpinPow;',
+                '    float life = 16.0 + 20.0 * fract(aScale * 2.71 + aRandom.y * 19.3);',
+                '    float tau = fract(fract(aScale * 5.13 + aRandom.x * 37.1 + aRandom.z * 11.7) + uTime / life);',
+                '    float r = pow(pow(r0, E) + E * uSpin / SK * life * tau, 1.0 / E);',
+                '    float s = clamp((SO - r) / (SO - SI), 0.0, 1.0), s0 = clamp((SO - r0) / (SO - SI), 0.0, 1.0);',   // 1 at the disc, 0 at the far end
+                '    float a1 = SA - SK * (SO - r);',
+                '    q = vec3(sin(a1) * r, 1.6 * (1.0 - s) * (1.0 - s), cos(a1) * r) + aRandom * (0.05 + 0.5 * (1.0 - s)) / (0.05 + 0.5 * (1.0 - s0));',   // widening as it leaves
+                '    float vr = uSpin / (SK * pow(r, uSpinPow)), vt = uSpin * pow(r, 1.0 - uSpinPow);',                       // outward and orbital speed
+                '    tdir = normalize(vec3(cos(a1), 0.0, -sin(a1)) * vt + vec3(sin(a1), 3.2 * (1.0 - s) / (SO - SI), cos(a1)) * vr);',
+                '    fade = smoothstep(0.0, 0.12, tau) * (1.0 - smoothstep(0.7, 1.0, tau)) * (1.0 - smoothstep(SO - 0.6, SO + 0.6, r));',
+                '    tcol = clamp((r - uInner) / (uRadius - uInner), 0.0, 1.0);',
                 '  } else if (aKind > 2.5) {',
                 // corona: orbits on inclined planes around the hole (Rodrigues rotation about the orbit normal)
                 '    vec3 nrm = normalize(aRandom); float cr = length(p);',
